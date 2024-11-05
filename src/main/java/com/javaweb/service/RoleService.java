@@ -1,0 +1,14 @@
+package com.javaweb.service;
+
+import com.javaweb.dto.request.RoleRequest;
+import com.javaweb.dto.response.RoleResponse;
+
+import java.util.List;
+
+public interface RoleService {
+    List<RoleResponse> getAll();
+
+    RoleResponse createOrUpdate(RoleRequest request);
+
+    void delete(List<String> codes);
+}
