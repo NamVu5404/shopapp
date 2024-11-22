@@ -19,6 +19,6 @@ server:
   port: 8088
 
 jwt:
-  signer-key: "CxW6hqQc4k77nN0/pbBQL1Gc00MHbtCNrBEi2mlqhEoivDfxUBznMQnIVqWNFWYy"
+  signer-key: '<secret-key>'
   valid-duration: 20 # in seconds
   refreshable-duration: 60 # in seconds
