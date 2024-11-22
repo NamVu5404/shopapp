@@ -8,6 +8,7 @@ import com.javaweb.entity.User;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.UserRepository;
+import com.javaweb.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserServiceImpl implements com.javaweb.service.UserService {
+public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     UserConverter userConverter;
