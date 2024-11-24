@@ -22,18 +22,22 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class ApplicationInitConfig {
+
     @NonFinal
     static String ADMIN_USERNAME = "admin";
+
     @NonFinal
     static String ADMIN_PASSWORD = "admin";
+
     @NonFinal
     static String ADMIN_FULL_NAME = "ADMIN";
-    @NonFinal
-    static String ADMIN_PHONE = "0999999999";
+
     @NonFinal
     static String ADMIN_EMAIL = "admin@gmail.com";
+
     @NonFinal
     static String ROLE_ADMIN_CODE = "ADMIN";
+
     @NonFinal
     static String ROLE_ADMIN_DESCRIPTION = "Admin role";
     PasswordEncoder passwordEncoder;
@@ -62,9 +66,8 @@ public class ApplicationInitConfig {
                     .username(ADMIN_USERNAME)
                     .password(passwordEncoder.encode(ADMIN_PASSWORD))
                     .fullName(ADMIN_FULL_NAME)
-                    .phone(ADMIN_PHONE)
                     .email(ADMIN_EMAIL)
-                    .status((byte) 1)
+                    .isActive((byte) 1)
                     .roles(roles)
                     .build();
 

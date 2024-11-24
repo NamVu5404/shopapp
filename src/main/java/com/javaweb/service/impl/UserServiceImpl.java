@@ -15,8 +15,10 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     UserConverter userConverter;
+    PasswordEncoder passwordEncoder;
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,7 +60,7 @@ public class UserServiceImpl implements UserService {
         if (!currentUsername.equals(request.getUsername()))
             throw new CustomException(ErrorCode.UNAUTHORIZED);
 
-        if (!userRepository.existsByIdAndStatus(id, (byte) 1))
+        if (!userRepository.existsByIdAndIsActive(id, (byte) 1))
             throw new CustomException(ErrorCode.USER_NOT_EXISTS);
         request.setId(id);
 
@@ -76,7 +79,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)))
                 .collect(Collectors.toList());
 
-        users.forEach(user -> user.setStatus((byte) 0));
+        users.forEach(user -> user.setIsActive((byte) 0));
         userRepository.saveAll(users);
     }
 
@@ -85,18 +88,37 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
-        User user = userRepository.findByUsernameAndStatus(username, (byte) 1)
+        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
 
-        return userConverter.toResponse(user);
+        UserResponse userResponse = userConverter.toResponse(user);
+        userResponse.setHasPassword(StringUtils.hasText(user.getPassword()));
+
+        return userResponse;
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getById(String id) {
         return userConverter.toResponse(
-                userRepository.findByIdAndStatus(id, (byte) 1)
+                userRepository.findByIdAndIsActive(id, (byte) 1)
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS))
         );
+    }
+
+    @Override
+    @Transactional
+    public void setPassword(String password) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        if (StringUtils.hasText(user.getPassword()))
+            throw new CustomException(ErrorCode.PASSWORD_EXISTS);
+
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
     }
 }

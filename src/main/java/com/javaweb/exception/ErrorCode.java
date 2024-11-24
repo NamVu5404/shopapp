@@ -19,11 +19,12 @@ public enum ErrorCode {
     PASSWORD_NOT_NULL(1005, "Password is required", HttpStatus.BAD_REQUEST),
     FULL_NAME_NOT_NULL(1006, "Full name is required", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_NULL(1007, "Email is required", HttpStatus.BAD_REQUEST),
-    PHONE_NOT_NULL(1008, "Phone is required", HttpStatus.BAD_REQUEST),
-    INVALID_USERNAME(1009, "Username must be at least {min} characters and no more than {max} characters.", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1010, "Password must be at least {min} characters and no more than {max} characters.", HttpStatus.BAD_REQUEST),
-    INVALID_EMAIL(1011, "Email must have @ and correct structure", HttpStatus.BAD_REQUEST),
-    INVALID_PHONE(1012, "Phone number must be 10 digits and start by 0", HttpStatus.BAD_REQUEST),
+    INVALID_USERNAME(1009, "Username must be at least {min} characters and" +
+            " no more than {max} characters.", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1010, "Password must be at least {min} characters and" +
+            " no more than {max} characters.", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL(1011, "Invalid email format", HttpStatus.BAD_REQUEST),
+    INVALID_PHONE(1012, "Invalid phone format", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1013, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1014, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1015, "You are not authorized", HttpStatus.FORBIDDEN),
@@ -36,6 +37,7 @@ public enum ErrorCode {
             "because it is assigned to users. Please unassign all users first", HttpStatus.BAD_REQUEST),
     INVALID_DELETE_PERMISSION(1022, "'PERMISSION' cannot be deleted " +
             "because it is assigned to roles. Please unassign all roles first", HttpStatus.BAD_REQUEST),
+    PASSWORD_EXISTS(1023, "Password already exists", HttpStatus.BAD_REQUEST),
     ;
 
     int code;

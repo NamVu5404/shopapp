@@ -42,6 +42,6 @@ public class BaseEntity {
     @LastModifiedBy
     String modifiedBy;
 
-    @Column(name = "status", nullable = false)
-    byte status = 1;
+    @Column(name = "is_active", nullable = false)
+    byte isActive = 1;
 }

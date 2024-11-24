@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-@Table(name = "User")
+@Table(name = "`user`")
 @Getter
 @Setter
 @SuperBuilder
@@ -20,13 +20,13 @@ public class User extends BaseEntity {
     @Column(name = "username", unique = true, nullable = false)
     String username;
 
-    @Column(name = "password", nullable = false)
+    @Column(name = "password")
     String password;
 
     @Column(name = "fullname", nullable = false)
     String fullName;
 
-    @Column(name = "phone", length = 10, nullable = false)
+    @Column(name = "phone", length = 10)
     String phone;
 
     @Column(name = "dob")

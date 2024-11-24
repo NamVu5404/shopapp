@@ -19,4 +19,6 @@ public class UserResponse {
     String email;
     LocalDate dob;
     List<String> roles;
+    @Builder.Default
+    boolean hasPassword = true;
 }

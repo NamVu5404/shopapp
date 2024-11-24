@@ -18,4 +18,6 @@ public interface UserService {
     UserResponse getMyInfo();
 
     UserResponse getById(String id);
+
+    void setPassword(String password);
 }
