@@ -55,7 +55,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     private String queryBuildFilter(UserSearchRequest userSearchRequest) {
-        StringBuilder sql = new StringBuilder("SELECT u.* FROM User u ");
+        StringBuilder sql = new StringBuilder("SELECT u.* FROM `user` u ");
         queryJoin(sql, userSearchRequest);
         StringBuilder where = new StringBuilder(" WHERE 1 = 1 ");
         queryWhere(where, userSearchRequest);
