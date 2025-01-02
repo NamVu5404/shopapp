@@ -18,7 +18,16 @@ spring:
 server:
   port: 8088
 
+outbound:
+  redirect-uri: "http://localhost:3000/authenticate"
+  facebook:
+    client-id: "${FACEBOOK_CLIENT_ID}"
+    client-secret: "${FACEBOOK_CLIENT_SECRET}"
+  google:
+    client-id: "${GOOGLE_CLIENT_ID}"
+    client-secret: "${GOOGLE_CLIENT_SECRET}"
+
 jwt:
-  signer-key: '<secret-key>'
+  signer-key: "${JWT_SIGNER_KEY}"
   valid-duration: 20 # in seconds
   refreshable-duration: 60 # in seconds

@@ -19,7 +19,7 @@ public class UserRequest {
     String id;
 
     @NotNull(message = "USERNAME_NOT_NULL")
-    @Size(min = 5, max = 30, message = "INVALID_USERNAME")
+    @Size(min = 5, max = 16, message = "INVALID_USERNAME")
     String username;
 
     @NotNull(message = "PASSWORD_NOT_NULL")
@@ -29,10 +29,10 @@ public class UserRequest {
     @NotNull(message = "FULL_NAME_NOT_NULL")
     String fullName;
 
-    @NotNull(message = "PHONE_NOT_NULL")
     @Pattern(regexp = "^0\\d{9}$", message = "INVALID_PHONE")
     String phone;
 
+    @NotNull(message = "EMAIL_NOT_NULL")
     @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "INVALID_EMAIL")
     String email;
 

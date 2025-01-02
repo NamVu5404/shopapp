@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
-    @Builder.Default
+    @Builder.Default // giá trị mặc định luôn được sử dụng khi dùng builder
     int code = 1000;
     String message;
     T result;

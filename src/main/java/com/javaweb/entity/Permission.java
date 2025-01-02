@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 import java.util.List;
 
 @Entity
-@Table(name = "Permission")
+@Table(name = "permission")
 @Getter
 @Setter
 @SuperBuilder

@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
             errorCode = ErrorCode.valueOf(enumKey);
 
             ConstraintViolation<?> constraintViolation = e.getBindingResult()
-                    .getAllErrors().get(0).unwrap(ConstraintViolation.class);
+                    .getAllErrors().getFirst().unwrap(ConstraintViolation.class);
 
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
         } catch (IllegalArgumentException ignored) {

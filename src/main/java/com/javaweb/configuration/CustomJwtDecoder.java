@@ -28,7 +28,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Lazy
     private AuthenticationService authenticationService;
 
-    private NimbusJwtDecoder nimbusJwtDecoder = null; // khai báo bên ngoài cho phép kiểm tra xem nó đã được khởi tạo chưa và chỉ tạo ra nó một lần duy nhất khi cần thiết.
+    private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {

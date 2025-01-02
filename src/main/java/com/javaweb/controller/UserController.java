@@ -1,5 +1,6 @@
 package com.javaweb.controller;
 
+import com.javaweb.dto.request.SetPasswordRequest;
 import com.javaweb.dto.request.UserRequest;
 import com.javaweb.dto.request.UserSearchRequest;
 import com.javaweb.dto.response.ApiResponse;
@@ -45,10 +46,10 @@ public class UserController {
     }
 
     @DeleteMapping("/{ids}")
-    public ApiResponse<String> delete(@PathVariable List<String> ids) {
+    public ApiResponse<Void> delete(@PathVariable List<String> ids) {
         userService.delete(ids);
-        return ApiResponse.<String>builder()
-                .result("Delete successfully")
+        return ApiResponse.<Void>builder()
+                .message("Delete successfully")
                 .build();
     }
 
@@ -63,6 +64,18 @@ public class UserController {
     public ApiResponse<UserResponse> getById(@PathVariable String id) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getById(id))
+                .build();
+    }
+
+    /*
+     * set password cho user login bằng bên thứ 3
+     */
+    @PostMapping("/set-password")
+    public ApiResponse<Void> setPassword(@RequestBody @Valid SetPasswordRequest request) {
+        userService.setPassword(request.getPassword());
+
+        return ApiResponse.<Void>builder()
+                .message("Set password successfully")
                 .build();
     }
 }
