@@ -1,7 +1,7 @@
 package com.javaweb.controller;
 
 import com.javaweb.dto.response.ApiResponse;
-import com.javaweb.dto.response.AuthenticationResponse;
+import com.javaweb.dto.response.auth.AuthenticationResponse;
 import com.javaweb.service.OutboundAuthenticationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

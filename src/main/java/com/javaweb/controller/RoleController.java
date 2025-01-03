@@ -1,8 +1,8 @@
 package com.javaweb.controller;
 
-import com.javaweb.dto.request.RoleRequest;
+import com.javaweb.dto.request.role.RoleRequest;
 import com.javaweb.dto.response.ApiResponse;
-import com.javaweb.dto.response.RoleResponse;
+import com.javaweb.dto.response.role.RoleResponse;
 import com.javaweb.service.RoleService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

@@ -1,6 +1,6 @@
 package com.javaweb.service.impl;
 
-import com.javaweb.dto.response.OutboundUserResponse;
+import com.javaweb.dto.response.user.OutboundUserResponse;
 import com.javaweb.entity.Role;
 import com.javaweb.entity.User;
 import com.javaweb.repository.RoleRepository;

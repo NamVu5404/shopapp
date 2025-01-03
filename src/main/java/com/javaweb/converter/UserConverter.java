@@ -1,10 +1,14 @@
 package com.javaweb.converter;
 
-import com.javaweb.dto.request.UserRequest;
-import com.javaweb.dto.response.UserResponse;
+import com.javaweb.dto.request.user.UserCreateRequest;
+import com.javaweb.dto.request.user.UserUpdateRequest;
+import com.javaweb.dto.response.user.UserResponse;
 import com.javaweb.entity.Role;
 import com.javaweb.entity.User;
+import com.javaweb.exception.CustomException;
+import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.RoleRepository;
+import com.javaweb.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +29,9 @@ public class UserConverter {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public UserResponse toResponse(User user) {
         UserResponse userResponse = modelMapper.map(user, UserResponse.class);
 
@@ -36,11 +43,25 @@ public class UserConverter {
         return userResponse;
     }
 
-    public User toEntity(UserRequest userRequest) {
-        User user = modelMapper.map(userRequest, User.class);
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+    public User toEntity(UserCreateRequest request) {
+        User user = modelMapper.map(request, User.class);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        List<Role> roles = userRequest.getRoles().stream()
+        List<Role> roles = request.getRoles().stream()
+                .map(roleRepository::findByCode)
+                .collect(Collectors.toList());
+        user.setRoles(roles);
+
+        return user;
+    }
+
+    public User toEntity(String id, UserUpdateRequest request) {
+        User user = userRepository.findByIdAndIsActive(id, (byte) 1)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        modelMapper.map(request, user);
+
+        List<Role> roles = request.getRoles().stream()
                 .map(roleRepository::findByCode)
                 .collect(Collectors.toList());
         user.setRoles(roles);

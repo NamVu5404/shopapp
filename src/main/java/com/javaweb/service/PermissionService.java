@@ -1,7 +1,7 @@
 package com.javaweb.service;
 
-import com.javaweb.dto.request.PermissionRequest;
-import com.javaweb.dto.response.PermissionResponse;
+import com.javaweb.dto.request.permission.PermissionRequest;
+import com.javaweb.dto.response.permission.PermissionResponse;
 
 import java.util.List;
 

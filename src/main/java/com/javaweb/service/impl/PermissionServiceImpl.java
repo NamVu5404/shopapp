@@ -1,8 +1,8 @@
 package com.javaweb.service.impl;
 
 import com.javaweb.converter.PermissionConverter;
-import com.javaweb.dto.request.PermissionRequest;
-import com.javaweb.dto.response.PermissionResponse;
+import com.javaweb.dto.request.permission.PermissionRequest;
+import com.javaweb.dto.response.permission.PermissionResponse;
 import com.javaweb.entity.Permission;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;

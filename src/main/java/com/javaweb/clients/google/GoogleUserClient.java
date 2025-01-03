@@ -1,6 +1,6 @@
 package com.javaweb.clients.google;
 
-import com.javaweb.dto.response.OutboundUserResponse;
+import com.javaweb.dto.response.user.OutboundUserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

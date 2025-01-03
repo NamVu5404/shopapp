@@ -2,10 +2,10 @@ package com.javaweb.service.impl;
 
 import com.javaweb.clients.google.GoogleAuthClient;
 import com.javaweb.clients.google.GoogleUserClient;
-import com.javaweb.dto.request.ExchangeTokenRequest;
-import com.javaweb.dto.response.AuthenticationResponse;
-import com.javaweb.dto.response.ExchangeTokenResponse;
-import com.javaweb.dto.response.OutboundUserResponse;
+import com.javaweb.dto.request.auth.ExchangeTokenRequest;
+import com.javaweb.dto.response.auth.AuthenticationResponse;
+import com.javaweb.dto.response.auth.ExchangeTokenResponse;
+import com.javaweb.dto.response.user.OutboundUserResponse;
 import com.javaweb.entity.User;
 import com.javaweb.service.OutboundAuthenticationService;
 import com.javaweb.service.OutboundUserService;

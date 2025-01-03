@@ -1,7 +1,7 @@
 package com.javaweb.service;
 
-import com.javaweb.dto.request.RoleRequest;
-import com.javaweb.dto.response.RoleResponse;
+import com.javaweb.dto.request.role.RoleRequest;
+import com.javaweb.dto.response.role.RoleResponse;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package com.javaweb.converter;
 
-import com.javaweb.dto.request.RoleRequest;
-import com.javaweb.dto.response.RoleResponse;
+import com.javaweb.dto.request.role.RoleRequest;
+import com.javaweb.dto.response.role.RoleResponse;
 import com.javaweb.entity.Permission;
 import com.javaweb.entity.Role;
 import com.javaweb.repository.PermissionRepository;

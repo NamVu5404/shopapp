@@ -1,10 +1,8 @@
 package com.javaweb.controller;
 
-import com.javaweb.dto.request.SetPasswordRequest;
-import com.javaweb.dto.request.UserRequest;
-import com.javaweb.dto.request.UserSearchRequest;
+import com.javaweb.dto.request.user.*;
 import com.javaweb.dto.response.ApiResponse;
-import com.javaweb.dto.response.UserResponse;
+import com.javaweb.dto.response.user.UserResponse;
 import com.javaweb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -32,14 +30,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiResponse<UserResponse> create(@RequestBody @Valid UserRequest request) {
+    public ApiResponse<UserResponse> create(@RequestBody @Valid UserCreateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.create(request))
                 .build();
     }
 
     @PostMapping("/{id}")
-    public ApiResponse<UserResponse> update(@PathVariable String id, @RequestBody @Valid UserRequest request) {
+    public ApiResponse<UserResponse> update(@PathVariable String id, @RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.update(id, request))
                 .build();
@@ -57,6 +55,15 @@ public class UserController {
     public ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
+                .build();
+    }
+
+    @PostMapping("/myInfo/password")
+    public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        userService.changePassword(request);
+
+        return ApiResponse.<Void>builder()
+                .message("Change password successfully")
                 .build();
     }
 

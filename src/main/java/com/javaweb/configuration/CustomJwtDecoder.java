@@ -1,7 +1,7 @@
 package com.javaweb.configuration;
 
-import com.javaweb.dto.request.IntrospectRequest;
-import com.javaweb.dto.response.IntrospectResponse;
+import com.javaweb.dto.request.auth.IntrospectRequest;
+import com.javaweb.dto.response.auth.IntrospectResponse;
 import com.javaweb.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.beans.factory.annotation.Autowired;

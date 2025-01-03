@@ -1,8 +1,8 @@
 package com.javaweb.controller;
 
-import com.javaweb.dto.request.PermissionRequest;
+import com.javaweb.dto.request.permission.PermissionRequest;
 import com.javaweb.dto.response.ApiResponse;
-import com.javaweb.dto.response.PermissionResponse;
+import com.javaweb.dto.response.permission.PermissionResponse;
 import com.javaweb.service.PermissionService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;

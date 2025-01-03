@@ -1,9 +1,11 @@
 package com.javaweb.service.impl;
 
 import com.javaweb.converter.UserConverter;
-import com.javaweb.dto.request.UserRequest;
-import com.javaweb.dto.request.UserSearchRequest;
-import com.javaweb.dto.response.UserResponse;
+import com.javaweb.dto.request.user.ChangePasswordRequest;
+import com.javaweb.dto.request.user.UserCreateRequest;
+import com.javaweb.dto.request.user.UserSearchRequest;
+import com.javaweb.dto.request.user.UserUpdateRequest;
+import com.javaweb.dto.response.user.UserResponse;
 import com.javaweb.entity.User;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
@@ -43,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse create(UserRequest request) {
+    public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new CustomException(ErrorCode.USER_EXISTS);
 
@@ -55,16 +57,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse update(String id, UserRequest request) {
+    public UserResponse update(String id, UserUpdateRequest request) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!currentUsername.equals(request.getUsername()))
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
 
         if (!userRepository.existsByIdAndIsActive(id, (byte) 1))
             throw new CustomException(ErrorCode.USER_NOT_EXISTS);
-        request.setId(id);
 
-        User user = userConverter.toEntity(request);
+        User user = userConverter.toEntity(id, request);
+
+        if (!currentUsername.equals(user.getUsername()))
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+
         userRepository.save(user);
 
         return userConverter.toResponse(user);
@@ -95,6 +98,23 @@ public class UserServiceImpl implements UserService {
         userResponse.setHasPassword(StringUtils.hasText(user.getPassword()));
 
         return userResponse;
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.OLD_PASSWORD_INCORRECT);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override

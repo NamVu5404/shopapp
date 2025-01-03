@@ -1,4 +1,4 @@
-package com.javaweb.dto.response;
+package com.javaweb.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PermissionResponse {
-    String code;
-    String description;
+public class RefreshRequest {
+    String token;
 }

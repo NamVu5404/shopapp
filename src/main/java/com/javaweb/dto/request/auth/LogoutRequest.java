@@ -1,4 +1,4 @@
-package com.javaweb.dto.request;
+package com.javaweb.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RefreshRequest {
+public class LogoutRequest {
     String token;
 }

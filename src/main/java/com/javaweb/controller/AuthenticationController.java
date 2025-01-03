@@ -1,13 +1,13 @@
 package com.javaweb.controller;
 
-import com.javaweb.dto.request.AuthenticationRequest;
-import com.javaweb.dto.request.IntrospectRequest;
-import com.javaweb.dto.request.LogoutRequest;
-import com.javaweb.dto.request.RefreshRequest;
+import com.javaweb.dto.request.auth.AuthenticationRequest;
+import com.javaweb.dto.request.auth.IntrospectRequest;
+import com.javaweb.dto.request.auth.LogoutRequest;
+import com.javaweb.dto.request.auth.RefreshRequest;
 import com.javaweb.dto.response.ApiResponse;
-import com.javaweb.dto.response.AuthenticationResponse;
-import com.javaweb.dto.response.IntrospectResponse;
-import com.javaweb.dto.response.RefreshResponse;
+import com.javaweb.dto.response.auth.AuthenticationResponse;
+import com.javaweb.dto.response.auth.IntrospectResponse;
+import com.javaweb.dto.response.auth.RefreshResponse;
 import com.javaweb.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;

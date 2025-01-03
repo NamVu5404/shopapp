@@ -38,6 +38,9 @@ public enum ErrorCode {
     INVALID_DELETE_PERMISSION(1022, "'PERMISSION' cannot be deleted " +
             "because it is assigned to roles. Please unassign all roles first", HttpStatus.BAD_REQUEST),
     PASSWORD_EXISTS(1023, "Password already exists", HttpStatus.BAD_REQUEST),
+    OLD_PASSWORD_INCORRECT(1024, "Old password incorrect", HttpStatus.BAD_REQUEST),
+    OLD_PASSWORD_NOT_NULL(1025, "Old password is required", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_NOT_NULL(1026, "New password is required", HttpStatus.BAD_REQUEST),
     ;
 
     int code;

@@ -1,18 +1,24 @@
-package com.javaweb.dto.request;
+package com.javaweb.dto.response.user;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserSearchRequest {
+public class UserResponse {
     String id;
     String username;
     String fullName;
-    String email;
     String phone;
-    String role;
+    String email;
+    LocalDate dob;
+    List<String> roles;
+    @Builder.Default
+    boolean hasPassword = true;
 }

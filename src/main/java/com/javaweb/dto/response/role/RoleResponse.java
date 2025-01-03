@@ -1,5 +1,6 @@
-package com.javaweb.dto.response;
+package com.javaweb.dto.response.role;
 
+import com.javaweb.dto.response.permission.PermissionResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

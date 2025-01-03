@@ -1,4 +1,4 @@
-package com.javaweb.dto.request;
+package com.javaweb.dto.request.auth;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

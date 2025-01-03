@@ -1,4 +1,4 @@
-package com.javaweb.dto.request;
+package com.javaweb.dto.request.user;
 
 import com.javaweb.validator.DobConstraint;
 import jakarta.validation.constraints.NotNull;
@@ -15,9 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserRequest {
-    String id;
-
+public class UserCreateRequest {
     @NotNull(message = "USERNAME_NOT_NULL")
     @Size(min = 5, max = 16, message = "INVALID_USERNAME")
     String username;

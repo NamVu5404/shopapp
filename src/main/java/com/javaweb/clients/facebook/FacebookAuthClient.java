@@ -1,7 +1,7 @@
 package com.javaweb.clients.facebook;
 
-import com.javaweb.dto.request.ExchangeTokenRequest;
-import com.javaweb.dto.response.ExchangeTokenResponse;
+import com.javaweb.dto.request.auth.ExchangeTokenRequest;
+import com.javaweb.dto.response.auth.ExchangeTokenResponse;
 import feign.QueryMap;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;

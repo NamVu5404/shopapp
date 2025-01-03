@@ -1,6 +1,6 @@
 package com.javaweb.repository.custom.impl;
 
-import com.javaweb.dto.request.UserSearchRequest;
+import com.javaweb.dto.request.user.UserSearchRequest;
 import com.javaweb.entity.User;
 import com.javaweb.repository.custom.UserRepositoryCustom;
 import jakarta.persistence.EntityManager;

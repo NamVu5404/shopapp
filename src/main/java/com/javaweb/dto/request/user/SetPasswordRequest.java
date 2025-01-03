@@ -1,4 +1,4 @@
-package com.javaweb.dto.request;
+package com.javaweb.dto.request.user;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
