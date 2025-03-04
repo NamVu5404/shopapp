@@ -22,8 +22,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/auth/**"
+    private final String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/v1/categories", "/api/v1/roles", "/api/v1/permissions", "/api/v1/suppliers", "/api/v1/products/**"
+    };
+
+    private final String[] PUBLIC_POST_ENDPOINTS = {
+            "/api/v1/users", "/api/v1/users/guests", "/api/v1/auth/**", "/api/v1/addresses", "/api/v1/orders",
     };
 
     @Autowired
@@ -38,17 +42,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(requests ->
-                        requests.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable);
 
         httpSecurity
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwtConfigurer ->
-                                jwtConfigurer.decoder(customJwtDecoder)
-                                        .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        .jwt(jwtConfigurer -> jwtConfigurer
+                                .decoder(customJwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 );

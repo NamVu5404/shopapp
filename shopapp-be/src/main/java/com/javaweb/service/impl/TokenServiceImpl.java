@@ -51,12 +51,13 @@ public class TokenServiceImpl implements TokenService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .issuer("javaweb.com")
+                .claim("userId", user.getId())
                 .subject(user.getUsername())
                 .claim("scope", buildScope(user.getRoles()))
                 .issueTime(new Date())
                 .jwtID(UUID.randomUUID().toString())
                 .expirationTime(Date.from(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS)
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.HOURS)
                 ))
                 .build();
 
@@ -81,7 +82,7 @@ public class TokenServiceImpl implements TokenService {
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expirationDate = (isRefresh) ?
                 Date.from(signedJWT.getJWTClaimsSet().getIssueTime()
-                        .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS))
+                        .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.HOURS))
                 : signedJWT.getJWTClaimsSet().getExpirationTime(); // isRefresh: true - refresh token, false - access token
 
         boolean verified = signedJWT.verify(verifier);

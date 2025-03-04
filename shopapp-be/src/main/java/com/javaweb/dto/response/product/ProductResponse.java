@@ -1,0 +1,30 @@
+package com.javaweb.dto.response.product;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ProductResponse {
+    String id;
+    String categoryCode;
+    String supplierCode;
+    String code;
+    String name;
+    String description;
+    int price;
+    Integer discountPrice;
+    int inventoryQuantity;
+    int soldQuantity;
+    int point;
+    String discountName;
+    LocalDateTime createdDate;
+    String createdBy;
+    LocalDateTime modifiedDate;
+    String modifiedBy;
+}

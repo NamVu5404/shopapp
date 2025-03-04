@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
@@ -34,11 +34,11 @@ public class RoleController {
     }
 
     @DeleteMapping("/{codes}")
-    public ApiResponse<String> delete(@PathVariable List<String> codes) {
+    public ApiResponse<Void> delete(@PathVariable List<String> codes) {
         roleService.delete(codes);
 
-        return ApiResponse.<String>builder()
-                .result("Delete successfully")
+        return ApiResponse.<Void>builder()
+                .message("Delete successfully")
                 .build();
     }
 }

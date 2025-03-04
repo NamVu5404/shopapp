@@ -1,7 +1,6 @@
 package com.javaweb.dto.request.permission;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,8 +11,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRequest {
     String id;
-    @NotNull(message = "CODE_NOT_EMPTY")
-    @Size(min = 1, message = "CODE_NOT_EMPTY")
+
+    @NotBlank(message = "CODE_NOT_BLANK")
     String code;
+
     String description;
 }

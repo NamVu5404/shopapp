@@ -1,26 +1,31 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.constant.StatusConstant;
 import com.javaweb.converter.UserConverter;
-import com.javaweb.dto.request.user.ChangePasswordRequest;
+import com.javaweb.dto.request.user.GuestCreateRequest;
 import com.javaweb.dto.request.user.UserCreateRequest;
 import com.javaweb.dto.request.user.UserSearchRequest;
 import com.javaweb.dto.request.user.UserUpdateRequest;
+import com.javaweb.dto.response.PageResponse;
 import com.javaweb.dto.response.user.UserResponse;
 import com.javaweb.entity.User;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.UserRepository;
 import com.javaweb.service.UserService;
+import com.javaweb.specifications.UserSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,45 +37,87 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     UserConverter userConverter;
-    PasswordEncoder passwordEncoder;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> search(UserSearchRequest request) {
-        List<User> users = userRepository.findAll(request);
-        return users.stream()
-                .map(userConverter::toResponse)
-                .collect(Collectors.toList());
+    @PreAuthorize("hasAuthority('RU_USER')")
+    public PageResponse<UserResponse> search(UserSearchRequest request, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Specification<User> spec = Specification
+                .where(UserSpecification.withId(request.getId()))
+                .and(UserSpecification.withUsername(request.getUsername()))
+                .and(UserSpecification.withFullName(request.getFullName()))
+                .and(UserSpecification.withPhone(request.getPhone()))
+                .and(UserSpecification.withIsGuest(request.getIsGuest()))
+                .and(UserSpecification.withRole(request.getRole()));
+
+        Page<User> users = userRepository.findAll(spec, pageable);
+
+        return PageResponse.<UserResponse>builder()
+                .totalPage(users.getTotalPages())
+                .pageSize(size)
+                .currentPage(page)
+                .totalElements(users.getTotalElements())
+                .data(users.stream().map(userConverter::toResponse).toList())
+                .build();
     }
 
     @Override
     @Transactional
     public UserResponse create(UserCreateRequest request) {
-        if (userRepository.existsByUsername(request.getUsername()))
+        String username = request.getUsername();
+
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        // Chưa tồn tại user, tạo mới
+        if (user == null) {
+            return createNewUser(request);
+        }
+
+        // Tồn tại user và ko là guest -> throw ex
+        if (user.getIsGuest() == StatusConstant.USER) {
             throw new CustomException(ErrorCode.USER_EXISTS);
+        }
 
-        User user = userConverter.toEntity(request);
+        // Là guest, -> user
+        return upgradeGuestToUser(user, request);
+    }
+
+    private UserResponse createNewUser(UserCreateRequest request) {
+        User user = userConverter.toEntity(null, request);
         userRepository.save(user);
+        return userConverter.toResponse(user);
+    }
 
+    private UserResponse upgradeGuestToUser(User existedUser, UserCreateRequest request) {
+        User user = userConverter.toEntity(existedUser, request);
+        userRepository.save(user);
         return userConverter.toResponse(user);
     }
 
     @Override
     @Transactional
-    public UserResponse update(String id, UserUpdateRequest request) {
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        if (!userRepository.existsByIdAndIsActive(id, (byte) 1))
-            throw new CustomException(ErrorCode.USER_NOT_EXISTS);
-
-        User user = userConverter.toEntity(id, request);
-
-        if (!currentUsername.equals(user.getUsername()))
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-
+    public UserResponse createGuest(GuestCreateRequest request) {
+        User user = userConverter.toEntity(request);
         userRepository.save(user);
-
         return userConverter.toResponse(user);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAuthority('RU_USER') or authentication.name == #request.username")
+    public UserResponse update(String id, UserUpdateRequest request) {
+        User currentUser = userRepository.findByIdAndIsActive(id, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        User updatedUser = userConverter.toEntity(currentUser, request);
+
+        userRepository.save(updatedUser);
+
+        return userConverter.toResponse(updatedUser);
     }
 
     @Override
@@ -82,63 +129,26 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)))
                 .collect(Collectors.toList());
 
-        users.forEach(user -> user.setIsActive((byte) 0));
+        users.forEach(user -> user.setIsActive(StatusConstant.INACTIVE));
         userRepository.saveAll(users);
     }
 
     @Override
     public UserResponse getMyInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
+        User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
 
-        UserResponse userResponse = userConverter.toResponse(user);
-        userResponse.setHasPassword(StringUtils.hasText(user.getPassword()));
-
-        return userResponse;
+        return userConverter.toResponse(user);
     }
 
     @Override
-    @Transactional
-    public void changePassword(ChangePasswordRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
-
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.OLD_PASSWORD_INCORRECT);
-        }
-
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('RU_USER')")
     public UserResponse getById(String id) {
         return userConverter.toResponse(
-                userRepository.findByIdAndIsActive(id, (byte) 1)
+                userRepository.findByIdAndIsActive(id, StatusConstant.ACTIVE)
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS))
         );
-    }
-
-    @Override
-    @Transactional
-    public void setPassword(String password) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
-        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
-
-        if (StringUtils.hasText(user.getPassword()))
-            throw new CustomException(ErrorCode.PASSWORD_EXISTS);
-
-        user.setPassword(passwordEncoder.encode(password));
-        userRepository.save(user);
     }
 }

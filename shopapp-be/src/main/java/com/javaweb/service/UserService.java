@@ -1,17 +1,20 @@
 package com.javaweb.service;
 
-import com.javaweb.dto.request.user.ChangePasswordRequest;
+import com.javaweb.dto.request.user.GuestCreateRequest;
 import com.javaweb.dto.request.user.UserCreateRequest;
 import com.javaweb.dto.request.user.UserSearchRequest;
 import com.javaweb.dto.request.user.UserUpdateRequest;
+import com.javaweb.dto.response.PageResponse;
 import com.javaweb.dto.response.user.UserResponse;
 
 import java.util.List;
 
 public interface UserService {
-    List<UserResponse> search(UserSearchRequest request);
+    PageResponse<UserResponse> search(UserSearchRequest request, int page, int size);
 
     UserResponse create(UserCreateRequest request);
+
+    UserResponse createGuest(GuestCreateRequest request);
 
     UserResponse update(String id, UserUpdateRequest request);
 
@@ -19,9 +22,5 @@ public interface UserService {
 
     UserResponse getMyInfo();
 
-    void changePassword(ChangePasswordRequest request);
-
     UserResponse getById(String id);
-
-    void setPassword(String password);
 }

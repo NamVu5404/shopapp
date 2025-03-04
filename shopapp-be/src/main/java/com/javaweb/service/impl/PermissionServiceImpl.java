@@ -27,7 +27,6 @@ public class PermissionServiceImpl implements PermissionService {
     PermissionConverter permissionConverter;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAll() {
         return permissionRepository.findAll()
                 .stream()

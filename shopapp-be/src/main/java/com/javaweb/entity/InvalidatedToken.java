@@ -1,6 +1,5 @@
 package com.javaweb.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -21,6 +20,5 @@ public class InvalidatedToken {
     @Id
     String id;
 
-    @Column(name = "expirytime")
     Date expiryTime;
 }

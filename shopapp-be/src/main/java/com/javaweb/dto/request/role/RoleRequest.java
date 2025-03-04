@@ -1,7 +1,6 @@
 package com.javaweb.dto.request.role;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,9 +13,10 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleRequest {
     String id;
-    @NotNull(message = "CODE_NOT_EMPTY")
-    @Size(min = 1, message = "CODE_NOT_EMPTY")
+
+    @NotBlank(message = "CODE_NOT_BLANK")
     String code;
+
     String description;
     List<String> permissions;
 }

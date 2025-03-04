@@ -24,7 +24,7 @@ import java.util.List;
 public class ApplicationInitConfig {
 
     @NonFinal
-    static String ADMIN_USERNAME = "admin";
+    static String ADMIN_USERNAME = "admin@gmail.com";
 
     @NonFinal
     static String ADMIN_PASSWORD = "admin";
@@ -33,13 +33,11 @@ public class ApplicationInitConfig {
     static String ADMIN_FULL_NAME = "ADMIN";
 
     @NonFinal
-    static String ADMIN_EMAIL = "admin@gmail.com";
-
-    @NonFinal
     static String ROLE_ADMIN_CODE = "ADMIN";
 
     @NonFinal
     static String ROLE_ADMIN_DESCRIPTION = "Admin role";
+
     PasswordEncoder passwordEncoder;
 
     @Bean
@@ -66,7 +64,6 @@ public class ApplicationInitConfig {
                     .username(ADMIN_USERNAME)
                     .password(passwordEncoder.encode(ADMIN_PASSWORD))
                     .fullName(ADMIN_FULL_NAME)
-                    .email(ADMIN_EMAIL)
                     .isActive((byte) 1)
                     .roles(roles)
                     .build();

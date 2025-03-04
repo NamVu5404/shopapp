@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/permissions")
+@RequestMapping("/api/v1/permissions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
@@ -35,11 +35,11 @@ public class PermissionController {
     }
 
     @DeleteMapping("/{codes}")
-    public ApiResponse<String> delete(@PathVariable List<String> codes) {
+    public ApiResponse<Void> delete(@PathVariable List<String> codes) {
         permissionService.delete(codes);
 
-        return ApiResponse.<String>builder()
-                .result("Delete successfully")
+        return ApiResponse.<Void>builder()
+                .message("Delete successfully")
                 .build();
     }
 

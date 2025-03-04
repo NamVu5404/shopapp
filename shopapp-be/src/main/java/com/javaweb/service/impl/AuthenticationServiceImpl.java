@@ -1,5 +1,6 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.constant.StatusConstant;
 import com.javaweb.dto.request.auth.AuthenticationRequest;
 import com.javaweb.dto.request.auth.IntrospectRequest;
 import com.javaweb.dto.request.auth.LogoutRequest;
@@ -47,7 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        User user = userRepository.findByUsernameAndIsActive(request.getUsername(), (byte) 1)
+        User user = userRepository.findByUsernameAndIsActive(request.getUsername(), StatusConstant.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -84,7 +85,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             String jti = signedJWT.getJWTClaimsSet().getJWTID();
             Date expiryTime = Date.from(signedJWT.getJWTClaimsSet().getIssueTime()
-                    .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS));
+                    .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.HOURS));
 
             InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                     .id(jti)
@@ -106,7 +107,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // xóa token cũ bằng cách logout
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = Date.from(signedJWT.getJWTClaimsSet().getIssueTime()
-                .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS));
+                .toInstant().plus(REFRESHABLE_DURATION, ChronoUnit.HOURS));
 
         invalidatedTokenRepository.save(InvalidatedToken.builder()
                 .id(jti)
@@ -116,7 +117,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // tạo token mới dựa vào subject
         String username = signedJWT.getJWTClaimsSet().getSubject();
 
-        User user = userRepository.findByUsernameAndIsActive(username, (byte) 1)
+        User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHENTICATED));
 
         return RefreshResponse.builder()

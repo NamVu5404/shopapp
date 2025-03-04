@@ -17,23 +17,21 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class User extends BaseEntity {
-    @Column(name = "username", unique = true, nullable = false)
+    @Column(unique = true, nullable = false)
     String username;
 
-    @Column(name = "password")
     String password;
 
-    @Column(name = "fullname", nullable = false)
+    @Column(nullable = false)
     String fullName;
 
-    @Column(name = "phone", length = 10)
+    @Column(length = 10)
     String phone;
 
-    @Column(name = "dob")
     LocalDate dob;
 
-    @Column(name = "email", nullable = false)
-    String email;
+    @Column(nullable = false)
+    byte isGuest;
 
     @ManyToMany
     @JoinTable(
@@ -42,4 +40,7 @@ public class User extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "roleid")
     )
     List<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Address> addresses;
 }

@@ -19,11 +19,12 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Permission extends BaseEntity {
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     String code;
 
-    @Column(name = "description")
     String description;
+
+    Integer sortOrder;
 
     @ManyToMany(mappedBy = "permissions")
     List<Role> roles;

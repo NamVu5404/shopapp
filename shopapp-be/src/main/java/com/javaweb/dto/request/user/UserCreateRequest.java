@@ -1,7 +1,7 @@
 package com.javaweb.dto.request.user;
 
 import com.javaweb.validator.DobConstraint;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -16,25 +16,22 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreateRequest {
-    @NotNull(message = "USERNAME_NOT_NULL")
-    @Size(min = 5, max = 16, message = "INVALID_USERNAME")
+    @NotBlank(message = "EMAIL_NOT_BLANK")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "INVALID_EMAIL")
     String username;
 
-    @NotNull(message = "PASSWORD_NOT_NULL")
+    @NotBlank(message = "PASSWORD_NOT_BLANK")
     @Size(min = 8, max = 32, message = "INVALID_PASSWORD")
     String password;
 
-    @NotNull(message = "FULL_NAME_NOT_NULL")
+    @NotBlank(message = "FULL_NAME_NOT_BLANK")
     String fullName;
 
+    @NotBlank(message = "PHONE_NOT_BLANK")
     @Pattern(regexp = "^0\\d{9}$", message = "INVALID_PHONE")
     String phone;
 
-    @NotNull(message = "EMAIL_NOT_NULL")
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "INVALID_EMAIL")
-    String email;
-
-    @DobConstraint(min = 16, message = "INVALID_DOB")
+    @DobConstraint(min = 13, message = "INVALID_DOB")
     LocalDate dob;
 
     List<String> roles;

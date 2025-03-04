@@ -1,0 +1,87 @@
+import { message } from "antd";
+import { getToken } from "../services/localStorageService";
+import { API } from "./auth";
+
+export const setPassword = async (body) => {
+  try {
+    const response = await fetch(`${API}/password/set`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Đặt mật khẩu thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Đặt mật khẩu thành công");
+    window.location.reload();
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const changePassword = async (body) => {
+  try {
+    const response = await fetch(`${API}/password/change`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Thay đổi mật khẩu thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Thay đổi mật khẩu thành công");
+    message.success(result.message);
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const resetPassword = async (id) => {
+  try {
+    const response = await fetch(`${API}/password/reset/${id}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Reset mật khẩu thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Reset mật khẩu thành công");
+  } catch (error) {
+    message.error(error.message);
+  }
+};

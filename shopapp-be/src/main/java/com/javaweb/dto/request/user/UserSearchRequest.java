@@ -12,7 +12,7 @@ public class UserSearchRequest {
     String id;
     String username;
     String fullName;
-    String email;
     String phone;
     String role;
+    String isGuest;
 }

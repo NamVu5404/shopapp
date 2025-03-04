@@ -26,22 +26,22 @@ public class BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @Column(name = "createddate")
     @CreatedDate
+    @Column(name = "createddate")
     LocalDateTime createdDate;
 
-    @Column(name = "createdby")
     @CreatedBy
+    @Column(name = "createdby")
     String createdBy;
 
-    @Column(name = "modifieddate")
     @LastModifiedDate
+    @Column(name = "modifieddate")
     LocalDateTime modifiedDate;
 
-    @Column(name = "modifiedby")
     @LastModifiedBy
+    @Column(name = "modifiedby")
     String modifiedBy;
 
-    @Column(name = "is_active", nullable = false)
+    @Builder.Default
     byte isActive = 1;
 }

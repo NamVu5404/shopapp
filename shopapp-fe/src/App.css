@@ -1,38 +1,63 @@
-.App {
-  text-align: center;
+:root {
+  --primary-color: #1c5b41;
+  --secondary-color: #fffaf0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.root {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100vh;
+  width: 100vw;
 }
 
-.App-link {
-  color: #61dafb;
+* {
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  list-style: none;
+  text-decoration: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.container {
+  padding: 0 220px;
+}
+
+.primary-link {
+  color: var(--primary-color);
+}
+
+.primary-link:hover {
+  color: #000;
+}
+
+.secondary-link {
+  color: var(--secondary-color);
+}
+
+.secondary-link:hover {
+  color: #000000;
+}
+
+.custom-menu-item {
+  padding: 0 !important;
+}
+
+.ant-layout-sider .ant-layout-sider-trigger {
+  width: 220px !important;  /* Đặt chiều rộng khi không collapsed */
+}
+
+/* Khi Sider đã thu gọn */
+.ant-layout-sider.ant-layout-sider-collapsed .ant-layout-sider-trigger {
+  width: 80px !important;  /* Đặt chiều rộng khi collapsed */
+}
+
+.ant-layout-sider {
+  min-width: 220px !important; /* Chiều rộng khi không collapsed */
+}
+
+.ant-layout-sider.ant-layout-sider-collapsed {
+  min-width: 80px !important; /* Chiều rộng khi collapsed */
 }

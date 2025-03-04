@@ -53,7 +53,7 @@ public class GoogleAuthenticationServiceImpl implements OutboundAuthenticationSe
         // Onboard user
         User user = outboundUserService.onboardUser(userInfo);
 
-        // Generate JWT Token
+        // Generate JWT
         String token = tokenService.generateToken(user);
 
         return AuthenticationResponse.builder()

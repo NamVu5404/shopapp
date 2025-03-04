@@ -16,11 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Role extends BaseEntity {
-    @Column(name = "description")
-    String description;
-
-    @Column(name = "code", nullable = false)
+    @Column(nullable = false)
     String code;
+
+    String description;
 
     @ManyToMany(mappedBy = "roles")
     List<User> users;

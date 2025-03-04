@@ -1,7 +1,7 @@
 package com.javaweb.dto.request.user;
 
 import com.javaweb.validator.DobConstraint;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,18 +15,21 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
-    @NotNull(message = "FULL_NAME_NOT_NULL")
+    @NotBlank(message = "EMAIL_NOT_BLANK")
+    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "INVALID_EMAIL")
+    String username;
+
+    @NotBlank(message = "FULL_NAME_NOT_BLANK")
     String fullName;
 
+    @NotBlank(message = "PHONE_NOT_BLANK")
     @Pattern(regexp = "^0\\d{9}$", message = "INVALID_PHONE")
     String phone;
 
-    @NotNull(message = "EMAIL_NOT_NULL")
-    @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "INVALID_EMAIL")
-    String email;
-
-    @DobConstraint(min = 16, message = "INVALID_DOB")
+    @DobConstraint(min = 13, message = "INVALID_DOB")
     LocalDate dob;
+
+    byte isGuest;
 
     List<String> roles;
 }

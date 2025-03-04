@@ -28,7 +28,6 @@ public class OutboundUserServiceImpl implements OutboundUserService {
                 () -> userRepository.save(
                         User.builder()
                                 .username(userInfo.getEmail())
-                                .email(userInfo.getEmail())
                                 .fullName(userInfo.getName())
                                 .isActive((byte) 1)
                                 .roles(roles)

@@ -1,7 +1,11 @@
 package com.javaweb.controller;
 
-import com.javaweb.dto.request.user.*;
+import com.javaweb.dto.request.user.GuestCreateRequest;
+import com.javaweb.dto.request.user.UserCreateRequest;
+import com.javaweb.dto.request.user.UserSearchRequest;
+import com.javaweb.dto.request.user.UserUpdateRequest;
 import com.javaweb.dto.response.ApiResponse;
+import com.javaweb.dto.response.PageResponse;
 import com.javaweb.dto.response.user.UserResponse;
 import com.javaweb.service.UserService;
 import jakarta.validation.Valid;
@@ -13,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
@@ -21,10 +25,13 @@ public class UserController {
     UserService userService;
 
     @GetMapping
-    public ApiResponse<List<UserResponse>> search(UserSearchRequest request) {
-        List<UserResponse> result = userService.search(request);
+    public ApiResponse<PageResponse<UserResponse>> search(
+            UserSearchRequest request,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        PageResponse<UserResponse> result = userService.search(request, page, size);
 
-        return ApiResponse.<List<UserResponse>>builder()
+        return ApiResponse.<PageResponse<UserResponse>>builder()
                 .result(result)
                 .build();
     }
@@ -33,6 +40,13 @@ public class UserController {
     public ApiResponse<UserResponse> create(@RequestBody @Valid UserCreateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.create(request))
+                .build();
+    }
+
+    @PostMapping("/guests")
+    public ApiResponse<UserResponse> createGuest(@RequestBody @Valid GuestCreateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createGuest(request))
                 .build();
     }
 
@@ -58,31 +72,10 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("/myInfo/password")
-    public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
-        userService.changePassword(request);
-
-        return ApiResponse.<Void>builder()
-                .message("Change password successfully")
-                .build();
-    }
-
     @GetMapping("/{id}")
     public ApiResponse<UserResponse> getById(@PathVariable String id) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getById(id))
-                .build();
-    }
-
-    /*
-     * set password cho user login bằng bên thứ 3
-     */
-    @PostMapping("/set-password")
-    public ApiResponse<Void> setPassword(@RequestBody @Valid SetPasswordRequest request) {
-        userService.setPassword(request.getPassword());
-
-        return ApiResponse.<Void>builder()
-                .message("Set password successfully")
                 .build();
     }
 }
