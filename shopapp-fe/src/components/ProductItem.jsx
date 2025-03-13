@@ -3,7 +3,18 @@ import {
   HeartOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
-import { Col, message, Row, Tag } from "antd";
+import {
+  Col,
+  message,
+  Row,
+  Tag,
+  Rate,
+  Badge,
+  Card,
+  Typography,
+  Space,
+  Tooltip,
+} from "antd";
 import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -12,6 +23,8 @@ import { addCartItem } from "../api/cart";
 import { getWishListByUser, toggleWishlist } from "../api/wishList";
 import { useCategories } from "../context/CategoryContext";
 import { getToken } from "../services/localStorageService";
+
+const { Text, Title } = Typography;
 
 export default function ProductItem({ data }) {
   const [wishlist, setWishlist] = useState({});
@@ -26,10 +39,10 @@ export default function ProductItem({ data }) {
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        const response = await getWishListByUser(userId, 1, 100);
+        const response = await getWishListByUser(userId, 1, 50);
         const likedProducts = response.data;
         const wishlistMap = likedProducts.reduce((acc, item) => {
-          acc[item.id] = item; // Lưu toàn bộ thông tin sản phẩm từ API
+          acc[item.id] = item;
           return acc;
         }, {});
         setWishlist(wishlistMap);
@@ -56,13 +69,12 @@ export default function ProductItem({ data }) {
     const newWishlist = { ...wishlist };
 
     if (getToken() && userId) {
-      // User đã đăng nhập, gọi API
       try {
         await toggleWishlist(userId, productId);
         if (isFavorite) {
           delete newWishlist[productId];
         } else {
-          newWishlist[productId] = product; // Lưu toàn bộ thông tin sản phẩm
+          newWishlist[productId] = product;
         }
         setWishlist(newWishlist);
         isFavorite
@@ -71,14 +83,13 @@ export default function ProductItem({ data }) {
       } catch (error) {
         console.error("Lỗi khi cập nhật wishlist:", error);
         message.error("Có lỗi xảy ra, vui lòng thử lại!");
-        setWishlist(wishlist); // Rollback nếu thất bại
+        setWishlist(wishlist);
       }
     } else {
-      // User chưa đăng nhập, lưu vào localStorage
       if (isFavorite) {
         delete newWishlist[productId];
       } else {
-        newWishlist[productId] = product; // Lưu toàn bộ thông tin sản phẩm
+        newWishlist[productId] = product;
       }
       localStorage.setItem("guestWishlist", JSON.stringify(newWishlist));
       setWishlist(newWishlist);
@@ -88,9 +99,14 @@ export default function ProductItem({ data }) {
     }
   };
 
+  // Function to dispatch cart update event
+  const dispatchCartUpdatedEvent = () => {
+    const cartUpdatedEvent = new Event("cartUpdated");
+    window.dispatchEvent(cartUpdatedEvent);
+  };
+
   const handleAddToCart = debounce(async (product) => {
     if (!getToken()) {
-      // Lấy giỏ hàng guest từ localStorage
       const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
         items: [],
       };
@@ -112,8 +128,11 @@ export default function ProductItem({ data }) {
       }
 
       localStorage.setItem("guestCart", JSON.stringify(guestCart));
-      console.log("Giỏ hàng guest:", guestCart); // Kiểm tra dữ liệu lưu
+      console.log("Giỏ hàng guest:", guestCart);
       message.success("Đã thêm vào giỏ hàng");
+
+      // Trigger cart update event for guest
+      dispatchCartUpdatedEvent();
       return;
     }
 
@@ -126,6 +145,9 @@ export default function ProductItem({ data }) {
       };
       await addCartItem(data);
       message.success("Đã thêm vào giỏ hàng");
+
+      // Trigger cart update event for logged-in user
+      dispatchCartUpdatedEvent();
     } catch (error) {
       console.error("Lỗi khi thêm vào giỏ hàng:", error);
       message.error("Có lỗi xảy ra, vui lòng thử lại!");
@@ -133,130 +155,153 @@ export default function ProductItem({ data }) {
   }, 500);
 
   return (
-    <>
-      <Row
-        gutter={[16, 16]}
-        style={{ marginTop: 16, color: "var(--primary-color)" }}
-      >
-        {data.map((product) => (
-          <Col xl={6} key={product.code}>
-            <div
-              style={{
-                padding: 0,
-                borderRadius: "8px",
-                overflow: "hidden",
-                height: "auto",
-                border: "1px solid #ccc",
-              }}
-            >
-              <Link to={`/products/${product.code}`}>
-                <img
-                  src="/logo/wallpaperflare.com_wallpaper.jpg"
-                  alt="Product"
-                  style={{
-                    width: "100%",
-                    maxHeight: 250,
-                    objectFit: "contain",
-                    display: "block",
-                    borderTopLeftRadius: "8px",
-                    borderTopRightRadius: "8px",
-                  }}
-                />
-                <Tag color="orange">
-                  <b>{product.discountName}</b>
-                </Tag>
-              </Link>
-
-              <div style={{ padding: 8 }}>
-                <h4 style={{ marginBottom: 16 }}>
-                  [
-                  <span style={{ fontSize: 12 }}>
-                    {categoryMap[product.categoryCode]}
-                  </span>
-                  ] {product.name}
-                </h4>
-                {product.discountPrice ? (
-                  <>
-                    <h3 style={{ color: "red", marginBottom: 5 }}>
-                      <span
-                        style={{
-                          fontWeight: "bold",
-                          color: "red",
-                          marginRight: 5,
-                        }}
-                      >
-                        {product.discountPrice?.toLocaleString("vi-VN")}đ
-                      </span>
-                      <span
-                        style={{
-                          textDecoration: "line-through",
-                          color: "gray",
-                          fontSize: 14,
-                        }}
-                      >
-                        {product.price?.toLocaleString("vi-VN")}đ
-                      </span>
-                    </h3>
-                  </>
-                ) : (
-                  <>
-                    <h3 style={{ color: "red", marginBottom: 5 }}>
-                      {product.price?.toLocaleString("vi-VN") + "đ"}
-                    </h3>
-                  </>
-                )}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <p>
-                    Đã bán: <b>{product.soldQuantity}</b>
-                  </p>
-                  {product.inventoryQuantity === 0 && (
-                    <Tag color="red">
-                      <b>Hết hàng</b>
-                    </Tag>
-                  )}
-                </div>
-
-                {/* Nút yêu thích và giỏ hàng */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: 5,
-                    gap: 15,
-                  }}
+    <Row gutter={[16, 24]} className="product-grid" style={{ marginTop: 16 }}>
+      {data.map((product) => (
+        <Col xl={6} lg={8} md={12} sm={24} xs={24} key={product.code}>
+          <Badge.Ribbon
+            text={product.discountName || " "}
+            color="orange"
+            style={{ display: product.discountName ? "block" : "none" }}
+          >
+            <Card
+              hoverable
+              className="product-card"
+              cover={
+                <Link to={`/products/${product.code}`}>
+                  <div
+                    className="image-container"
+                    style={{
+                      height: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      background: "#f5f5f5",
+                    }}
+                  >
+                    <img
+                      src="/logo/wallpaperflare.com_wallpaper.jpg"
+                      alt={product.name}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                </Link>
+              }
+              actions={[
+                <Tooltip
+                  title={
+                    wishlist[product.id]
+                      ? "Xóa khỏi danh sách yêu thích"
+                      : "Thêm vào danh sách yêu thích"
+                  }
                 >
                   <span
-                    style={{
-                      fontSize: 24,
-                      cursor: "pointer",
-                      color: wishlist[product.id] ? "red" : "gray",
-                    }}
                     onClick={() => handleToggleWishlist(product.id, product)}
+                    style={{
+                      color: wishlist[product.id]
+                        ? "#ff4d4f"
+                        : "rgba(0, 0, 0, 0.45)",
+                      fontSize: 20,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
                   >
                     {wishlist[product.id] ? <HeartFilled /> : <HeartOutlined />}
                   </span>
-                  {product.inventoryQuantity !== 0 && (
+                </Tooltip>,
+                <Rate
+                  disabled
+                  allowHalf
+                  value={Math.round(product.avgRating * 2) / 2}
+                  style={{ fontSize: 14 }}
+                />,
+                product.inventoryQuantity > 0 ? (
+                  <Tooltip title="Thêm vào giỏ hàng">
                     <span
-                      style={{
-                        fontSize: 24,
-                        cursor: "pointer",
-                      }}
                       onClick={() => handleAddToCart(product)}
+                      style={{
+                        fontSize: 20,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
                     >
                       <ShoppingCartOutlined />
                     </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Col>
-        ))}
-      </Row>
-    </>
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Hết hàng">
+                    <span
+                      style={{
+                        color: "rgba(0, 0, 0, 0.25)",
+                        fontSize: 20,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ShoppingCartOutlined />
+                    </span>
+                  </Tooltip>
+                ),
+              ]}
+            >
+              <Link
+                to={`/products/${product.code}`}
+                style={{ color: "inherit" }}
+              >
+                <Space direction="vertical" size={0} style={{ width: "100%" }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    {categoryMap[product.categoryCode]}
+                  </Text>
+                  <Title
+                    level={5}
+                    ellipsis={{ rows: 2 }}
+                    style={{ marginTop: 0, height: 48, overflow: "hidden" }}
+                  >
+                    {product.name}
+                  </Title>
+                  <Space align="baseline">
+                    {product.discountPrice ? (
+                      <>
+                        <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
+                          {product.discountPrice?.toLocaleString("vi-VN")}đ
+                        </Text>
+                        <Text delete type="secondary" style={{ fontSize: 14 }}>
+                          {product.price?.toLocaleString("vi-VN")}đ
+                        </Text>
+                      </>
+                    ) : (
+                      <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
+                        {product.price?.toLocaleString("vi-VN")}đ
+                      </Text>
+                    )}
+                  </Space>
+                  <Space
+                    style={{
+                      width: "100%",
+                      justifyContent: "space-between",
+                      marginTop: 8,
+                    }}
+                  >
+                    <Text type="secondary" size="small">
+                      Đã bán: <Text strong>{product.soldQuantity}</Text>
+                    </Text>
+                    {product.inventoryQuantity === 0 && (
+                      <Tag color="red">Hết hàng</Tag>
+                    )}
+                  </Space>
+                </Space>
+              </Link>
+            </Card>
+          </Badge.Ribbon>
+        </Col>
+      ))}
+    </Row>
   );
 }

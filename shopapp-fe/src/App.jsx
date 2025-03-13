@@ -13,27 +13,20 @@ function App() {
   const token = getToken();
   const dispatch = useDispatch();
 
-  // refresh token
   useEffect(() => {
     const refreshToken = async (token) => {
       const isValidAccessToken = await introspect(token);
-
+      
       if (!isValidAccessToken) {
         await refresh(token);
       }
-    };
-
-    if (token) {
-      refreshToken(token).then(() => {
-        dispatch(getMyInfo(token)); // Lấy thông tin user sau khi xác thực token
-      });
-    }
-  }, [token, dispatch]);
-
-  // set user data
-  useEffect(() => {
-    if (token) {
+      
+      // Lấy thông tin user sau khi xác thực token
       dispatch(getMyInfo(token));
+    };
+    
+    if (token) {
+      refreshToken(token);
     }
   }, [token, dispatch]);
 

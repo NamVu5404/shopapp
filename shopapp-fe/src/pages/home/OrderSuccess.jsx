@@ -1,13 +1,43 @@
 import React from "react";
-import { Result, Card, Row, Col, Button, Descriptions, Table } from "antd";
+import {
+  Result,
+  Card,
+  Row,
+  Col,
+  Button,
+  Descriptions,
+  Table,
+  Divider,
+  Typography,
+  Space,
+} from "antd";
 import { Link, useLocation } from "react-router-dom";
+import {
+  ShoppingOutlined,
+  CheckCircleOutlined,
+  UserOutlined,
+  EnvironmentOutlined,
+  CreditCardOutlined,
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const OrderSuccess = () => {
   const { state } = useLocation();
   const order = state?.order;
 
   if (!order) {
-    return <Result status="error" title="Không tìm thấy thông tin đơn hàng" />;
+    return (
+      <Result
+        status="error"
+        title="Không tìm thấy thông tin đơn hàng"
+        extra={
+          <Button type="primary">
+            <Link to="/">Trở về trang chủ</Link>
+          </Button>
+        }
+      />
+    );
   }
 
   const address = order.address || "Không có thông tin địa chỉ";
@@ -20,137 +50,230 @@ const OrderSuccess = () => {
       key: "productName",
       render: (_, record) => (
         <Link to={`/products/${record.productCode}`}>
-          <span style={{ wordBreak: "break-word", maxWidth: "150px" }}>
+          <Text strong style={{ wordBreak: "break-word" }}>
             {record.productName}
-          </span>
+          </Text>
         </Link>
       ),
     },
-    { title: "Số lượng", dataIndex: "quantity", key: "quantity", width: 80 },
+    {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      width: 80,
+      align: "center",
+      render: (quantity) => <Text>{quantity}</Text>,
+    },
     {
       title: "Giá",
       dataIndex: "priceAtPurchase",
       key: "priceAtPurchase",
-      render: (price) => `${price.toLocaleString()}đ`,
+      render: (price) => <Text type="danger">{price.toLocaleString()}đ</Text>,
       width: 120,
+      align: "right",
     },
   ];
 
   return (
-    <div style={{ padding: "20px", background: "#f0f2f5" }}>
-      <Result
-        status="success"
-        title="Cảm ơn bạn đã đặt hàng!"
-        subTitle={
-          <span>
+    <div style={{ padding: "20px", background: "#f5f7fa", minHeight: "100vh" }}>
+      <Card
+        style={{
+          maxWidth: 1000,
+          margin: "0 auto",
+          borderRadius: "8px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+        }}
+        bodyStyle={{ padding: "0" }}
+      >
+        {/* Header với background gradient */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #1890ff 0%, #096dd9 100%)",
+            padding: "35px 20px",
+            borderRadius: "8px 8px 0 0",
+            textAlign: "center",
+          }}
+        >
+          <CheckCircleOutlined style={{ fontSize: 60, color: "white" }} />
+          <Title level={2} style={{ color: "white", margin: "16px 0 8px" }}>
+            Cảm ơn bạn đã đặt hàng!
+          </Title>
+          <Text style={{ fontSize: 16, color: "white" }}>
             Email xác nhận đã được gửi tới{" "}
-            <span style={{ color: "#1890ff", fontWeight: "bold" }}>
-              {order.username}
-            </span>
-            . Xin vui lòng kiểm tra email của bạn.
-          </span>
-        }
-        extra={
-          <div style={{ fontSize: "16px", color: "#1890ff" }}>
-            Đơn hàng #{order.id}
+            <span style={{ fontWeight: "bold" }}>{order.username}</span>
+          </Text>
+          <div style={{ marginTop: 15 }}>
+            <Text
+              style={{
+                fontSize: "18px",
+                color: "white",
+                background: "rgba(255,255,255,0.2)",
+                padding: "6px 12px",
+                borderRadius: "4px",
+              }}
+            >
+              Đơn hàng #{order.id}
+            </Text>
           </div>
-        }
-      />
+        </div>
 
-      <Card style={{ marginTop: 20 }}>
-        <Row gutter={[16, 16]}>
-          {/* Cột trái - Thông tin đơn hàng */}
-          <Col span={16}>
-            <Descriptions
-              title="Thông tin mua hàng"
-              bordered
-              column={1}
-              size="small"
-            >
-              <Descriptions.Item label="Tên">
-                {order.fullName || "Không có"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Email">
-                <span style={{ wordBreak: "break-word", maxWidth: "200px" }}>
-                  {order.username}
-                </span>
-              </Descriptions.Item>
-              <Descriptions.Item label="Số điện thoại">
-                {order.phone}
-              </Descriptions.Item>
-            </Descriptions>
+        <div style={{ padding: "24px" }}>
+          <Row gutter={[24, 24]}>
+            {/* Cột trái - Thông tin đơn hàng */}
+            <Col xs={24} md={14}>
+              <Card
+                title={
+                  <Space>
+                    <UserOutlined />
+                    <span>Thông tin mua hàng</span>
+                  </Space>
+                }
+                bordered={false}
+                style={{ marginBottom: 16 }}
+                headStyle={{
+                  background: "#f0f5ff",
+                  borderBottom: "1px solid #d6e4ff",
+                }}
+              >
+                <Descriptions
+                  column={1}
+                  size="small"
+                  bordered={false}
+                  layout="vertical"
+                >
+                  <Descriptions.Item label="Tên">
+                    <Text strong>{order.fullName || "Không có"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    <Text copyable style={{ wordBreak: "break-word" }}>
+                      {order.username}
+                    </Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số điện thoại">
+                    <Text>{order.phone}</Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
 
-            <Descriptions
-              title="Phương thức thanh toán"
-              bordered
-              column={1}
-              size="small"
-              style={{ marginTop: 16 }}
-            >
-              <Descriptions.Item>{order.paymentMethod}</Descriptions.Item>
-            </Descriptions>
+              <Card
+                title={
+                  <Space>
+                    <CreditCardOutlined />
+                    <span>Phương thức thanh toán</span>
+                  </Space>
+                }
+                bordered={false}
+                style={{ marginBottom: 16 }}
+                headStyle={{
+                  background: "#f0f5ff",
+                  borderBottom: "1px solid #d6e4ff",
+                }}
+              >
+                <Text strong>{order.paymentMethod}</Text>
+              </Card>
 
-            <Descriptions
-              title="Địa chỉ nhận hàng"
-              bordered
-              column={1}
-              size="small"
-              style={{ marginTop: 16 }}
-            >
-              <Descriptions.Item label="Tên">
-                {order.fullName || "Không có"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Địa chỉ">
-                <span style={{ wordBreak: "break-word", maxWidth: "250px" }}>
-                  {address}
-                </span>
-              </Descriptions.Item>
-              <Descriptions.Item label="Số điện thoại">
-                {order.phone}
-              </Descriptions.Item>
-            </Descriptions>
-          </Col>
+              <Card
+                title={
+                  <Space>
+                    <EnvironmentOutlined />
+                    <span>Địa chỉ nhận hàng</span>
+                  </Space>
+                }
+                bordered={false}
+                headStyle={{
+                  background: "#f0f5ff",
+                  borderBottom: "1px solid #d6e4ff",
+                }}
+              >
+                <Descriptions
+                  column={1}
+                  size="small"
+                  bordered={false}
+                  layout="vertical"
+                >
+                  <Descriptions.Item label="Tên">
+                    <Text strong>{order.fullName || "Không có"}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Địa chỉ">
+                    <Text style={{ wordBreak: "break-word" }}>{address}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số điện thoại">
+                    <Text>{order.phone}</Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Card>
+            </Col>
 
-          {/* Cột phải - Tóm tắt đơn hàng */}
-          <Col span={8}>
-            <h3 style={{ marginBottom: 16, fontSize: "18px", color: "#333" }}>
-              Tóm tắt đơn hàng
-            </h3>
-            <Table
-              dataSource={order.details}
-              columns={columns}
-              rowKey="productId"
-              pagination={false}
-              size="small"
-              scroll={{ y: 200 }} // Kích thước cố định cho bảng
-              summary={() => (
-                <Table.Summary fixed>
-                  <Table.Summary.Row>
-                    <Table.Summary.Cell
-                      colSpan={2}
-                      style={{ textAlign: "right" }}
+            {/* Cột phải - Tóm tắt đơn hàng */}
+            <Col xs={24} md={10}>
+              <Card
+                title={
+                  <Space>
+                    <ShoppingOutlined />
+                    <span>Tóm tắt đơn hàng</span>
+                  </Space>
+                }
+                bordered={false}
+                headStyle={{
+                  background: "#f0f5ff",
+                  borderBottom: "1px solid #d6e4ff",
+                }}
+              >
+                <Table
+                  dataSource={order.details}
+                  columns={columns}
+                  rowKey="productId"
+                  pagination={false}
+                  size="small"
+                  scroll={{ y: 240 }}
+                  bordered={false}
+                  summary={() => (
+                    <Table.Summary fixed>
+                      <Table.Summary.Row>
+                        <Table.Summary.Cell
+                          colSpan={2}
+                          style={{ textAlign: "right", paddingRight: "10px" }}
+                        >
+                          <Text strong>Tổng cộng:</Text>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell>
+                          <Text
+                            strong
+                            style={{ fontSize: "16px", color: "#f5222d" }}
+                          >
+                            {order.totalPrice.toLocaleString()}đ
+                          </Text>
+                        </Table.Summary.Cell>
+                      </Table.Summary.Row>
+                    </Table.Summary>
+                  )}
+                />
+
+                <Divider style={{ margin: "16px 0" }} />
+
+                <div style={{ textAlign: "center" }}>
+                  <Link to="/products">
+                    <Button
+                      type="primary"
+                      size="large"
+                      icon={<ShoppingOutlined />}
+                      style={{
+                        height: "auto",
+                        padding: "10px 24px",
+                        borderRadius: "6px",
+                        background:
+                          "linear-gradient(to right, #1890ff, #096dd9)",
+                      }}
                     >
-                      Tổng cộng
-                    </Table.Summary.Cell>
-                    <Table.Summary.Cell>
-                      <span style={{ fontWeight: "bold", color: "#d4380d" }}>
-                        {order.totalPrice.toLocaleString()}đ
-                      </span>
-                    </Table.Summary.Cell>
-                  </Table.Summary.Row>
-                </Table.Summary>
-              )}
-            />
-          </Col>
-        </Row>
+                      Tiếp tục mua hàng
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
       </Card>
-
-      {/* Phần chân trang */}
-      <div style={{ textAlign: "center", marginTop: 24 }}>
-        <Button type="primary" size="large">
-          <Link to="/products">Tiếp tục mua hàng</Link>
-        </Button>
-      </div>
     </div>
   );
 };

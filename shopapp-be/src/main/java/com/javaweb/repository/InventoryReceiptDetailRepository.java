@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface InventoryReceiptDetailRepository extends JpaRepository<InventoryReceiptDetail, String> {
     Page<InventoryReceiptDetail> findByProductId(String productId, Pageable pageable);
-
-    void deleteByReceiptId(String receiptId);
 }

@@ -14,6 +14,7 @@ import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.AddressRepository;
 import com.javaweb.repository.ProductRepository;
+import com.javaweb.repository.ReviewRepository;
 import com.javaweb.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class OrderConverter {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     public Order toEntity(OrderRequest request) {
         Order order = modelMapper.map(request, Order.class);
@@ -69,6 +73,7 @@ public class OrderConverter {
     public OrderResponse toResponse(Order order) {
         OrderResponse response = modelMapper.map(order, OrderResponse.class);
 
+        response.setUserId(order.getUser().getId());
         response.setUsername(order.getUser().getUsername());
         response.setFullName(order.getAddress().getFullName());
         response.setPhone(order.getAddress().getPhone());
@@ -82,9 +87,16 @@ public class OrderConverter {
                                 .productName(orderDetail.getProduct().getName())
                                 .quantity(orderDetail.getQuantity())
                                 .priceAtPurchase(orderDetail.getPriceAtPurchase())
+                                .isReviewed(reviewRepository.existsByUserIdAndOrderIdAndProductId(
+                                        order.getUser().getId(),
+                                        order.getId(),
+                                        orderDetail.getProduct().getId()
+                                ))
                                 .build())
                 .toList();
 
+        boolean isAllReviewed = details.stream().allMatch(OrderDetailResponse::isReviewed);
+        response.setAllReviewed(isAllReviewed);
         response.setDetails(details);
 
         return response;

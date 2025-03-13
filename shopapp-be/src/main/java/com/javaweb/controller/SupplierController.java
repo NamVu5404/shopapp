@@ -1,6 +1,9 @@
 package com.javaweb.controller;
 
+import com.javaweb.dto.request.supplier.SupplierCreateRequest;
+import com.javaweb.dto.request.supplier.SupplierUpdateRequest;
 import com.javaweb.dto.response.ApiResponse;
+import com.javaweb.dto.response.supplier.SupplierResponse;
 import com.javaweb.entity.Supplier;
 import com.javaweb.service.SupplierService;
 import lombok.AccessLevel;
@@ -18,29 +21,30 @@ public class SupplierController {
     SupplierService supplierService;
 
     @GetMapping
-    public ApiResponse<List<Supplier>> getAll() {
-        return ApiResponse.<List<Supplier>>builder()
+    public ApiResponse<List<SupplierResponse>> getAll() {
+        return ApiResponse.<List<SupplierResponse>>builder()
                 .result(supplierService.getAll())
                 .build();
     }
 
     @PostMapping
-    public ApiResponse<Supplier> create(@RequestBody Supplier supplier) {
-        return ApiResponse.<Supplier>builder()
-                .result(supplierService.create(supplier))
+    public ApiResponse<SupplierResponse> create(@RequestBody SupplierCreateRequest request) {
+        return ApiResponse.<SupplierResponse>builder()
+                .result(supplierService.create(request))
                 .build();
     }
 
     @PostMapping("/{code}")
-    public ApiResponse<Supplier> update(@PathVariable String code, @RequestBody Supplier supplier) {
-        return ApiResponse.<Supplier>builder()
-                .result(supplierService.update(code, supplier))
+    public ApiResponse<SupplierResponse> update(@PathVariable String code,
+                                                @RequestBody SupplierUpdateRequest request) {
+        return ApiResponse.<SupplierResponse>builder()
+                .result(supplierService.update(code, request))
                 .build();
     }
 
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable String id) {
-        supplierService.delete(id);
+    @DeleteMapping("/{code}")
+    public ApiResponse<Void> delete(@PathVariable String code) {
+        supplierService.delete(code);
 
         return ApiResponse.<Void>builder()
                 .message("Delete successfully")

@@ -22,6 +22,8 @@ public class ProductResponse {
     int inventoryQuantity;
     int soldQuantity;
     int point;
+    double avgRating;
+    int reviewCount;
     String discountName;
     LocalDateTime createdDate;
     String createdBy;

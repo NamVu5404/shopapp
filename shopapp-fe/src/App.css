@@ -46,12 +46,12 @@
 }
 
 .ant-layout-sider .ant-layout-sider-trigger {
-  width: 220px !important;  /* Đặt chiều rộng khi không collapsed */
+  width: 220px !important; /* Đặt chiều rộng khi không collapsed */
 }
 
 /* Khi Sider đã thu gọn */
 .ant-layout-sider.ant-layout-sider-collapsed .ant-layout-sider-trigger {
-  width: 80px !important;  /* Đặt chiều rộng khi collapsed */
+  width: 80px !important; /* Đặt chiều rộng khi collapsed */
 }
 
 .ant-layout-sider {

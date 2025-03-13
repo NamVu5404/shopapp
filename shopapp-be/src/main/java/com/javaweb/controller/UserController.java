@@ -12,6 +12,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,11 +31,15 @@ public class UserController {
     public ApiResponse<PageResponse<UserResponse>> search(
             UserSearchRequest request,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size) {
-        PageResponse<UserResponse> result = userService.search(request, page, size);
+            @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         return ApiResponse.<PageResponse<UserResponse>>builder()
-                .result(result)
+                .result(userService.search(request, pageable))
                 .build();
     }
 

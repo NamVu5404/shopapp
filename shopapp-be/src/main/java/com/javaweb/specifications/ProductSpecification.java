@@ -1,6 +1,7 @@
 package com.javaweb.specifications;
 
 import com.javaweb.entity.Product;
+import jakarta.persistence.criteria.Expression;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -55,7 +56,11 @@ public class ProductSpecification {
             if (minPrice == null)
                 return null;
 
-            return criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
+            // Sử dụng coalesce để lấy discountPrice nếu không null, nếu không thì lấy price
+            Expression<Long> effectivePrice = criteriaBuilder.coalesce(
+                    root.get("discountPrice"), root.get("price"));
+
+            return criteriaBuilder.greaterThanOrEqualTo(effectivePrice, minPrice);
         };
     }
 
@@ -64,7 +69,11 @@ public class ProductSpecification {
             if (maxPrice == null)
                 return null;
 
-            return criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice);
+            // Sử dụng coalesce để lấy discountPrice nếu không null, nếu không thì lấy price
+            Expression<Long> effectivePrice = criteriaBuilder.coalesce(
+                    root.get("discountPrice"), root.get("price"));
+
+            return criteriaBuilder.lessThanOrEqualTo(effectivePrice, maxPrice);
         };
     }
 

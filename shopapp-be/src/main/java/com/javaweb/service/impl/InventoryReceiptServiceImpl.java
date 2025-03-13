@@ -2,27 +2,27 @@ package com.javaweb.service.impl;
 
 import com.javaweb.converter.InventoryReceiptConverter;
 import com.javaweb.dto.request.inventoryReceipt.InventoryReceiptRequest;
+import com.javaweb.dto.request.inventoryReceipt.InventorySearchRequest;
 import com.javaweb.dto.request.inventoryReceipt.InventoryStatusRequest;
 import com.javaweb.dto.response.PageResponse;
 import com.javaweb.dto.response.inventoryReceipt.InventoryReceiptResponse;
 import com.javaweb.entity.InventoryReceipt;
 import com.javaweb.entity.InventoryReceiptDetail;
 import com.javaweb.entity.Product;
-import com.javaweb.enums.ReceiptStatus;
+import com.javaweb.enums.InventoryStatus;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
-import com.javaweb.repository.InventoryReceiptDetailRepository;
 import com.javaweb.repository.InventoryReceiptRepository;
 import com.javaweb.repository.ProductRepository;
 import com.javaweb.service.InventoryReceiptService;
+import com.javaweb.specifications.InventorySpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,20 +34,19 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InventoryReceiptServiceImpl implements InventoryReceiptService {
     InventoryReceiptRepository receiptRepository;
-    InventoryReceiptDetailRepository receiptDetailRepository;
     ProductRepository productRepository;
     ModelMapper modelMapper;
     InventoryReceiptConverter converter;
 
     @Override
     @PreAuthorize("hasAuthority('CRU_RECEIPT')")
-    public PageResponse<InventoryReceiptResponse> getAll(int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
+    public PageResponse<InventoryReceiptResponse> search(InventorySearchRequest request, Pageable pageable) {
+        Specification<InventoryReceipt> specification = Specification
+                .where(InventorySpecification.withId(request.getId()))
+                .and(InventorySpecification.withEmail(request.getEmail()))
+                .and(InventorySpecification.withDateRange(request.getStartDate(), request.getEndDate()));
 
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        Page<InventoryReceipt> receipts = receiptRepository.findAll(pageable);
+        Page<InventoryReceipt> receipts = receiptRepository.findAll(specification, pageable);
 
         List<InventoryReceiptResponse> receiptResponses = receipts.stream()
                 .map((receipt) -> modelMapper.map(receipt, InventoryReceiptResponse.class))
@@ -55,8 +54,26 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
 
         return PageResponse.<InventoryReceiptResponse>builder()
                 .totalPage(receipts.getTotalPages())
-                .pageSize(size)
-                .currentPage(page)
+                .pageSize(pageable.getPageSize())
+                .currentPage(pageable.getPageNumber() + 1)
+                .totalElements(receipts.getTotalElements())
+                .data(receiptResponses)
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('CRU_RECEIPT')")
+    public PageResponse<InventoryReceiptResponse> getAllByStatus(InventoryStatus status, Pageable pageable) {
+        Page<InventoryReceipt> receipts = receiptRepository.findAllByStatus(status, pageable);
+
+        List<InventoryReceiptResponse> receiptResponses = receipts.stream()
+                .map((receipt) -> modelMapper.map(receipt, InventoryReceiptResponse.class))
+                .toList();
+
+        return PageResponse.<InventoryReceiptResponse>builder()
+                .totalPage(receipts.getTotalPages())
+                .pageSize(pageable.getPageSize())
+                .currentPage(pageable.getPageNumber() + 1)
                 .totalElements(receipts.getTotalElements())
                 .data(receiptResponses)
                 .build();
@@ -78,7 +95,7 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
         // save receipt
         InventoryReceipt receipt = InventoryReceipt.builder()
                 .totalAmount(request.getTotalAmount())
-                .status(ReceiptStatus.PENDING)
+                .status(InventoryStatus.PENDING)
                 .note(request.getNote())
                 .build();
 
@@ -99,7 +116,7 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTS));
 
         // Chỉ update khi ở trạng thái pending
-        if (!ReceiptStatus.PENDING.equals(receipt.getStatus()))
+        if (!InventoryStatus.PENDING.equals(receipt.getStatus()))
             throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
 
         // save updated receipt
@@ -107,15 +124,14 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
         receipt.setNote(request.getNote());
 
         // Xóa liên kết cũ
-        receiptDetailRepository.deleteByReceiptId(id);
+        receipt.getDetails().clear();
 
-        // save receipt detail
-        List<InventoryReceiptDetail> details = converter.toDetailEntity(receipt, request.getDetails());
-        receipt.setDetails(details);
+        // Thêm danh sách mới
+        receipt.getDetails().addAll(converter.toDetailEntity(receipt, request.getDetails()));
 
         receiptRepository.save(receipt);
 
-        return converter.toResponse(receipt, details);
+        return converter.toResponse(receipt, receipt.getDetails());
     }
 
     @Override
@@ -126,11 +142,11 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTS));
 
         // Chỉ update khi ở trạng thái pending
-        if (!ReceiptStatus.PENDING.equals(receipt.getStatus()))
+        if (!InventoryStatus.PENDING.equals(receipt.getStatus()))
             throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
 
         // New status: COMPLETED, update số lượng sản phẩm
-        if (ReceiptStatus.COMPLETED.equals(request.getStatus())) {
+        if (InventoryStatus.COMPLETED.equals(request.getStatus())) {
             updateProductInventory(receipt);
         }
 
@@ -138,6 +154,11 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
         receiptRepository.save(receipt);
 
         return converter.toResponse(receipt, receipt.getDetails());
+    }
+
+    @Override
+    public int countTotalPendingReceipts() {
+        return receiptRepository.countByStatus(InventoryStatus.PENDING);
     }
 
     private void updateProductInventory(InventoryReceipt receipt) {

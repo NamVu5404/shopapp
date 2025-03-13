@@ -1,5 +1,6 @@
 package com.javaweb.dto.response.order;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.javaweb.enums.OrderStatus;
 import com.javaweb.enums.OrderType;
 import com.javaweb.enums.PaymentMethod;
@@ -21,10 +22,14 @@ public class OrderResponse {
     Long totalPrice;
     PaymentMethod paymentMethod;
     String note;
+    String userId;
     String username;
     String fullName;
     String phone;
     String address;
     LocalDateTime createdDate;
     List<OrderDetailResponse> details;
+
+    @JsonProperty("isAllReviewed")
+    boolean isAllReviewed;
 }

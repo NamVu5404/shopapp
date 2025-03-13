@@ -1,29 +1,50 @@
 import {
+  CalendarOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+  HistoryOutlined,
+  HomeOutlined,
+  KeyOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  PlusOutlined,
+  SaveOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import {
+  Avatar,
+  Badge,
+  Breadcrumb,
   Button,
   Card,
   Checkbox,
   Col,
   DatePicker,
-  Divider,
+  Descriptions,
   Form,
   Input,
+  Modal,
   Row,
   Space,
+  Tag,
+  Tooltip,
   Typography,
+  message,
 } from "antd";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { resetPassword } from "../../api/password";
-import { deleteUser, updateUser } from "../../api/user";
-import MyButton from "../../components/MyButton";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   createAddress,
   deleteAddress,
   getAddressesByUserId,
   updateAddress,
 } from "../../api/address";
+import { resetPassword } from "../../api/password";
+import { deleteUser, getUserById, updateUser } from "../../api/user";
 import AddressModal from "../../components/AddressModal";
 import { useRoles } from "../../context/RoleContext";
 import { hasPermission } from "../../services/authService";
@@ -36,31 +57,39 @@ const customFormat = (value) => {
     : null;
 };
 
-const { Text } = Typography;
+const { Text, Title } = Typography;
+const { confirm } = Modal;
 
 export default function UserDetailAdmin() {
-  const location = useLocation();
-  const initialUser = location.state?.user || {};
-  const [user, setUser] = useState(initialUser);
+  const [user, setUser] = useState(null);
   const [form] = Form.useForm();
   const [addressData, setAddressData] = useState(null);
   const [initValues, setInitValues] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const roles = useRoles();
   const navigate = useNavigate();
+  const { id } = useParams();
 
-  // Address
+  // User, Address
   useEffect(() => {
+    const getUserData = async () => {
+      const response = await getUserById(id);
+      setUser(response);
+    };
+
     const getAddressData = async () => {
-      const result = await getAddressesByUserId(user.id);
+      const result = await getAddressesByUserId(id);
       setAddressData(result);
     };
 
+    getUserData();
     getAddressData();
-  }, [user]);
+  }, [id]);
 
   const refreshAddressList = async () => {
-    const updatedData = await getAddressesByUserId(user.id);
+    const updatedData = await getAddressesByUserId(id);
     setAddressData(updatedData);
   };
 
@@ -74,59 +103,119 @@ export default function UserDetailAdmin() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteAddress = async (addressId) => {
-    await deleteAddress(addressId);
-    await refreshAddressList();
+  const showDeleteAddressConfirm = (addressId, addressDetail) => {
+    confirm({
+      title: "Xác nhận xóa địa chỉ",
+      icon: <ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />,
+      content: `Bạn có chắc chắn muốn xóa địa chỉ "${addressDetail}" không?`,
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await deleteAddress(addressId);
+          await refreshAddressList();
+        } catch (error) {
+          message.error("Có lỗi xảy ra khi xóa địa chỉ");
+        }
+      },
+    });
   };
 
   const handleModalSubmit = async (address) => {
-    if (initValues?.id) {
-      await updateAddress(initValues.id, address);
-    } else {
-      address.userId = user.id;
-      await createAddress(address);
+    try {
+      if (initValues?.id) {
+        await updateAddress(initValues.id, address);
+      } else {
+        address.userId = id;
+        await createAddress(address);
+      }
+      setIsModalOpen(false);
+      await refreshAddressList();
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi lưu địa chỉ");
     }
-    setIsModalOpen(false);
-    await refreshAddressList();
   };
 
   // User
   const handleCancel = () => {
     form.resetFields();
+    setIsEditing(false);
     window.location.reload();
   };
 
+  const handleStartEditing = () => {
+    setIsEditing(true);
+  };
+
   const onSubmit = async (values) => {
-    const data = {
-      username: values.username,
-      fullName: values.fullName,
-      phone: values.phone,
-      dob: customFormat(values.dob),
-      roles: values.roles,
-      isGuest: values.isGuest,
-    };
+    confirm({
+      title: "Xác nhận cập nhật",
+      icon: <ExclamationCircleOutlined />,
+      content: "Bạn có chắc chắn muốn cập nhật thông tin người dùng này?",
+      okText: "Cập nhật",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          setIsSubmitting(true);
+          const data = {
+            username: values.username,
+            fullName: values.fullName,
+            phone: values.phone,
+            dob: customFormat(values.dob),
+            roles: values.roles,
+            isGuest: values.isGuest,
+          };
 
-    await updateUser(data, user.id);
+          await updateUser(data, id);
 
-    setUser({
-      ...user,
-      ...data,
+          setUser({
+            ...user,
+            ...data,
+          });
+
+          setIsEditing(false);
+        } catch (error) {
+          message.error("Có lỗi xảy ra khi cập nhật thông tin");
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
     });
   };
 
-  const handleDelete = async () => {
-    await deleteUser(user.id);
-    navigate("/admin/users")
+  const handleDelete = () => {
+    confirm({
+      title: "Xác nhận xóa tài khoản",
+      icon: <ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />,
+      content: `Bạn có chắc chắn muốn xóa tài khoản "${user.username}" không? Hành động này không thể hoàn tác.`,
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await deleteUser(id);
+          message.success("Đã xóa tài khoản thành công");
+          navigate("/admin/users");
+        } catch (error) {
+          message.error("Có lỗi xảy ra khi xóa tài khoản");
+        }
+      },
+    });
   };
 
   const handleResetPassword = async () => {
-    await resetPassword(user.id);
+    try {
+      await resetPassword(id);
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi đặt lại mật khẩu");
+    }
   };
 
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
-        id: user.id,
+        id: id,
         username: user.username,
         fullName: user.fullName,
         phone: user.phone,
@@ -139,165 +228,398 @@ export default function UserDetailAdmin() {
         roles: user.roles,
       });
     }
-  }, [user, form]);
+  }, [user, id, form]);
+
+  // Function to get first letter of full name for avatar
+  const getFirstLetter = () => {
+    if (user?.fullName) {
+      return user.fullName.charAt(0).toUpperCase();
+    }
+    return <UserOutlined />;
+  };
+
+  if (!user) {
+    return <div>Đang tải thông tin người dùng...</div>;
+  }
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}>Chi tiết tài khoản</h2>
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/admin">Admin</Link> },
+          { title: <Link to="/admin/users">Quản lý tài khoản</Link> },
+          { title: user?.username || "N/A" },
+        ]}
+      />
 
-      <div style={{ display: "flex" }}>
-        <Card style={{ width: 500 }}>
-          <Form form={form} layout="vertical" onFinish={onSubmit}>
-            <Form.Item label="ID" name="id">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Email" name="username">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item label="Họ và tên" name="fullName">
-              <Input required />
-            </Form.Item>
-
-            <Form.Item label="Số điện thoại" name="phone">
-              <Input required />
-            </Form.Item>
-
-            <Form.Item label="Ngày sinh" name="dob">
-              <DatePicker style={{ width: "100%" }} dateFormat={dateFormat} />
-            </Form.Item>
-
-            <Form.Item label="Ngày tạo" name="createdDate">
-              <DatePicker showTime style={{ width: "100%" }} disabled />
-            </Form.Item>
-
-            <Form.Item label="Ngày chỉnh sửa" name="modifiedDate">
-              <DatePicker showTime style={{ width: "100%" }} disabled />
-            </Form.Item>
-
-            <Form.Item label="Người chỉnh sửa" name="modifiedBy">
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item
-              label="Trạng thái tài khoản"
-              name="isActive"
-              valuePropName="checked"
-            >
-              <span
-                style={{
-                  color: user.isActive === 0 ? "red" : "green",
-                  fontWeight: "bold",
-                }}
-              >
-                {user.isActive === 0 ? "Đã xóa" : "Hoạt động"}
-              </span>
-            </Form.Item>
-
-            <Form.Item
-              label="Loại tài khoản"
-              name="isGuest"
-              valuePropName="checked"
-            >
-              <span
-                style={{
-                  color: user.isGuest === 0 ? "green" : "#FFA500",
-                  fontWeight: "bold",
-                }}
-              >
-                {user.isGuest === 0 ? "Người dùng hệ thống" : "Khách"}
-              </span>
-            </Form.Item>
-
-            <Form.Item label="Vai trò" name="roles">
-              <Checkbox.Group>
-                {roles.map((role) => (
-                  <Checkbox key={role.code} value={role.code}>
-                    {role.description}
-                  </Checkbox>
-                ))}
-              </Checkbox.Group>
-            </Form.Item>
-
-            {user.isActive === 1 && (
-              <Form.Item>
-                <Button onClick={handleCancel} style={{ marginRight: 20 }}>
-                  Hủy
-                </Button>
-                <MyButton
-                  type="primary"
-                  htmlType="submit"
-                  style={{ marginRight: 20 }}
+      <Row gutter={24}>
+        {/* User Information */}
+        <Col xs={24} lg={16}>
+          <Card
+            title={
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <Avatar
+                  size={64}
+                  style={{ backgroundColor: "#1890ff", marginRight: 16 }}
                 >
-                  Cập nhật
-                </MyButton>
-                {hasPermission(["ROLE_ADMIN"]) && (
-                  <Button
-                    danger
-                    onClick={handleDelete}
-                    style={{ marginRight: 20 }}
+                  <span style={{ fontSize: 32 }}>{getFirstLetter()}</span>
+                </Avatar>
+                <div>
+                  <Title level={4} style={{ margin: 0 }}>
+                    {user.fullName}
+                  </Title>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginTop: 4,
+                    }}
                   >
-                    Xóa tài khoản
-                  </Button>
+                    <MailOutlined style={{ marginRight: 8 }} />
+                    <Text>{user.username}</Text>
+                  </div>
+                  <Space style={{ marginTop: 4 }}>
+                    <Badge
+                      status={user.isActive === 1 ? "success" : "error"}
+                      text={user.isActive === 1 ? "Hoạt động" : "Đã xóa"}
+                    />
+                    <Badge
+                      status={user.isGuest === 0 ? "processing" : "warning"}
+                      text={
+                        user.isGuest === 0 ? "Người dùng hệ thống" : "Khách"
+                      }
+                    />
+                  </Space>
+                </div>
+              </div>
+            }
+            extra={
+              <Space>
+                {user.isActive === 1 && (
+                  <>
+                    {isEditing ? (
+                      <>
+                        <Button icon={<CloseOutlined />} onClick={handleCancel}>
+                          Hủy
+                        </Button>
+                        <Button
+                          icon={<SaveOutlined />}
+                          type="primary"
+                          onClick={form.submit}
+                          loading={isSubmitting}
+                        >
+                          Lưu
+                        </Button>
+                      </>
+                    ) : (
+                      <Tooltip title="Chỉnh sửa thông tin">
+                        <Button
+                          type="primary"
+                          icon={<EditOutlined />}
+                          onClick={handleStartEditing}
+                        >
+                          Chỉnh sửa
+                        </Button>
+                      </Tooltip>
+                    )}
+                    {hasPermission(["ROLE_ADMIN"]) && (
+                      <Tooltip title="Xóa tài khoản">
+                        <Button
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={handleDelete}
+                        >
+                          Xóa
+                        </Button>
+                      </Tooltip>
+                    )}
+                  </>
                 )}
-                {user.hasPassword && (
-                  <Button onClick={handleResetPassword} type="primary">
-                    Reset mật khẩu
-                  </Button>
-                )}
-              </Form.Item>
-            )}
-          </Form>
-        </Card>
+              </Space>
+            }
+          >
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={onSubmit}
+              initialValues={form.getFieldsValue()}
+            >
+              {isEditing ? (
+                <>
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item label="ID" name="id">
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label="Email" name="username">
+                        <Input disabled prefix={<MailOutlined />} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-        {/* Address */}
-        <div style={{ flex: 1, marginLeft: 20 }}>
-          <MyButton onClick={handleAddAddress}>Thêm địa chỉ</MyButton>
-          <Divider />
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
-            {(addressData || []).map((address) => (
-              <Card key={address.id}>
-                <Row>
-                  <Col xl={18}>
-                    <div>
-                      <Text strong>{address.fullName}</Text> | {address.phone}
-                    </div>
-                    <div>{address.detail}</div>
-                    <div>
-                      {address.ward}, {address.district}, {address.province}
-                    </div>
-                  </Col>
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item
+                        label="Họ và tên"
+                        name="fullName"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập họ và tên",
+                          },
+                        ]}
+                      >
+                        <Input prefix={<UserOutlined />} />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        label="Số điện thoại"
+                        name="phone"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập số điện thoại",
+                          },
+                        ]}
+                      >
+                        <Input prefix={<PhoneOutlined />} />
+                      </Form.Item>
+                    </Col>
+                  </Row>
 
-                  <Col xl={6} style={{ display: "flex", alignItems: "center" }}>
-                    <Button
-                      type="link"
-                      onClick={() => handleUpdateAddress(address)}
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item label="Ngày sinh" name="dob">
+                        <DatePicker
+                          style={{ width: "100%" }}
+                          format={dateFormat}
+                          placeholder="Chọn ngày sinh"
+                          prefix={<CalendarOutlined />}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item label="Loại tài khoản" name="isGuest">
+                        <Tag
+                          color={user.isGuest === 0 ? "green" : "orange"}
+                          style={{ padding: "5px 10px" }}
+                        >
+                          {user.isGuest === 0 ? "Người dùng hệ thống" : "Khách"}
+                        </Tag>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Form.Item label="Vai trò" name="roles">
+                    <Checkbox.Group>
+                      {roles.map((role) => (
+                        <Checkbox key={role.code} value={role.code}>
+                          {role.description}
+                        </Checkbox>
+                      ))}
+                    </Checkbox.Group>
+                  </Form.Item>
+                </>
+              ) : (
+                <Descriptions
+                  bordered
+                  column={1}
+                  labelStyle={{ fontWeight: "bold", width: "30%" }}
+                >
+                  <Descriptions.Item label="ID">{id}</Descriptions.Item>
+                  <Descriptions.Item label="Email">
+                    {user.username}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Họ và tên">
+                    {user.fullName}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Số điện thoại">
+                    {user.phone}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày sinh">
+                    {user.dob
+                      ? dayjs(user.dob).format(dateFormat)
+                      : "Chưa cập nhật"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày tạo">
+                    {dayjs(user.createdDate).format("DD/MM/YYYY HH:mm:ss")}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày chỉnh sửa">
+                    {dayjs(user.modifiedDate).format("DD/MM/YYYY HH:mm:ss")}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Người chỉnh sửa">
+                    {user.modifiedBy || "N/A"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Vai trò">
+                    {(user.roles || []).length > 0 ? (
+                      <Space size={[0, 4]} wrap>
+                        {roles
+                          .filter((role) =>
+                            (user.roles || []).includes(role.code)
+                          )
+                          .map((role) => (
+                            <Tag key={role.code} color="blue">
+                              {role.description}
+                            </Tag>
+                          ))}
+                      </Space>
+                    ) : (
+                      "Không có vai trò"
+                    )}
+                  </Descriptions.Item>
+                </Descriptions>
+              )}
+
+              {user.isActive === 1 && !isEditing && (
+                <Row style={{ marginTop: 16 }} gutter={[16, 16]}>
+                  {user.hasPassword && (
+                    <Col>
+                      <Tooltip title="Đặt lại mật khẩu">
+                        <Button
+                          onClick={handleResetPassword}
+                          type="default"
+                          icon={<KeyOutlined />}
+                        >
+                          Reset mật khẩu
+                        </Button>
+                      </Tooltip>
+                    </Col>
+                  )}
+                  <Col>
+                    <Link
+                      to={`/admin/orders/user/${id}/status/PENDING`}
+                      state={{ username: user.username }}
                     >
-                      Cập nhật
-                    </Button>
-                    <Button
-                      type="link"
-                      danger
-                      onClick={() => handleDeleteAddress(address.id)}
-                    >
-                      Xóa
-                    </Button>
+                      <Button type="primary" icon={<HistoryOutlined />}>
+                        Lịch sử đặt hàng
+                      </Button>
+                    </Link>
                   </Col>
                 </Row>
-              </Card>
-            ))}
-          </Space>
+              )}
+            </Form>
+          </Card>
+        </Col>
 
-          <AddressModal
-            visible={isModalOpen}
-            onCancel={() => setIsModalOpen(false)}
-            onSubmit={handleModalSubmit}
-            initValues={initValues}
-            isUpdateAdmin={!!initValues && !!initValues.id}
-          />
-        </div>
-      </div>
+        {/* Address Cards */}
+        <Col xs={24} lg={8}>
+          <Card
+            title={
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>Danh sách địa chỉ</span>
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={handleAddAddress}
+                >
+                  Thêm địa chỉ
+                </Button>
+              </div>
+            }
+            style={{ marginBottom: 16 }}
+          >
+            {(addressData || []).length > 0 ? (
+              <Space
+                direction="vertical"
+                size="middle"
+                style={{ width: "100%" }}
+              >
+                {(addressData || []).map((address) => (
+                  <Card
+                    key={address.id}
+                    size="small"
+                    style={{ borderLeft: "3px solid #1890ff" }}
+                    actions={[
+                      <Tooltip title="Cập nhật" key="edit">
+                        <EditOutlined
+                          onClick={() => handleUpdateAddress(address)}
+                        />
+                      </Tooltip>,
+                      <Tooltip title="Xóa" key="delete">
+                        <DeleteOutlined
+                          onClick={() =>
+                            showDeleteAddressConfirm(address.id, address.detail)
+                          }
+                          style={{ color: "#ff4d4f" }}
+                        />
+                      </Tooltip>,
+                    ]}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Avatar
+                        size="small"
+                        style={{ marginRight: 8, backgroundColor: "#1890ff" }}
+                      >
+                        {address.fullName ? (
+                          address.fullName.charAt(0).toUpperCase()
+                        ) : (
+                          <UserOutlined />
+                        )}
+                      </Avatar>
+                      <Text strong>{address.fullName}</Text>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginLeft: 16,
+                        }}
+                      >
+                        <PhoneOutlined style={{ marginRight: 8 }} />
+                        <Text>{address.phone}</Text>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        marginBottom: 4,
+                      }}
+                    >
+                      <HomeOutlined style={{ marginRight: 8, marginTop: 4 }} />
+                      <div>
+                        <div>{address.detail}</div>
+                        <div>
+                          {address.ward}, {address.district}, {address.province}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </Space>
+            ) : (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <Text type="secondary">Chưa có địa chỉ nào</Text>
+              </div>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      <AddressModal
+        visible={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        initValues={initValues}
+        isUpdateAdmin={!!initValues && !!initValues.id}
+      />
     </>
   );
 }

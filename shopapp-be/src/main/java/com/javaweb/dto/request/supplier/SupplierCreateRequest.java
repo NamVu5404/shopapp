@@ -1,0 +1,20 @@
+package com.javaweb.dto.request.supplier;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+public class SupplierCreateRequest {
+    @NotBlank(message = "CODE_NOT_BLANK")
+    String code;
+
+    @NotBlank(message = "NAME_NOT_BLANK")
+    String name;
+}

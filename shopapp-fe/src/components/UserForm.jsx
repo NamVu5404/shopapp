@@ -47,26 +47,50 @@ export default function UserForm({
         </Form.Item>
         <Form.Item
           name="username"
-          rules={[{ required: true, message: "Please enter your email!" }]}
+          rules={[
+            { required: true, message: "Please enter your email!" },
+            { type: "email", message: "Email không hợp lệ" },
+          ]}
         >
           <Input placeholder="Email" disabled={isUpdate} />
         </Form.Item>
 
-        <div style={{ display: "flex" }}>
-          <div style={{ marginRight: "20px" }}>
-            <Form.Item
-              name="phone"
-              rules={[{ required: true, message: "Please enter your phone!" }]}
-            >
-              <Input placeholder="Số điện thoại" />
-            </Form.Item>
+        {isUpdate || isAdmin ? (
+          <div style={{ display: "flex" }}>
+            <div style={{ marginRight: "16px" }}>
+              <Form.Item
+                name="phone"
+                rules={[
+                  { required: true, message: "Please enter your phone!" },
+                  {
+                    pattern: /^0\d{9}$/,
+                    message: "Số điện thoại không hợp lệ",
+                  },
+                ]}
+              >
+                <Input placeholder="Số điện thoại" />
+              </Form.Item>
+            </div>
+            <div>
+              <Form.Item name="dob">
+                <DatePicker placeholder="Ngày sinh" format={dateFormat} />
+              </Form.Item>
+            </div>
           </div>
-          <div>
-            <Form.Item name="dob">
-              <DatePicker placeholder="Ngày sinh" format={dateFormat} />
-            </Form.Item>
-          </div>
-        </div>
+        ) : (
+          <Form.Item
+            name="phone"
+            rules={[
+              { required: true, message: "Please enter your phone!" },
+              {
+                pattern: /^0\d{9}$/,
+                message: "Số điện thoại không hợp lệ",
+              },
+            ]}
+          >
+            <Input placeholder="Số điện thoại" />
+          </Form.Item>
+        )}
 
         <Form.Item
           name="password"
@@ -76,6 +100,28 @@ export default function UserForm({
           style={{ display: isUpdate && "none" }}
         >
           <Input.Password placeholder="Mật khẩu" />
+        </Form.Item>
+
+        <Form.Item
+          name="rePassword"
+          dependencies={["password"]}
+          rules={[
+            {
+              required: !isUpdate,
+              message: "Please enter your password again!",
+            },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue("password") === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error("Passwords do not match!"));
+              },
+            }),
+          ]}
+          style={{ display: isUpdate && "none" }}
+        >
+          <Input.Password placeholder="Nhập lại mật khẩu" />
         </Form.Item>
 
         {isAdmin && (

@@ -7,10 +7,12 @@ import { introspect, login } from "../../api/auth";
 import MyButton from "../../components/MyButton";
 import { OAuthConfig } from "../../configurations/configuration";
 import { getToken } from "../../services/localStorageService";
+import { useDispatch } from "react-redux";
 
 export default function Login() {
   const navigate = useNavigate();
   const token = getToken();
+  const dispatch = useDispatch();
 
   const handleContinueWithFacebook = () => {
     const callbackUrl = OAuthConfig.redirectUri;
@@ -68,8 +70,8 @@ export default function Login() {
       username: values.username,
       password: values.password,
     };
-    
-    login(data, navigate);
+
+    login(data, navigate, dispatch);
   };
 
   return (
@@ -98,7 +100,10 @@ export default function Login() {
           >
             <Form.Item
               name="username"
-              rules={[{ required: true, message: "Please enter your email!" }]}
+              rules={[
+                { required: true, message: "Please enter your email!" },
+                { type: "email", message: "Email không hợp lệ" },
+              ]}
             >
               <Input
                 placeholder="Email"

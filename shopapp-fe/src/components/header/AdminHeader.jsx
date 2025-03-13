@@ -34,11 +34,7 @@ export default function AdminHeader() {
         <div className="header-top">
           <Link to={"/admin"} className="secondary-link">
             <div className="logo">
-              <img
-                src="/logo/image_processing20221028-18903-1oprry3.jpg"
-                alt="logo"
-              />
-              <h1>SHOPAPP</h1>
+              <img src="/logo/logo.webp" alt="logo" />
             </div>
           </Link>
 
@@ -51,7 +47,7 @@ export default function AdminHeader() {
             }}
           >
             <div>
-              Hello, <b>{myInfo.fullName}</b> !
+              Xin chào <b>{myInfo.fullName}</b> !
             </div>
 
             <div
@@ -71,7 +67,7 @@ export default function AdminHeader() {
                 <MdOutlineAdminPanelSettings
                   style={{
                     fontSize: "24px",
-                    marginRight: "10px",
+                    marginRight: "5px",
                   }}
                 />
                 Trang chủ

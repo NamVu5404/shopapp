@@ -9,8 +9,8 @@ import java.security.NoSuchAlgorithmException;
 public class AddressUtils {
     public static String generateUniqueAddressKey(Address address) {
         String uniqueAddressKey = address.getUser().getId() +
-                address.getUser().getFullName() +
-                address.getUser().getPhone() +
+                address.getFullName() +
+                address.getPhone() +
                 address.getProvince() +
                 address.getDistrict() +
                 address.getWard() +

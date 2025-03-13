@@ -1,21 +1,32 @@
-import { Button } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Button, Result, Row, Col } from "antd";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function NotFound() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleReturn = () => {
-    navigate("/");
+    if (location.pathname.startsWith("/admin")) {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
   };
 
   return (
-    <>
-      <h1 style={{ textAlign: "center" }}>404 NOT FOUND !!!</h1>
-      <div style={{ textAlign: "center" }}>
-        <Button type="primary" onClick={handleReturn}>
-          Về trang chủ
-        </Button>
-      </div>
-    </>
+    <Row justify="center" align="middle" style={{ height: "100vh" }}>
+      <Col>
+        <Result
+          status="404"
+          title="404"
+          subTitle="Xin lỗi, trang bạn truy cập không tồn tại."
+          extra={
+            <Button type="primary" onClick={handleReturn}>
+              {location.pathname.startsWith("/admin") ? "Về trang Admin" : "Về trang chủ"}
+            </Button>
+          }
+        />
+      </Col>
+    </Row>
   );
 }

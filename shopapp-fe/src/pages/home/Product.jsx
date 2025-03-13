@@ -1,9 +1,10 @@
-import { Collapse, Form, Pagination } from "antd";
+import { Breadcrumb, Collapse, Form, Pagination } from "antd";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { searchProduct } from "../../api/product";
 import ProductItem from "../../components/ProductItem";
 import ProductSeachForm from "../../components/ProductSeachForm";
+import { CaretRightOutlined, FilterOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 
@@ -15,6 +16,7 @@ export default function Product() {
   const categoryQuery = queryParams.get("categoryCode");
   const supplierQuery = queryParams.get("supplierCode");
   const page = queryParams.get("page");
+  const sort = queryParams.get("sortBy");
 
   const [id, setId] = useState(queryParams.get("id") || "");
   const [categoryCode, setCategoryCode] = useState(categoryQuery || "");
@@ -29,6 +31,7 @@ export default function Product() {
   const pageSize = 20;
   const [form] = Form.useForm();
   const [data, setData] = useState(null);
+  const [sortBy, setSortBy] = useState(sort || "point");
 
   // ✅ Hàm cập nhật URL
   const updateURL = (newParams) => {
@@ -53,6 +56,7 @@ export default function Product() {
     setName("");
     setMinPrice("");
     setMaxPrice("");
+    setSortBy("point");
     form.resetFields();
 
     updateURL({}); // ✅ Reset URL khi xoá bộ lọc
@@ -68,6 +72,7 @@ export default function Product() {
       minPrice: values.minPrice ?? minPrice,
       maxPrice: values.maxPrice ?? maxPrice,
       page: 1, // Reset về trang đầu khi lọc mới
+      sortBy: values.sortBy ?? sortBy,
     };
 
     setCurrentPage(1);
@@ -78,6 +83,7 @@ export default function Product() {
     setName(newParams.name);
     setMinPrice(newParams.minPrice);
     setMaxPrice(newParams.maxPrice);
+    setSortBy(newParams.sortBy);
 
     updateURL(newParams); // ✅ Cập nhật URL khi thay đổi bộ lọc
   };
@@ -87,14 +93,16 @@ export default function Product() {
     setSupplierCode(supplierQuery || "");
     setName(nameQuery || "");
     setCurrentPage(page || 1);
+    setSortBy(sort || "point");
 
     form.setFieldsValue({
       name: nameQuery || "",
       categoryCode: categoryQuery || "",
       supplierCode: supplierQuery || "",
-      page: supplierQuery || 1,
+      currentPage: page || 1,
+      sortBy: sort || "point",
     });
-  }, [categoryQuery, supplierQuery, nameQuery, page, form]);
+  }, [categoryQuery, supplierQuery, nameQuery, page, sort, form]);
 
   useEffect(() => {
     const getProduct = async () => {
@@ -108,7 +116,7 @@ export default function Product() {
         maxPrice,
       };
 
-      const data = await searchProduct(request, currentPage, pageSize);
+      const data = await searchProduct(request, currentPage, pageSize, sortBy);
       setData(data);
     };
 
@@ -133,23 +141,50 @@ export default function Product() {
     maxPrice,
     currentPage,
     pageSize,
+    sortBy,
     form,
   ]);
 
   return (
     <>
-      <Collapse style={{ marginBottom: 20 }}>
-        <Panel header="Tìm kiếm nâng cao" key="1">
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/">Trang chủ</Link> },
+          { title: "Sản phẩm" },
+        ]}
+      />
+
+      <Collapse
+        style={{
+          borderRadius: "8px",
+        }}
+        expandIcon={({ isActive }) => (
+          <CaretRightOutlined
+            rotate={isActive ? 90 : 0}
+            style={{ fontSize: "16px", color: "#1890ff" }}
+          />
+        )}
+      >
+        <Panel
+          header={
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <FilterOutlined style={{ marginRight: 8, color: "#1890ff" }} />
+              <span style={{ fontWeight: 500, fontSize: "15px" }}>
+                Bộ lọc tìm kiếm
+              </span>
+            </div>
+          }
+          key="1"
+          style={{ borderRadius: "8px", backgroundColor: "#fafafa" }}
+        >
           <ProductSeachForm
             form={form}
             onSearch={handleSubmit}
             handleCancel={handleCancel}
-            isAdmin={false}
           />
         </Panel>
       </Collapse>
-
-      <h4>Danh sách sản phẩm</h4>
 
       {data && (
         <>

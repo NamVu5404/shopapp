@@ -114,7 +114,7 @@ export const getMyInfo = (accessToken) => {
       const result = await response.json();
 
       if (result.code !== 1000) {
-        throw new Error(result.message);
+        throw new Error("get my info");
       }
 
       // Gọi action để lưu thông tin vào Redux store
@@ -179,6 +179,34 @@ export const deleteUser = async (id) => {
     }
 
     message.success("Xóa tài khoản thành công");
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const getUserById = async (id) => {
+  try {
+    const response = await fetch(`${API}/users/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Tải thông tin người dùng thất bại!"
+      );
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    return result.result;
   } catch (error) {
     message.error(error.message);
   }

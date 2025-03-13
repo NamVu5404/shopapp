@@ -11,6 +11,7 @@ import com.javaweb.service.DiscountService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,8 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public List<Discount> getAll() {
-        return discountRepository.findAll();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate");
+        return discountRepository.findAll(sort);
     }
 
     @Override

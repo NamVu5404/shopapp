@@ -1,15 +1,15 @@
-import { FaTruckFast } from "react-icons/fa6";
-import { MdSwapHorizontalCircle } from "react-icons/md";
-import { RiVipFill } from "react-icons/ri";
-import { MdPriceChange } from "react-icons/md";
 import { useEffect, useState } from "react";
+import { FaTruckFast } from "react-icons/fa6";
+import { MdPriceChange, MdSwapHorizontalCircle } from "react-icons/md";
+import { RiVipFill } from "react-icons/ri";
 import { searchProduct } from "../../api/product";
 import ProductItem from "../../components/ProductItem";
-import MyButton from "../../components/MyButton";
 import { Link } from "react-router-dom";
+import MyButton from "../../components/MyButton";
 
 export default function Home() {
-  const [productData, setProductData] = useState(null);
+  const [newProduct, setNewProduct] = useState(null);
+  const [hotProduct, setHotProduct] = useState(null);
 
   useEffect(() => {
     const getProducts = async () => {
@@ -23,8 +23,11 @@ export default function Home() {
         maxPrice: "",
       };
 
-      const data = await searchProduct(request, 1, 8);
-      setProductData(data.data);
+      const newProductData = await searchProduct(request, 1, 8, "createdDate");
+      const hotProductData = await searchProduct(request, 1, 8, "soldQuantity");
+
+      setNewProduct(newProductData.data);
+      setHotProduct(hotProductData.data);
     };
 
     getProducts();
@@ -108,7 +111,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hàng hot */}
+      {/* Sản phẩm mới */}
       <div
         style={{
           margin: "0 0 0 -220px",
@@ -118,12 +121,12 @@ export default function Home() {
           padding: "60px 220px",
         }}
       >
-        <h2>SẢN PHẨM HOT</h2>
+        <h2>SẢN PHẨM MỚI</h2>
 
-        <div>{productData && <ProductItem data={productData} />}</div>
+        <div>{newProduct && <ProductItem data={newProduct} />}</div>
 
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <Link to={"/products"}>
+          <Link to={"/products?sortBy=createdDate"}>
             <MyButton
               style={{
                 width: 200,
@@ -138,7 +141,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Hàng mới về */}
+      {/* Hàng bán chạy */}
       <div
         style={{
           margin: "0 0 0 -220px",
@@ -148,12 +151,12 @@ export default function Home() {
           padding: "60px 220px 0 220px",
         }}
       >
-        <h2>HÀNG MỚI VỀ</h2>
+        <h2>HÀNG BÁN CHẠY</h2>
 
-        <div>{productData && <ProductItem data={productData} />}</div>
+        <div>{hotProduct && <ProductItem data={hotProduct} />}</div>
 
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <Link to={"/products"}>
+          <Link to={"/products?sortBy=soldQuantity"}>
             <MyButton
               style={{
                 width: 200,

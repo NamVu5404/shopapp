@@ -2,6 +2,32 @@ import { message } from "antd";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
 
+export const getTotalItemsByUser = async (userId) => {
+  try {
+    const response = await fetch(`${API}/cart/${userId}/total-items`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Tải thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    return result.result;
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
 export const getCartByUser = async (userId) => {
   try {
     const response = await fetch(`${API}/cart/${userId}`, {
@@ -76,7 +102,6 @@ export const addCartItem = async (data) => {
       throw new Error(result.message);
     }
 
-    message.success("Đã thêm vào giỏ hàng");
   } catch (error) {
     message.error(error.message);
   }

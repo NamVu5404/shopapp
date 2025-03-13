@@ -1,13 +1,11 @@
 package com.javaweb.dto.request.user;
 
-import com.javaweb.validator.DobConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -30,9 +28,6 @@ public class UserCreateRequest {
     @NotBlank(message = "PHONE_NOT_BLANK")
     @Pattern(regexp = "^0\\d{9}$", message = "INVALID_PHONE")
     String phone;
-
-    @DobConstraint(min = 13, message = "INVALID_DOB")
-    LocalDate dob;
 
     List<String> roles;
 }

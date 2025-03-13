@@ -35,12 +35,7 @@ public class WishListServiceImpl implements WishListService {
     private final ProductRepository productRepository;
 
     @Override
-    public PageResponse<ProductResponse> getWishListByUser(String userId, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
+    public PageResponse<ProductResponse> getWishListByUser(String userId, Pageable pageable) {
         Page<WishList> wishLists = wishListRepository.findByUserId(userId, pageable);
 
         List<ProductResponse> productResponses = wishLists.stream()
@@ -49,8 +44,8 @@ public class WishListServiceImpl implements WishListService {
 
         return PageResponse.<ProductResponse>builder()
                 .totalPage(wishLists.getTotalPages())
-                .currentPage(page)
-                .pageSize(size)
+                .currentPage(pageable.getPageNumber() + 1)
+                .pageSize(pageable.getPageSize())
                 .totalElements(wishLists.getTotalElements())
                 .data(productResponses)
                 .build();

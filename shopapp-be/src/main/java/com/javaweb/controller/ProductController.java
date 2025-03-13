@@ -11,6 +11,9 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,10 +27,17 @@ public class ProductController {
     public ApiResponse<PageResponse<ProductResponse>> search(
             ProductSearchRequest request,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size) {
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sortBy", defaultValue = "point") String sortBy
+    ) {
+        Sort sort = Sort.by(Sort.Direction.DESC, sortBy)
+                .and(Sort.by(Sort.Direction.DESC, "inventoryQuantity"))
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .result(productService.search(request, page, size))
+                .result(productService.search(request, pageable))
                 .build();
     }
 

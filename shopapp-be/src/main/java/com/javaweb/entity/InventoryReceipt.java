@@ -1,6 +1,6 @@
 package com.javaweb.entity;
 
-import com.javaweb.enums.ReceiptStatus;
+import com.javaweb.enums.InventoryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +21,7 @@ public class InventoryReceipt extends BaseEntity {
     long totalAmount;
 
     @Enumerated(EnumType.STRING)
-    ReceiptStatus status;
+    InventoryStatus status;
 
     String note;
 

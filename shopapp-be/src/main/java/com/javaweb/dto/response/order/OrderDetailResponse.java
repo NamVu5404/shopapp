@@ -1,5 +1,6 @@
 package com.javaweb.dto.response.order;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,4 +15,7 @@ public class OrderDetailResponse {
     String productName;
     int quantity;
     Long priceAtPurchase;
+
+    @JsonProperty("isReviewed")
+    boolean isReviewed;
 }

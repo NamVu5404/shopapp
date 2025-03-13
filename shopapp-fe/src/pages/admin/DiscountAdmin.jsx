@@ -1,4 +1,6 @@
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
+  Breadcrumb,
   Button,
   DatePicker,
   Divider,
@@ -7,6 +9,10 @@ import {
   InputNumber,
   Modal,
   Table,
+  Space,
+  Tooltip,
+  Typography,
+  Popconfirm,
 } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -16,13 +22,15 @@ import {
   getAllDiscount,
 } from "../../api/discount";
 import MyButton from "../../components/MyButton";
+import { Link } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
+const { Text } = Typography;
 
 export default function DiscountAdmin() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
-  const [discountData, setDiscountData] = useState(null);
+  const [discountData, setDiscountData] = useState([]);
   const [form] = Form.useForm();
 
   // Fetch data
@@ -35,14 +43,14 @@ export default function DiscountAdmin() {
     getDiscounts();
   }, []);
 
-  // 🟢 Mở modal cho "Thêm mới"
+  // Mở modal cho "Thêm mới"
   const showCreateModal = () => {
-    setEditingDiscount(null); // Không có dữ liệu cũ
-    form.resetFields(); // Reset form
+    setEditingDiscount(null);
+    form.resetFields();
     setIsModalVisible(true);
   };
 
-  // 🟡 Mở modal cho "Cập nhật"
+  // Mở modal cho "Cập nhật"
   const showUpdateModal = (discount) => {
     setEditingDiscount(discount);
     form.setFieldsValue({
@@ -55,7 +63,7 @@ export default function DiscountAdmin() {
     setIsModalVisible(true);
   };
 
-  // 🔴 Đóng modal và reset form
+  // Đóng modal và reset form
   const handleCancelModal = () => {
     setIsModalVisible(false);
     form.resetFields();
@@ -71,29 +79,40 @@ export default function DiscountAdmin() {
 
     await createOrUpdateDiscount(formattedValues);
 
+    // Reload data after update
+    const data = await getAllDiscount();
+    setDiscountData(data);
+
     setIsModalVisible(false);
     form.resetFields();
   };
 
   const handleDelete = async (discount) => {
     await deleteDiscount(discount.id);
+
+    // Reload data after delete
+    const data = await getAllDiscount();
+    setDiscountData(data);
   };
 
   const columns = [
     {
       title: "STT",
       key: "stt",
+      width: 70,
       render: (_, __, index) => index + 1,
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      render: (name) => <span className="font-medium">{name}</span>,
     },
     {
       title: "Percent",
       dataIndex: "percent",
       key: "percent",
+      render: (percent) => <span>{percent.toFixed(2)}%</span>,
     },
     {
       title: "Start date",
@@ -108,52 +127,104 @@ export default function DiscountAdmin() {
     {
       title: "Hành động",
       key: "action",
+      width: 200,
+      align: "center",
       render: (discount) => (
-        <>
-          <Button type="link" onClick={() => showUpdateModal(discount)}>
-            Cập nhật
-          </Button>
-          <Button type="link" danger onClick={() => handleDelete(discount)}>
-            Xóa
-          </Button>
-        </>
+        <Space size="small">
+          <Tooltip title="Cập nhật">
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              size="small"
+              onClick={() => showUpdateModal(discount)}
+            >
+              Cập nhật
+            </Button>
+          </Tooltip>
+          <Popconfirm
+            title="Xác nhận xóa"
+            description="Bạn có chắc chắn muốn xóa mã giảm giá này?"
+            onConfirm={() => handleDelete(discount)}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              size="small"
+            >
+              Xóa
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}>Quản lý mã giảm giá</h2>
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/admin">Admin</Link> },
+          { title: "Quản lý mã giảm giá" },
+        ]}
+      />
 
-      <Button type="primary" onClick={showCreateModal}>
-        Thêm mới
-      </Button>
+      <div
+        style={{
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text strong>Tổng số: {discountData?.length || 0} mã giảm giá</Text>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={showCreateModal}
+          size="middle"
+        >
+          Thêm mới
+        </Button>
+      </div>
 
-      <Divider />
+      <Divider style={{ margin: "16px 0" }} />
 
       <Table
         dataSource={discountData}
         columns={columns}
         rowKey="id"
-        pagination={false}
+        pagination={{
+          defaultPageSize: 20,
+        }}
+        bordered
+        size="middle"
+        scroll={{ x: 800 }}
+        loading={discountData.length === 0}
       />
 
-      {/* Modal thêm/sửa */}
       <Modal
-        title={editingDiscount ? "Cập nhật mã giảm giá" : "Thêm mã giảm giá"}
+        title={
+          <span>
+            {editingDiscount ? "Cập nhật mã giảm giá" : "Thêm mới mã giảm giá"}
+          </span>
+        }
         open={isModalVisible}
         onCancel={handleCancelModal}
         footer={null}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+        destroyOnClose={true}
+        width={500}
+        maskClosable={false}
+        centered
       >
         <Form
           form={form}
           onFinish={handleSubmit}
-          style={{ marginBottom: 10, maxWidth: 450, minWidth: 300 }}
+          style={{ marginTop: 16 }}
+          layout="vertical"
         >
           <Form.Item name="id" style={{ display: "none" }}>
             <Input />
@@ -161,26 +232,39 @@ export default function DiscountAdmin() {
 
           <Form.Item
             name="name"
+            label="Tên mã giảm giá"
             rules={[{ required: true, message: "Vui lòng nhập tên" }]}
           >
-            <Input placeholder="Tên mã giảm giá" />
+            <Input placeholder="Nhập tên mã giảm giá" />
           </Form.Item>
 
           <Form.Item
             name="percent"
+            label="Phần trăm giảm giá"
             rules={[{ required: true, message: "Vui lòng nhập phần trăm" }]}
           >
             <InputNumber
               min={0}
               max={100}
               addonAfter="%"
-              placeholder="Phần trăm giảm giá"
+              placeholder="Nhập phần trăm giảm giá"
               style={{ width: "100%" }}
               step={0.01}
+              precision={2}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
             />
           </Form.Item>
 
-          <Form.Item name="range">
+          <Form.Item
+            name="range"
+            label="Thời gian áp dụng"
+            rules={[
+              { required: true, message: "Vui lòng chọn khoảng thời gian!" },
+            ]}
+          >
             <RangePicker
               format="YYYY-MM-DD"
               style={{ width: "100%" }}
@@ -190,7 +274,7 @@ export default function DiscountAdmin() {
 
           <Form.Item>
             <MyButton style={{ width: "100%" }} htmlType="submit">
-              {editingDiscount ? "Cập nhật" : "Lưu"}
+              {editingDiscount ? "Cập nhật" : "Thêm mới"}
             </MyButton>
           </Form.Item>
         </Form>

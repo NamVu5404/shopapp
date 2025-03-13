@@ -1,6 +1,6 @@
 package com.javaweb.dto.response.inventoryReceipt;
 
-import com.javaweb.enums.ReceiptStatus;
+import com.javaweb.enums.InventoryStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ReceiptDetailByProductResponse extends InventoryReceiptDetailResponse {
     String receiptId;
-    ReceiptStatus status;
+    InventoryStatus status;
     LocalDateTime createdDate;
     String createdBy;
     LocalDateTime modifiedDate;

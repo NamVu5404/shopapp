@@ -1,0 +1,21 @@
+package com.javaweb.dto.response.review;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ReviewResponse {
+    String userId;
+    String fullName;
+    String orderId;
+    String productId;
+    int rating;
+    String comment;
+    LocalDateTime createdDate;
+}

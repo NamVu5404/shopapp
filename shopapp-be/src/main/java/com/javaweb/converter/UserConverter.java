@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,7 @@ public class UserConverter {
                 () -> {
                     User user = modelMapper.map(request, User.class);
                     user.setIsGuest(StatusConstant.GUEST);
+                    user.setRoles(Collections.singletonList(roleRepository.findByCode("CUSTOMER")));
                     return user;
                 }
         );

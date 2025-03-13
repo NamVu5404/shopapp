@@ -1,15 +1,34 @@
-import { Button, Col, Form, Input, InputNumber, Row, Select } from "antd";
-import MyButton from "./MyButton";
+import {
+  AppstoreOutlined,
+  ClearOutlined,
+  IdcardOutlined,
+  SearchOutlined,
+  ShopOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Radio,
+  Row,
+  Select,
+  Space,
+} from "antd";
+import { useLocation } from "react-router-dom";
 import { useCategories } from "../context/CategoryContext";
 import { useSuppliers } from "../context/SupplierContext";
 
-export default function ProductSeachForm({
-  form,
-  onSearch,
-  handleCancel,
-  isAdmin,
-  showModal,
-}) {
+const sortOptions = [
+  { label: "Phổ biến", value: "point" },
+  { label: "Bán chạy", value: "soldQuantity" },
+  { label: "Mới nhất", value: "createdDate" },
+];
+
+export default function ProductSeachForm({ form, onSearch, handleCancel }) {
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith("/admin");
   const categories = useCategories();
   const suppliers = useSuppliers();
 
@@ -20,65 +39,76 @@ export default function ProductSeachForm({
   return (
     <>
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Row gutter={20}>
-          <Col xl={8}>
-            <Form.Item name="id">
-              <Input placeholder="Nhập ID" />
+        <Row gutter={16}>
+          {isAdminPath && (
+            <Col xl={8} lg={8} md={12} sm={24} xs={24}>
+              <Form.Item name="id" label="ID sản phẩm">
+                <Input placeholder="Nhập ID" prefix={<IdcardOutlined />} />
+              </Form.Item>
+            </Col>
+          )}
+
+          {isAdminPath && (
+            <Col xl={8} lg={8} md={12} sm={24} xs={24}>
+              <Form.Item name="code" label="Mã code">
+                <Input placeholder="Nhập Code" prefix={<AppstoreOutlined />} />
+              </Form.Item>
+            </Col>
+          )}
+
+          <Col xl={8} lg={8} md={12} sm={24} xs={24}>
+            <Form.Item name="name" label="Tên sản phẩm">
+              <Input placeholder="Nhập tến sản phẩm" prefix={<ShopOutlined />} />
             </Form.Item>
           </Col>
 
-          <Col xl={8}>
-            <Form.Item name="code">
-              <Input placeholder="Nhập Code" />
+          <Col xl={8} lg={8} md={12} sm={24} xs={24}>
+            <Form.Item label="Khoảng giá">
+              <Space style={{ width: "100%" }}>
+                <Form.Item name="minPrice" noStyle>
+                  <InputNumber
+                    min={0}
+                    max={1e9}
+                    placeholder="Giá từ"
+                    style={{ width: "100%" }}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    addonAfter="đ"
+                    onBeforeInput={(event) => {
+                      if (!/^\d+$/.test(event.data)) {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item name="maxPrice" noStyle>
+                  <InputNumber
+                    min={0}
+                    max={1e9}
+                    placeholder="Giá đến"
+                    style={{ width: "100%" }}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+                    addonAfter="đ"
+                    onBeforeInput={(event) => {
+                      if (!/^\d+$/.test(event.data)) {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Form.Item>
+              </Space>
             </Form.Item>
           </Col>
 
-          <Col xl={8}>
-            <Form.Item name="name">
-              <Input placeholder="Nhập Name" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={20}>
-          <Col xl={6}>
-            <Form.Item name="minPrice">
-              <InputNumber
-                min={0}
-                max={1e9}
-                addonAfter="VNĐ"
-                placeholder="Giá từ"
-                style={{ width: "100%" }}
-                onBeforeInput={(event) => {
-                  if (!/^\d+$/.test(event.data)) {
-                    event.preventDefault();
-                  }
-                }}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col xl={6}>
-            <Form.Item name="maxPrice">
-              <InputNumber
-                min={0}
-                max={1e9}
-                addonAfter="VNĐ"
-                placeholder="Giá đến"
-                style={{ width: "100%" }}
-                onBeforeInput={(event) => {
-                  if (!/^\d+$/.test(event.data)) {
-                    event.preventDefault();
-                  }
-                }}
-              />
-            </Form.Item>
-          </Col>
-
-          <Col xl={6}>
-            <Form.Item name="categoryCode">
-              <Select placeholder="---Chọn danh mục ---">
-                <Select.Option value={""}>--- Chọn danh mục ---</Select.Option>
+          <Col xl={4} lg={4} md={12} sm={24} xs={24}>
+            <Form.Item name="categoryCode" label="Danh mục">
+              <Select placeholder="Chọn danh mục">
+                <Select.Option value={""}>Tất cả danh mục</Select.Option>
                 {categories.map((category) => (
                   <Select.Option key={category.code} value={category.code}>
                     {category.name}
@@ -88,10 +118,10 @@ export default function ProductSeachForm({
             </Form.Item>
           </Col>
 
-          <Col xl={6}>
-            <Form.Item name="supplierCode">
-              <Select placeholder="---Chọn hãng ---">
-                <Select.Option value={""}>--- Chọn hãng ---</Select.Option>
+          <Col xl={4} lg={4} md={12} sm={24} xs={24}>
+            <Form.Item name="supplierCode" label="Nhà cung cấp">
+              <Select placeholder="Chọn nhà cung cấp">
+                <Select.Option value={""}>Tất cả nhà cung cấp</Select.Option>
                 {suppliers.map((supplier) => (
                   <Select.Option key={supplier.code} value={supplier.code}>
                     {supplier.name}
@@ -100,21 +130,64 @@ export default function ProductSeachForm({
               </Select>
             </Form.Item>
           </Col>
-        </Row>
 
-        <Row style={{ display: "flex", justifyContent: "space-between" }}>
-          {isAdmin && (
-            <Button type="primary" onClick={showModal}>
-              Thêm mới
-            </Button>
+          <Col xl={8} lg={8} md={12} sm={24} xs={24}>
+            <Form.Item name="sortBy" label="Sắp xếp theo">
+              <Radio.Group defaultValue="point">
+                {sortOptions.map((option) => (
+                  <Radio key={option.value} value={option.value}>
+                    {option.label}
+                  </Radio>
+                ))}
+              </Radio.Group>
+            </Form.Item>
+          </Col>
+
+          {isAdminPath ? (
+            <Col
+              xl={24}
+              lg={24}
+              md={24}
+              sm={24}
+              xs={24}
+              style={{ textAlign: "right" }}
+            >
+              <Space>
+                <Button icon={<ClearOutlined />} onClick={handleCancel}>
+                  Xóa bộ lọc
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SearchOutlined />}
+                >
+                  Tìm kiếm
+                </Button>
+              </Space>
+            </Col>
+          ) : (
+            <Col
+              xl={16}
+              lg={16}
+              md={12}
+              sm={24}
+              xs={24}
+              style={{ textAlign: "right", marginTop: 29 }}
+            >
+              <Space>
+                <Button icon={<ClearOutlined />} onClick={handleCancel}>
+                  Xóa bộ lọc
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  icon={<SearchOutlined />}
+                >
+                  Tìm kiếm
+                </Button>
+              </Space>
+            </Col>
           )}
-
-          <Form.Item>
-            <Button onClick={handleCancel} style={{ marginRight: 20 }}>
-              Hủy
-            </Button>
-            <MyButton htmlType="submit">Tìm kiếm</MyButton>
-          </Form.Item>
         </Row>
       </Form>
     </>

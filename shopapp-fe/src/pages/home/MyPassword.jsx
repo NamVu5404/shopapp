@@ -49,11 +49,11 @@ export default function MyPassword() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}>Mật Khẩu Và Bảo Mật</h2>
+      <h3 style={{ marginBottom: 5 }}>Mật Khẩu Và Bảo Mật</h3>
 
       {userDetails.hasPassword ? (
         <>
-          <h3 style={{ marginBottom: 20 }}>Đổi mật khẩu</h3>
+          <p style={{ marginBottom: 20 }}>Đổi mật khẩu</p>
 
           <Form
             form={formChange}
@@ -83,11 +83,22 @@ export default function MyPassword() {
 
             <Form.Item
               name="reNewPassword"
+              dependencies={["newPassword"]}
               rules={[
                 {
                   required: true,
                   message: "Please enter your new password again!",
                 },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("newPassword") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("New password do not match!")
+                    );
+                  },
+                }),
               ]}
             >
               <Input.Password placeholder="Nhập lại mật khẩu mới" />
@@ -108,7 +119,7 @@ export default function MyPassword() {
         </>
       ) : (
         <>
-          <h3 style={{ marginBottom: 20 }}>Bạn chưa có mật khẩu? Tạo ngay</h3>
+          <p style={{ marginBottom: 20 }}>Bạn chưa có mật khẩu? Tạo ngay</p>
 
           <Form
             form={formSet}

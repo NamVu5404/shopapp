@@ -34,7 +34,11 @@ public class Product extends BaseEntity {
 
     int soldQuantity = 0;
 
-    int point = 0;
+    double point = 0;
+
+    double avgRating = 2.5;
+
+    int reviewCount;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

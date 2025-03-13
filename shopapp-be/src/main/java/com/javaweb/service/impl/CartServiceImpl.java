@@ -34,6 +34,13 @@ public class CartServiceImpl implements CartService {
     CartConverter cartConverter;
 
     @Override
+    public int getTotalItems(String userId) {
+        return cartRepository.findByUser_Id(userId)
+                .map(cart -> cart.getItems().stream().mapToInt(CartItem::getQuantity).sum())
+                .orElse(0);
+    }
+
+    @Override
     public CartResponse getCartByUser(String userId) {
         Cart cart = cartRepository.findByUser_Id(userId)
                 .orElse(null);

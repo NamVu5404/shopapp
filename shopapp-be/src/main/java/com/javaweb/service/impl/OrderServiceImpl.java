@@ -1,26 +1,34 @@
 package com.javaweb.service.impl;
 
+import com.javaweb.constant.StatusConstant;
 import com.javaweb.converter.OrderConverter;
 import com.javaweb.dto.request.order.OrderRequest;
+import com.javaweb.dto.request.order.OrderSearchRequest;
 import com.javaweb.dto.request.order.OrderStatusRequest;
 import com.javaweb.dto.response.PageResponse;
 import com.javaweb.dto.response.order.OrderResponse;
 import com.javaweb.entity.Order;
 import com.javaweb.entity.OrderDetail;
 import com.javaweb.entity.Product;
+import com.javaweb.entity.User;
 import com.javaweb.enums.OrderStatus;
 import com.javaweb.exception.CustomException;
 import com.javaweb.exception.ErrorCode;
 import com.javaweb.repository.OrderRepository;
 import com.javaweb.repository.ProductRepository;
+import com.javaweb.repository.UserRepository;
 import com.javaweb.service.OrderService;
+import com.javaweb.specifications.OrderSpecification;
+import com.javaweb.utils.AuthUtils;
+import com.javaweb.utils.PointCalculator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +41,31 @@ public class OrderServiceImpl implements OrderService {
     OrderRepository orderRepository;
     OrderConverter orderConverter;
     ProductRepository productRepository;
+    UserRepository userRepository;
+
+    @Override
+    public PageResponse<OrderResponse> search(OrderSearchRequest request, Pageable pageable) {
+        Specification<Order> specification = Specification
+                .where(OrderSpecification.withId(request.getId()))
+                .and(OrderSpecification.withEmail(request.getEmail()))
+                .and(OrderSpecification.withPhone(request.getPhone()))
+                .and(OrderSpecification.withFullName(request.getFullName()))
+                .and(OrderSpecification.withDateRange(request.getStartDate(), request.getEndDate()));
+
+        Page<Order> orders = orderRepository.findAll(specification, pageable);
+
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(orderConverter::toResponse)
+                .toList();
+
+        return PageResponse.<OrderResponse>builder()
+                .currentPage(pageable.getPageNumber() + 1)
+                .pageSize(pageable.getPageSize())
+                .totalElements(orders.getTotalElements())
+                .totalPage(orders.getTotalPages())
+                .data(orderResponses)
+                .build();
+    }
 
     @Override
     @Transactional
@@ -49,41 +82,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResponse<OrderResponse> getByUserId(String userId, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        Page<Order> orders = orderRepository.findByUser_Id(userId, pageable);
-
-        List<OrderResponse> orderResponses = orders.stream()
-                .map(orderConverter::toResponse)
-                .toList();
-
-        return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .pageSize(size)
-                .totalElements(orders.getTotalElements())
-                .totalPage(orders.getTotalPages())
-                .data(orderResponses)
-                .build();
-    }
-
-    @Override
     public OrderResponse getOneByOrderId(String orderId) {
-        return orderRepository.findById(orderId)
-                .map(orderConverter::toResponse)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+        Order order = validatePermission(orderId);
+        return orderConverter.toResponse(order);
     }
 
     @Override
-    public PageResponse<OrderResponse> getByStatus(OrderStatus status, String userId, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
+    public OrderResponse getByIdAndEmail(String id, String email) {
+        return orderConverter.toResponse(orderRepository
+                .findByIdAndUser_Username(id, email)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS)));
+    }
 
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+    @Override
+    public PageResponse<OrderResponse> getByUser(OrderStatus status, String userId, Pageable pageable) {
+        // check valid permission
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        User currentUser = userRepository.findByUsernameAndIsActive(currentUsername, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        if (!userId.equals(currentUser.getId()) && !AuthUtils.hasPermission("RUD_ORDER")) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+        //
         Page<Order> orders = orderRepository.findByStatusAndUser_Id(status, userId, pageable);
 
         List<OrderResponse> orderResponses = orders.stream()
@@ -91,8 +113,8 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .pageSize(size)
+                .currentPage(pageable.getPageNumber() + 1)
+                .pageSize(pageable.getPageSize())
                 .totalElements(orders.getTotalElements())
                 .totalPage(orders.getTotalPages())
                 .data(orderResponses)
@@ -102,8 +124,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse cancel(String orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+        Order order = validatePermission(orderId);
 
         handleCancel(order);
 
@@ -113,21 +134,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public PageResponse<OrderResponse> getAll(int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        Page<Order> orders = orderRepository.findAll(pageable);
+    @PreAuthorize("hasAuthority('RUD_ORDER')")
+    public PageResponse<OrderResponse> getAllByStatus(OrderStatus status, Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByStatus(status, pageable);
 
         List<OrderResponse> orderResponses = orders.stream()
                 .map(orderConverter::toResponse)
                 .toList();
 
         return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .pageSize(size)
+                .currentPage(pageable.getPageNumber() + 1)
+                .pageSize(pageable.getPageSize())
                 .totalElements(orders.getTotalElements())
                 .totalPage(orders.getTotalPages())
                 .data(orderResponses)
@@ -136,24 +153,39 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('RUD_ORDER')")
     public OrderResponse updateStatus(String orderId, OrderStatusRequest request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
 
         switch (request.getStatus()) {
-            case CANCELLED -> handleCancel(order);
-            case CONFIRMED -> handleConfirm(order);
-            case SHIPPING -> handleShipping(order);
-            case COMPLETED -> handleCompleted(order);
-            case FAILED -> handleFailed(order);
-            default -> {
+            case CANCELLED:
+                handleCancel(order);
+                break;
+            case CONFIRMED:
+                handleConfirm(order);
+                break;
+            case SHIPPING:
+                handleShipping(order);
+                break;
+            case COMPLETED:
+                handleCompleted(order);
+                break;
+            case FAILED:
+                handleFailed(order);
+                break;
+            default:
                 throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
-            }
         }
 
         order.setStatus(request.getStatus());
         orderRepository.save(order);
         return orderConverter.toResponse(order);
+    }
+
+    @Override
+    public int countTotalPendingOrders() {
+        return orderRepository.countByStatus(OrderStatus.PENDING);
     }
 
     private void handleCancel(Order order) {
@@ -182,6 +214,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         updateSoldQuantity(order.getOrderDetails()); // + sold quantity
+        updateProductPoint(order.getOrderDetails());
     }
 
     private void handleFailed(Order order) {
@@ -219,5 +252,35 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         productRepository.saveAll(products);
+    }
+
+    private void updateProductPoint(List<OrderDetail> details) {
+        List<Product> products = details.stream()
+                .map(detail -> {
+                    Product product = detail.getProduct();
+                    double point = PointCalculator.calculatePoint(product.getSoldQuantity(),
+                            product.getAvgRating(), product.getReviewCount());
+                    product.setPoint(point);
+                    return product;
+                })
+                .toList();
+
+        productRepository.saveAll(products);
+    }
+
+    private Order validatePermission(String orderId) {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User currentUser = userRepository.findByUsernameAndIsActive(currentUsername, StatusConstant.ACTIVE)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+
+        if (!order.getUser().getId().equals(currentUser.getId()) && !AuthUtils.hasPermission("RUD_ORDER")) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return order;
     }
 }

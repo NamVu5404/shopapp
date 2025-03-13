@@ -64,7 +64,7 @@ const MyAddresses = () => {
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}>Địa Chỉ Của Tôi</h2>
+      <h3 style={{ marginBottom: 20 }}>Địa Chỉ Của Tôi</h3>
       <MyButton onClick={handleAddAddress}>Thêm địa chỉ</MyButton>
       <Divider />
       <Space direction="vertical" size="large" style={{ width: "100%" }}>

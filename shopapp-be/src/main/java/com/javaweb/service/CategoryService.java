@@ -2,16 +2,17 @@ package com.javaweb.service;
 
 import com.javaweb.dto.request.category.CategoryCreateRequest;
 import com.javaweb.dto.request.category.CategoryUpdateRequest;
+import com.javaweb.dto.response.category.CategoryResponse;
 import com.javaweb.entity.Category;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getAll();
+    List<CategoryResponse> getAll();
 
-    Category create(CategoryCreateRequest request);
+    CategoryResponse create(CategoryCreateRequest request);
 
-    Category update(String code, CategoryUpdateRequest request);
+    CategoryResponse update(String code, CategoryUpdateRequest request);
 
-    void delete(String id);
+    void delete(String code);
 }

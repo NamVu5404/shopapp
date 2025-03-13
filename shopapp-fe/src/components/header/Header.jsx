@@ -1,36 +1,50 @@
 import {
   CaretDownOutlined,
-  HeartTwoTone,
   PhoneOutlined,
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Dropdown, Input, Space } from "antd";
-import { useEffect, useState } from "react";
+import { FaHeart } from "react-icons/fa6";
+import { Button, Dropdown, Input, Space, Badge, Tooltip } from "antd";
+import { useCallback, useEffect, useState } from "react";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { introspect, logout } from "../../api/auth";
 import { useCategories } from "../../context/CategoryContext";
 import { hasPermission } from "../../services/authService";
 import { getToken } from "../../services/localStorageService";
 import "./Header.css";
+import { getTotalItemsByUser } from "../../api/cart";
 
 export default function Header() {
   const [isHidden, setIsHidden] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(window.scrollY);
   const [isLogin, setIsLogin] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const token = getToken();
   const location = useLocation();
   const dispatch = useDispatch();
   const categories = useCategories();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const userId = useSelector((state) => state.user.id);
 
+  // Cấu trúc menu category với CSS tùy chỉnh
   const menuCategory = categories.map((category) => ({
     key: category.id,
     label: (
-      <Link to={`products?categoryCode=${category.code}&page=1`}>{category.name}</Link>
+      <Link
+        to={`products?categoryCode=${category.code}&page=1`}
+        className="category-link"
+      >
+        <span>{category.name}</span>
+        {category.suppliers && category.suppliers.length > 0 && (
+          <span style={{ float: "right", color: "#aaa" }}>
+            <CaretDownOutlined />
+          </span>
+        )}
+      </Link>
     ),
     children: category.suppliers
       ? category.suppliers.map((supplier) => ({
@@ -38,18 +52,52 @@ export default function Header() {
           label: (
             <Link
               to={`products?categoryCode=${category.code}&supplierCode=${supplier.code}&page=1`}
+              className="supplier-link"
             >
               {supplier.name}
             </Link>
           ),
         }))
       : [],
+    popupClassName: "custom-dropdown-submenu",
   }));
 
   const onSearch = (event) => {
     event.preventDefault();
     navigate(`/products?name=${query}&page=1`);
   };
+
+  // Function to fetch cart count for logged-in users
+  const fetchCartCount = useCallback(async () => {
+    try {
+      if (token && userId) {
+        const totalItems = await getTotalItemsByUser(userId);
+        setCartCount(totalItems);
+      }
+    } catch (error) {
+      console.error("Error fetching cart count:", error.message);
+    }
+  }, [token, userId]);
+
+  // Function to get cart count for guest users
+  const getGuestCartCount = () => {
+    const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
+      items: [],
+    };
+    const count = guestCart.items.reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
+    setCartCount(count);
+  };
+
+  const updateCartCount = useCallback(() => {
+    if (token && userId) {
+      fetchCartCount();
+    } else {
+      getGuestCartCount();
+    }
+  }, [token, userId, fetchCartCount]);
 
   useEffect(() => {
     const isValidToken = async () => {
@@ -68,9 +116,24 @@ export default function Header() {
     }
   }, [token]);
 
+  useEffect(() => {
+    updateCartCount(); // Gọi khi component mount hoặc userId/token thay đổi
+
+    // Lắng nghe sự kiện cartUpdated
+    window.addEventListener("cartUpdated", updateCartCount);
+
+    return () => {
+      window.removeEventListener("cartUpdated", updateCartCount);
+    };
+  }, [userId, token, updateCartCount]);
+
   const handleLogout = async () => {
     setIsLogin(false);
     dispatch(logout());
+    // Reset cart count when logging out
+    setCartCount(0);
+    // Update cart count for guest after logout
+    setTimeout(getGuestCartCount, 100);
   };
 
   useEffect(() => {
@@ -85,17 +148,75 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos]);
 
+  // CSS nội tuyến cho dropdown
+  const dropdownCSS = `
+    .custom-dropdown .ant-dropdown-menu {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      padding: 8px 0;
+      min-width: 220px;
+      border: 1px solid #f0f0f0;
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-item,
+    .custom-dropdown .ant-dropdown-menu-submenu-title {
+      padding: 10px 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-item:hover,
+    .custom-dropdown .ant-dropdown-menu-submenu-title:hover {
+      background-color: #f5f5f5;
+      color: var(--primary-color);
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-item-active,
+    .custom-dropdown .ant-dropdown-menu-submenu-title-active {
+      background-color: #e6f7ff;
+      color: var(--primary-color);
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-submenu > .ant-dropdown-menu {
+      border-radius: 8px;
+    }
+    
+    .custom-dropdown .category-link,
+    .custom-dropdown .supplier-link {
+      display: block;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+      width: 100%;
+    }
+    
+    .custom-dropdown .supplier-link {
+      font-weight: normal;
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-item:hover .category-link,
+    .custom-dropdown .ant-dropdown-menu-item:hover .supplier-link {
+      color: var(--primary-color);
+    }
+    
+    .custom-dropdown .ant-dropdown-menu-submenu-arrow {
+      color: #aaa;
+      font-size: 10px;
+    }
+    
+    .custom-dropdown-submenu {
+      min-width: 180px !important;
+    }
+  `;
+
   return (
     <>
+      <style>{dropdownCSS}</style>
       <header className="header">
         <div className="header-top">
           <Link to={"/"} className="secondary-link">
             <div className="logo">
-              <img
-                src="/logo/image_processing20221028-18903-1oprry3.jpg"
-                alt="logo"
-              />
-              <h1>SHOPAPP</h1>
+              <img src="/logo/logo.webp" alt="logo" />
             </div>
           </Link>
 
@@ -136,12 +257,34 @@ export default function Header() {
             </form>
           </div>
 
-          <Link className="cart" to={"/wish-list"}>
-            <HeartTwoTone />
+          <Link
+            className="cart heart-icon"
+            to={"/wish-list"}
+            style={{ fontSize: 28, marginTop: 6 }}
+          >
+            <Tooltip title="Sản phẩm yêu thích">
+              <FaHeart />
+            </Tooltip>
           </Link>
-          
-          <Link className="cart" to={"/cart"}>
-            <ShoppingCartOutlined />
+
+          <Link className="cart cart-simple" to={"/cart"}>
+            <Tooltip title="Giỏ hàng">
+              <Badge
+                count={cartCount}
+                size="small"
+                offset={[0, 3]}
+                showZero
+                style={{ backgroundColor: "#ff4d4f" }}
+              >
+                <ShoppingCartOutlined
+                  style={{
+                    fontSize: 30,
+                    color: "#FFF",
+                    transition: "all 0.2s ease",
+                  }}
+                />
+              </Badge>
+            </Tooltip>
           </Link>
 
           <div
@@ -154,7 +297,7 @@ export default function Header() {
               <UserOutlined
                 style={{
                   fontSize: "24px",
-                  marginRight: "10px",
+                  marginRight: "5px",
                 }}
               />
               <div
@@ -168,7 +311,11 @@ export default function Header() {
                       Tài khoản
                     </Link>{" "}
                     |{" "}
-                    <Link className="secondary-link" onClick={handleLogout}>
+                    <Link
+                      className="secondary-link"
+                      onClick={handleLogout}
+                      to={"/"}
+                    >
                       Đăng xuất
                     </Link>
                   </>
@@ -209,7 +356,7 @@ export default function Header() {
                     <MdOutlineAdminPanelSettings
                       style={{
                         fontSize: "24px",
-                        marginRight: "10px",
+                        marginRight: "5px",
                       }}
                     />
                     Quản trị viên
@@ -238,8 +385,9 @@ export default function Header() {
               <Dropdown
                 menu={{ items: menuCategory }}
                 trigger={["hover"]}
-                mouseEnterDelay={0.05} // Hiển thị nhanh hơn
-                mouseLeaveDelay={0.1} // Ẩn nhanh hơn
+                mouseEnterDelay={0.05}
+                mouseLeaveDelay={0.1}
+                overlayClassName="custom-dropdown"
               >
                 <Link to={"/products"} className="primary-link">
                   Sản phẩm <CaretDownOutlined />

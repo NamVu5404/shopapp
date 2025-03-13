@@ -33,13 +33,7 @@ public class ProductServiceImpl implements ProductService {
     ProductConverter productConverter;
 
     @Override
-    public PageResponse<ProductResponse> search(ProductSearchRequest request, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "point")
-                .and(Sort.by(Sort.Direction.DESC, "createdDate"))
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
+    public PageResponse<ProductResponse> search(ProductSearchRequest request, Pageable pageable) {
         Specification<Product> spec = Specification
                 .where(ProductSpecification.withId(request.getId()))
                 .and(ProductSpecification.withCategoryCode(request.getCategoryCode()))
@@ -54,8 +48,8 @@ public class ProductServiceImpl implements ProductService {
 
         return PageResponse.<ProductResponse>builder()
                 .totalPage(products.getTotalPages())
-                .pageSize(size)
-                .currentPage(page)
+                .pageSize(pageable.getPageSize())
+                .currentPage(pageable.getPageNumber() + 1)
                 .totalElements(products.getTotalElements())
                 .data(products.stream().map(productConverter::toResponse).toList())
                 .build();

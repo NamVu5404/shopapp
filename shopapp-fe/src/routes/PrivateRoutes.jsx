@@ -17,7 +17,7 @@ const PrivateRoute = ({ element, requiredRoles }) => {
           const isValid = await introspect(token);
           setIsLogin(isValid);
         } catch (error) {
-          console.error(error.message);
+          console.error("lỗi ở private route");
           setIsLogin(false);
         }
       } else {

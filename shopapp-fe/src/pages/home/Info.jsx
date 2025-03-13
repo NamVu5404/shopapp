@@ -1,4 +1,4 @@
-import { Col, Menu, Row, Space, Spin, Typography } from "antd";
+import { Col, Menu, Row, Space, Spin, Typography, Breadcrumb } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -14,9 +14,13 @@ export default function Info() {
 
   const menuItems = [
     { key: "1", label: "Thông tin cá nhân", path: "/users" },
-    { key: "2", label: "Đơn hàng của tôi", path: "/users/orders" },
-    { key: "3", label: "Mật khẩu và bảo mật", path: "/users/password" },
-    { key: "4", label: "Địa chỉ của tôi", path: "/users/addresses" },
+    { key: "2", label: "Địa chỉ của tôi", path: "/users/addresses" },
+    {
+      key: "3",
+      label: "Lịch sử đặt hàng",
+      redirectTo: `/orders/user/${userDetails.id}/status/PENDING`,
+    },
+    { key: "4", label: "Mật khẩu và bảo mật", path: "/users/password" },
   ];
 
   useEffect(() => {
@@ -29,15 +33,40 @@ export default function Info() {
 
   useEffect(() => {
     if (userDetails.id) {
-      setLoading(false); // Cập nhật loading khi có userDetails
+      setLoading(false);
     } else {
-      setLoading(true); // Giữ loading nếu chưa có thông tin người dùng
+      setLoading(true);
     }
   }, [userDetails]);
 
+  // Xử lý khi chọn mục menu
+  const handleMenuClick = ({ key }) => {
+    const selectedItem = menuItems.find((item) => item.key === key);
+    if (selectedItem.redirectTo) {
+      navigate(selectedItem.redirectTo);
+    }
+  };
+
+  // Hàm để lấy item hiện tại dựa trên pathname
+  const getCurrentBreadcrumb = () => {
+    const currentPath = window.location.pathname;
+    const currentItem = menuItems.find(
+      (item) => item.path === currentPath || item.redirectTo === currentPath
+    );
+    return currentItem ? currentItem.label : "Thông tin tài khoản";
+  };
+
   return (
     <>
-      <h2 style={{ marginBottom: 5 }}>Thông tin tài khoản</h2>
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/">Trang chủ</Link> },
+          { title: <Link to="/users">Thông tin tài khoản</Link> },
+          { title: getCurrentBreadcrumb() },
+        ]}
+      />
+
       <h3 style={{ marginBottom: 30 }}>
         Xin chào{" "}
         <span style={{ color: "var(--primary-color)" }}>
@@ -50,9 +79,24 @@ export default function Info() {
         <Col xl={6}>
           <Menu
             mode="vertical"
+            selectedKeys={[
+              menuItems.find(
+                (item) =>
+                  item.path === window.location.pathname ||
+                  item.redirectTo === window.location.pathname
+              )?.key || "1",
+            ]}
+            onClick={handleMenuClick}
             items={menuItems.map((item) => ({
               key: item.key,
-              label: (
+              label: item.redirectTo ? (
+                <span
+                  onClick={() => handleMenuClick({ key: item.key })}
+                  style={{ fontSize: 16, cursor: "pointer" }}
+                >
+                  {item.label}
+                </span>
+              ) : (
                 <Link
                   to={item.path}
                   className="primary-link"

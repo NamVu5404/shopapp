@@ -18,9 +18,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,12 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasAuthority('RU_USER')")
-    public PageResponse<UserResponse> search(UserSearchRequest request, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
+    public PageResponse<UserResponse> search(UserSearchRequest request, Pageable pageable) {
         Specification<User> spec = Specification
                 .where(UserSpecification.withId(request.getId()))
                 .and(UserSpecification.withUsername(request.getUsername()))
@@ -58,8 +51,8 @@ public class UserServiceImpl implements UserService {
 
         return PageResponse.<UserResponse>builder()
                 .totalPage(users.getTotalPages())
-                .pageSize(size)
-                .currentPage(page)
+                .pageSize(pageable.getPageSize())
+                .currentPage(pageable.getPageNumber() + 1)
                 .totalElements(users.getTotalElements())
                 .data(users.stream().map(userConverter::toResponse).toList())
                 .build();
@@ -147,8 +140,6 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('RU_USER')")
     public UserResponse getById(String id) {
         return userConverter.toResponse(
-                userRepository.findByIdAndIsActive(id, StatusConstant.ACTIVE)
-                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS))
-        );
+                userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)));
     }
 }

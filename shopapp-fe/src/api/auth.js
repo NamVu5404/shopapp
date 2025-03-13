@@ -5,10 +5,11 @@ import {
 } from "../services/localStorageService";
 import { message } from "antd";
 import { persistor } from "../store/store";
+import { getMyInfo } from "./user";
 
 export const API = `http://localhost:8088/api/v1`;
 
-export const login = async (data, navigate) => {
+export const login = async (data, navigate, dispatch) => {
   await fetch(`${API}/auth/login`, {
     method: "POST",
     headers: {
@@ -17,11 +18,17 @@ export const login = async (data, navigate) => {
     body: JSON.stringify(data),
   })
     .then((response) => response.json())
-    .then((result) => {
+    .then(async (result) => {
       if (result.code !== 1000)
         throw new Error("Email hoặc mật khẩu không chính xác");
 
-      setToken(result.result?.token);
+      const token = result.result?.token;
+      setToken(token);
+
+      // Lấy thông tin người dùng trước khi chuyển hướng
+      await dispatch(getMyInfo(token));
+
+      // Chuyển hướng sau khi lấy thông tin người dùng
       navigate("/");
     })
     .catch((error) => {
@@ -96,7 +103,7 @@ export const refresh = async (token) => {
     .then((result) => {
       if (result.code !== 1000) {
         removeToken();
-        throw new Error(result.message);
+        // throw new Error(result.message);
       }
 
       setToken(result.result?.token);

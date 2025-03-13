@@ -66,7 +66,10 @@ public enum ErrorCode {
     INVENTORY_NOT_ENOUGH(1047, "Inventory is not enough", HttpStatus.NOT_FOUND),
     ORDER_NOT_EXISTS(1048, "Order not exists", HttpStatus.NOT_FOUND),
     MIN_QUANTITY(1049, "Quantity must be at least 1", HttpStatus.BAD_REQUEST),
-    MIN_PRICE(1050, "Price must be at least 1000", HttpStatus.BAD_REQUEST),
+    MIN_PRICE(1050, "Price must be at least 1000 vnd", HttpStatus.BAD_REQUEST),
+    ALREADY_REVIEWED(1051, "You have already reviewed this order", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_IN_ORDER(1052, "Product is not part of this order", HttpStatus.BAD_REQUEST),
+    CAN_NOT_REVIEW(1053, "Can not review in current status", HttpStatus.BAD_REQUEST),
     ;
 
     int code;

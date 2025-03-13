@@ -10,6 +10,7 @@ import { createUser } from "../../api/user";
 import UserForm from "../../components/UserForm";
 import { OAuthConfig } from "../../configurations/configuration";
 import { getToken } from "../../services/localStorageService";
+import { useDispatch } from "react-redux";
 
 dayjs.extend(customParseFormat);
 const dateFormat = "YYYY-MM-DD";
@@ -18,6 +19,7 @@ const customFormat = (value) => (value ? `${value.format(dateFormat)}` : null);
 export default function Register() {
   const navigate = useNavigate();
   const token = getToken();
+  const dispatch = useDispatch();
 
   const handleContinueWithFacebook = () => {
     const callbackUrl = OAuthConfig.redirectUri;
@@ -90,7 +92,7 @@ export default function Register() {
       return;
     }
 
-    await login(loginData, navigate);
+    login(loginData, navigate, dispatch);
   };
 
   return (

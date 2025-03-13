@@ -15,5 +15,5 @@ public class CategoryUpdateRequest {
     @NotBlank(message = "NAME_NOT_BLANK")
     String name;
 
-    List<String> supplierIds;
+    List<String> supplierCodes;
 }

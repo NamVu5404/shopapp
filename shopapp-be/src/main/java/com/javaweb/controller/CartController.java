@@ -17,6 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     CartService cartService;
 
+    @GetMapping("/{userId}/total-items")
+    public ApiResponse<Integer> getTotalItems(@PathVariable String userId) {
+        return ApiResponse.<Integer>builder()
+                .result(cartService.getTotalItems(userId))
+                .build();
+    }
+
     @GetMapping("/{userId}")
     public ApiResponse<CartResponse> getCartByUser(@PathVariable String userId) {
         return ApiResponse.<CartResponse>builder()

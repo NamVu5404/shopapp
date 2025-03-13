@@ -1,15 +1,17 @@
 package com.javaweb.service;
 
-import com.javaweb.entity.Supplier;
+import com.javaweb.dto.request.supplier.SupplierCreateRequest;
+import com.javaweb.dto.request.supplier.SupplierUpdateRequest;
+import com.javaweb.dto.response.supplier.SupplierResponse;
 
 import java.util.List;
 
 public interface SupplierService {
-    List<Supplier> getAll();
+    List<SupplierResponse> getAll();
 
-    Supplier create(Supplier request);
+    SupplierResponse create(SupplierCreateRequest request);
 
-    Supplier update(String code, Supplier request);
+    SupplierResponse update(String code, SupplierUpdateRequest request);
 
-    void delete(String id);
+    void delete(String code);
 }

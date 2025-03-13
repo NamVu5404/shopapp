@@ -1,6 +1,7 @@
-import { Divider, Pagination } from "antd";
+import { Breadcrumb, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import { getWishListByUser } from "../../api/wishList";
 import ProductItem from "../../components/ProductItem";
 import { getToken } from "../../services/localStorageService";
@@ -44,13 +45,15 @@ export default function WishList() {
     fetchWishlist();
   }, [user, currentPage]);
 
-  console.log(data);
-
   return (
     <>
-      <h4>Danh sách sản phẩm yêu thích</h4>
-
-      <Divider />
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/">Trang chủ</Link> },
+          { title: "Sản phẩm yêu thích" },
+        ]}
+      />
 
       {data && (
         <>

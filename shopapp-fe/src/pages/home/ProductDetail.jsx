@@ -1,16 +1,39 @@
-import { Button, Col, InputNumber, message, Row, Tag } from "antd";
+import {
+  Avatar,
+  Badge,
+  Breadcrumb,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Empty,
+  InputNumber,
+  List,
+  message,
+  Rate,
+  Row,
+  Skeleton,
+  Space,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { FaTruckFast } from "react-icons/fa6";
 import { MdSwapHorizontalCircle } from "react-icons/md";
 import { useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { addCartItem } from "../../api/cart";
 import { getProductByCode, searchProduct } from "../../api/product";
+import { getProductReviews } from "../../api/review";
 import MyButton from "../../components/MyButton";
 import ProductItem from "../../components/ProductItem";
 import { useCategories } from "../../context/CategoryContext";
 import { getToken } from "../../services/localStorageService";
+import { useSuppliers } from "../../context/SupplierContext";
+
+const { Title, Text, Paragraph } = Typography;
 
 export default function ProductDetail() {
   const { code } = useParams();
@@ -18,11 +41,22 @@ export default function ProductDetail() {
   const [productDetail, setProductDetail] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [relatedData, setRelatedData] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewPage, setReviewPage] = useState(1);
+  const reviewSize = 5;
+  const [reviewTotal, setReviewTotal] = useState(0);
   const userId = useSelector((state) => state.user.id);
   const categories = useCategories();
+  const suppliers = useSuppliers();
 
   const categoryMap = categories.reduce((acc, category) => {
     acc[category.code] = category.name;
+    return acc;
+  }, {});
+
+  const supplierMap = suppliers.reduce((acc, supplier) => {
+    acc[supplier.code] = supplier.name;
     return acc;
   }, {});
 
@@ -47,12 +81,43 @@ export default function ProductDetail() {
         maxPrice: "",
       };
 
-      const data = await searchProduct(request, 1, 4);
-      setRelatedData(data);
+      // Lấy 5 sản phẩm thay vì 4 để đề phòng trường hợp 1 sản phẩm bị loại bỏ
+      const response = await searchProduct(request, 1, 5);
+      const data = response.data;
+      
+      // Lọc bỏ sản phẩm hiện tại (giả sử sản phẩm có thuộc tính id để so sánh)
+      const filteredData = data.filter((item) => item.id !== productDetail?.id);
+
+      // Chỉ lấy 4 sản phẩm đầu tiên
+      setRelatedData(filteredData.slice(0, 4));
     };
 
     getProduct();
   }, [productDetail]);
+
+  // Lấy đánh giá sản phẩm
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!productDetail) return;
+
+      try {
+        setReviewsLoading(true);
+        const response = await getProductReviews(
+          productDetail.id,
+          reviewPage,
+          reviewSize
+        );
+        setReviews(response.data);
+        setReviewTotal(response.totalElements);
+      } catch (error) {
+        console.error("Lỗi khi lấy đánh giá:", error);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [productDetail, reviewPage, reviewSize]);
 
   const handleAddToCart = debounce(async (product, isBuy) => {
     if (!getToken()) {
@@ -79,6 +144,10 @@ export default function ProductDetail() {
 
       localStorage.setItem("guestCart", JSON.stringify(guestCart));
       console.log("Giỏ hàng guest:", guestCart); // Kiểm tra dữ liệu lưu
+
+      // Kích hoạt sự kiện để cập nhật cartCount trong Header cho guest user
+      window.dispatchEvent(new Event("cartUpdated"));
+
       if (!isBuy) message.success("Đã thêm vào giỏ hàng");
       else navigate("/checkout");
       return;
@@ -93,188 +162,357 @@ export default function ProductDetail() {
 
     await addCartItem(data);
 
-    if (isBuy) {
-      navigate("/checkout");
-    }
+    if (isBuy) navigate("/checkout");
+    else message.success("Đã thêm vào giỏ hàng");
+
+    // Kích hoạt sự kiện để cập nhật cartCount trong Header cho guest user
+    window.dispatchEvent(new Event("cartUpdated"));
   }, 500);
+
+  // Format date for reviews
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (!productDetail) {
+    return (
+      <div style={{ padding: "40px 0" }}>
+        <Skeleton active paragraph={{ rows: 10 }} />
+      </div>
+    );
+  }
 
   return (
     <>
-      {productDetail && (
-        <div style={{ color: "var(--primary-color)" }}>
-          <Row gutter={[30]} style={{ marginBottom: 20 }}>
-            <Col xl={14}>
+      {/* Breadcrumb navigation */}
+      <Breadcrumb
+        style={{ marginBottom: 20 }}
+        items={[
+          { title: <Link to="/">Trang chủ</Link> },
+          { title: <Link to="/products">Sản phẩm</Link> },
+          { title: productDetail.name },
+        ]}
+      />
+
+      <Card bordered={false} style={{ marginBottom: 24, overflow: "hidden" }}>
+        <Row gutter={[40, 20]}>
+          {/* Product image */}
+          <Col xs={24} sm={24} md={12} lg={14} xl={14}>
+            <div
+              style={{
+                background: "#f7f7f7",
+                borderRadius: 8,
+                padding: 16,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 400,
+              }}
+            >
               <img
                 src="/logo/wallpaperflare.com_wallpaper.jpg"
-                alt="Product"
+                alt={productDetail.name}
                 style={{
-                  width: "100%",
-                  maxHeight: 750,
+                  maxWidth: "100%",
+                  maxHeight: 500,
                   objectFit: "contain",
-                  display: "block",
                 }}
               />
-            </Col>
+            </div>
+          </Col>
 
-            <Col xl={10}>
-              <h2 style={{ fontSize: 26, marginBottom: 10 }}>
-                [
-                <span style={{ fontSize: 18 }}>
+          {/* Product information */}
+          <Col xs={24} sm={24} md={12} lg={10} xl={10}>
+            <Space direction="vertical" size="large" style={{ width: "100%" }}>
+              {/* Product title and category */}
+              <div>
+                <Tag color="blue" style={{ marginBottom: 8 }}>
                   {categoryMap[productDetail.categoryCode]}
-                </span>
-                ] {productDetail.name}
-              </h2>
-
-              <p style={{ marginBottom: 20 }}>
-                Mã sản phẩm: {productDetail.code}
-              </p>
-
-              {productDetail.discountPrice ? (
-                <>
-                  <div>
-                    <Tag color="orange">
-                      <b>{productDetail.discountName}</b>
-                    </Tag>
-                  </div>
-                  <h2 style={{ color: "red", marginBottom: 20 }}>
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        color: "red",
-                        marginRight: 10,
-                      }}
-                    >
-                      {productDetail.discountPrice?.toLocaleString("vi-VN")}đ
-                    </span>
-                    <span
-                      style={{
-                        textDecoration: "line-through",
-                        color: "gray",
-                        fontSize: 18,
-                      }}
-                    >
-                      {productDetail.price?.toLocaleString("vi-VN")}đ
-                    </span>
-                  </h2>
-                </>
-              ) : (
-                <>
-                  <h2 style={{ color: "red", marginBottom: 20 }}>
-                    {productDetail.price?.toLocaleString("vi-VN") + "đ"}
-                  </h2>
-                </>
-              )}
-
-              <p style={{ marginBottom: 20 }}>{productDetail.description}</p>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 10,
-                }}
-              >
-                <p>
-                  Đã bán: <b>{productDetail.soldQuantity}</b>
-                </p>
+                </Tag>
+                <Tag color="green" style={{ marginBottom: 8 }}>
+                  {supplierMap[productDetail.supplierCode]}
+                </Tag>
+                <Title level={2} style={{ marginTop: 0, marginBottom: 8 }}>
+                  {productDetail.name}
+                </Title>
+                <Text type="secondary">Mã sản phẩm: {productDetail.code}</Text>
               </div>
 
-              <div style={{ marginBottom: 10 }}>
-                Số lượng: {` `}
+              {/* Ratings */}
+              <Space align="center">
+                <Rate
+                  disabled
+                  allowHalf
+                  value={Math.round(productDetail.avgRating * 2) / 2}
+                  style={{ fontSize: 16 }}
+                />
+                <Text>{productDetail.avgRating?.toFixed(1) || 0}</Text>
+                <Divider type="vertical" />
+                <Text type="secondary">
+                  ({productDetail.reviewCount || 0} đánh giá)
+                </Text>
+                <Divider type="vertical" />
+                <Text>
+                  Đã bán: <Text strong>{productDetail.soldQuantity}</Text>
+                </Text>
+              </Space>
+
+              {/* Price section with discount */}
+              <Card
+                style={{
+                  background: productDetail.discountPrice
+                    ? "#fff8f0"
+                    : "#f8f8f8",
+                  borderColor: productDetail.discountPrice
+                    ? "#ffbb96"
+                    : "#e8e8e8",
+                }}
+                bodyStyle={{ padding: 16 }}
+              >
+                {productDetail.discountPrice ? (
+                  <>
+                    <Space direction="vertical" size="small">
+                      {productDetail.discountName && (
+                        <Badge.Ribbon
+                          text={productDetail.discountName}
+                          color="orange"
+                        >
+                          <div style={{ height: 5 }}></div>
+                        </Badge.Ribbon>
+                      )}
+                      <div
+                        style={{
+                          marginTop: productDetail.discountName ? 20 : 0,
+                        }}
+                      >
+                        <Title
+                          level={2}
+                          style={{ color: "#f5222d", margin: 0 }}
+                        >
+                          {productDetail.discountPrice?.toLocaleString("vi-VN")}
+                          đ
+                        </Title>
+                        <Text delete type="secondary" style={{ fontSize: 16 }}>
+                          {productDetail.price?.toLocaleString("vi-VN")}đ
+                        </Text>
+                      </div>
+                    </Space>
+                  </>
+                ) : (
+                  <Title level={2} style={{ color: "#f5222d", margin: 0 }}>
+                    {productDetail.price?.toLocaleString("vi-VN")}đ
+                  </Title>
+                )}
+              </Card>
+
+              {/* Product description */}
+              <div>
+                <Title level={5}>Mô tả sản phẩm</Title>
+                <Paragraph>{productDetail.description}</Paragraph>
+              </div>
+
+              {/* Quantity selector */}
+              <Space align="center">
+                <Text strong>Số lượng:</Text>
                 <InputNumber
                   min={1}
-                  max={100}
-                  defaultValue={1}
-                  onChange={(quantity) => setQuantity(quantity)}
-                  onBeforeInput={(event) => {
-                    if (!/^\d+$/.test(event.data)) {
-                      event.preventDefault();
-                    }
-                  }}
+                  max={productDetail.inventoryQuantity || 100}
+                  value={quantity}
+                  onChange={(qty) => setQuantity(qty)}
+                  style={{ width: 100 }}
                 />
-              </div>
+                {productDetail.inventoryQuantity > 0 ? (
+                  <Text type="success">Còn hàng</Text>
+                ) : (
+                  <Text type="danger">Hết hàng</Text>
+                )}
+              </Space>
 
-              <div>
-                {productDetail.inventoryQuantity ? (
+              {/* Action buttons */}
+              <Space direction="vertical" style={{ width: "100%" }}>
+                {productDetail.inventoryQuantity > 0 ? (
                   <>
                     <MyButton
+                      type="primary"
+                      size="large"
                       style={{
                         width: "100%",
-                        height: 40,
-                        fontSize: 18,
+                        height: 48,
+                        fontSize: 16,
                         fontWeight: 600,
-                        marginBottom: 10,
                       }}
                       onClick={() => handleAddToCart(productDetail, true)}
                     >
-                      Mua ngay
+                      MUA NGAY
                     </MyButton>
                     <Button
+                      size="large"
                       style={{
                         width: "100%",
-                        height: 40,
-                        fontSize: 18,
+                        height: 48,
+                        fontSize: 16,
                         fontWeight: 600,
-                        marginBottom: 10,
                       }}
                       onClick={() => handleAddToCart(productDetail, false)}
                     >
-                      Thêm vào giỏ hàng
+                      THÊM VÀO GIỎ HÀNG
                     </Button>
                   </>
                 ) : (
-                  <>
-                    <MyButton
-                      style={{
-                        width: "100%",
-                        height: 40,
-                        fontSize: 18,
-                        fontWeight: 600,
-                        marginBottom: 10,
-                      }}
-                      disabled={true}
-                    >
-                      Hết hàng
-                    </MyButton>
-                  </>
+                  <Button
+                    danger
+                    size="large"
+                    disabled
+                    style={{
+                      width: "100%",
+                      height: 48,
+                      fontSize: 16,
+                      fontWeight: 600,
+                    }}
+                  >
+                    HẾT HÀNG
+                  </Button>
                 )}
+              </Space>
 
-                <div
-                  style={{
-                    fontSize: 16,
-                    marginTop: 20,
-                  }}
-                >
-                  <div style={{ marginBottom: 20, display: "flex" }}>
-                    <FaTruckFast style={{ fontSize: 50, marginRight: 20 }} />
-                    <div>
-                      <p>
-                        <b>Miễn phí vận chuyển</b>
-                      </p>
-                      <p>Giao hỏa tốc Hồ Chí Minh & Hà Nội</p>
+              {/* Shipping and return policy info */}
+              <Card style={{ backgroundColor: "#f8f8f8" }}>
+                <Space direction="vertical" size="middle">
+                  <Space align="start">
+                    <div
+                      style={{
+                        backgroundColor: "#e6f7ff",
+                        padding: 12,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <FaTruckFast style={{ fontSize: 24, color: "#1890ff" }} />
                     </div>
-                  </div>
-
-                  <div style={{ display: "flex" }}>
-                    <MdSwapHorizontalCircle
-                      style={{ fontSize: 50, marginRight: 20 }}
-                    />
                     <div>
-                      <p>
-                        <b>Hỗ trợ bảo hành</b>
-                      </p>
-                      <p>Đổi trả trong 7 ngày</p>
+                      <Text strong>Miễn phí vận chuyển</Text>
+                      <br />
+                      <Text type="secondary">
+                        Giao hỏa tốc Hồ Chí Minh & Hà Nội
+                      </Text>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </Col>
-          </Row>
+                  </Space>
 
-          <h3>Sản phẩm cùng loại</h3>
-          {relatedData && <ProductItem data={relatedData.data} />}
-        </div>
-      )}
+                  <Space align="start">
+                    <div
+                      style={{
+                        backgroundColor: "#f6ffed",
+                        padding: 12,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <MdSwapHorizontalCircle
+                        style={{ fontSize: 24, color: "#52c41a" }}
+                      />
+                    </div>
+                    <div>
+                      <Text strong>Hỗ trợ bảo hành</Text>
+                      <br />
+                      <Text type="secondary">Đổi trả trong 7 ngày</Text>
+                    </div>
+                  </Space>
+                </Space>
+              </Card>
+            </Space>
+          </Col>
+        </Row>
+      </Card>
+
+      {/* Reviews section */}
+      <Card
+        title={
+          <Space>
+            <Title level={4} style={{ margin: 0 }}>
+              Đánh giá sản phẩm
+            </Title>
+            <Tag color="blue">{reviewTotal}</Tag>
+          </Space>
+        }
+        style={{ marginBottom: 24 }}
+      >
+        {reviewsLoading ? (
+          <Skeleton active avatar paragraph={{ rows: 4 }} />
+        ) : reviews.length > 0 ? (
+          <List
+            itemLayout="horizontal"
+            dataSource={reviews}
+            pagination={{
+              onChange: (page) => setReviewPage(page),
+              pageSize: reviewSize,
+              total: reviewTotal,
+              current: reviewPage,
+            }}
+            renderItem={(item) => (
+              <List.Item>
+                <List.Item.Meta
+                  avatar={
+                    <Avatar style={{ backgroundColor: "#1890ff" }}>
+                      {item.fullName?.charAt(0)?.toUpperCase() || "U"}
+                    </Avatar>
+                  }
+                  title={
+                    <Space>
+                      <Text strong>{item.fullName}</Text>
+                      <Tooltip title={formatDate(item.createdDate)}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {formatDate(item.createdDate)}
+                        </Text>
+                      </Tooltip>
+                    </Space>
+                  }
+                  description={
+                    <div>
+                      <Rate
+                        disabled
+                        value={item.rating}
+                        style={{ fontSize: 14, marginBottom: 8 }}
+                      />
+                      <Paragraph style={{ margin: 0 }}>
+                        {item.comment}
+                      </Paragraph>
+                    </div>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <Empty
+            description="Chưa có đánh giá nào cho sản phẩm này"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        )}
+      </Card>
+
+      {/* Related products */}
+      <Card
+        title={
+          <Title level={4} style={{ margin: 0 }}>
+            Sản phẩm cùng loại
+          </Title>
+        }
+        style={{ marginBottom: 24 }}
+      >
+        {relatedData && <ProductItem data={relatedData} />}
+      </Card>
     </>
   );
 }

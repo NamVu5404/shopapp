@@ -11,13 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,18 +25,13 @@ public class InventoryReceiptDetailServiceImpl implements InventoryReceiptDetail
 
     @Override
     @PreAuthorize("hasAuthority('CRU_RECEIPT')")
-    public PageResponse<ReceiptDetailByProductResponse> getAllByProductId(String productId, int page, int size) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdDate")
-                .and(Sort.by(Sort.Direction.ASC, "id"));
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
+    public PageResponse<ReceiptDetailByProductResponse> getAllByProductId(String productId, Pageable pageable) {
         Page<InventoryReceiptDetail> receiptDetails = receiptDetailRepository.findByProductId(productId, pageable);
 
         return PageResponse.<ReceiptDetailByProductResponse>builder()
                 .totalPage(receiptDetails.getTotalPages())
-                .currentPage(page)
-                .pageSize(size)
+                .currentPage(pageable.getPageNumber() + 1)
+                .pageSize(pageable.getPageSize())
                 .totalElements(receiptDetails.getTotalElements())
                 .data(converter.toDetailResponse(receiptDetails))
                 .build();

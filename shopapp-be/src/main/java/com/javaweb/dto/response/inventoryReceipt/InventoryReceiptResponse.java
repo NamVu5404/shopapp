@@ -1,6 +1,6 @@
 package com.javaweb.dto.response.inventoryReceipt;
 
-import com.javaweb.enums.ReceiptStatus;
+import com.javaweb.enums.InventoryStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public class InventoryReceiptResponse {
     String id;
     long totalAmount;
-    ReceiptStatus status;
+    InventoryStatus status;
     String note;
     LocalDateTime createdDate;
     String createdBy;

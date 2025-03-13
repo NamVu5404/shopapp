@@ -2,10 +2,10 @@ import { message } from "antd";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
 
-export const searchProduct = async (request, page, size) => {
+export const searchProduct = async (request, page, size, sortBy) => {
   try {
     const response = await fetch(
-      `${API}/products?id=${request.id}&categoryCode=${request.categoryCode}&supplierCode=${request.supplierCode}&code=${request.code}&name=${request.name}&minPrice=${request.minPrice}&maxPrice=${request.maxPrice}&page=${page}&size=${size}`,
+      `${API}/products?id=${request.id}&categoryCode=${request.categoryCode}&supplierCode=${request.supplierCode}&code=${request.code}&name=${request.name}&minPrice=${request.minPrice}&maxPrice=${request.maxPrice}&page=${page}&size=${size}&sortBy=${sortBy || ""}`,
       {
         method: "GET",
       }

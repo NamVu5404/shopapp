@@ -1,6 +1,6 @@
 package com.javaweb.dto.request.inventoryReceipt;
 
-import com.javaweb.enums.ReceiptStatus;
+import com.javaweb.enums.InventoryStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,5 +10,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class InventoryStatusRequest {
-    ReceiptStatus status;
+    InventoryStatus status;
 }

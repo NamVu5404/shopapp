@@ -54,7 +54,6 @@ export const changePassword = async (body) => {
     }
 
     message.success("Thay đổi mật khẩu thành công");
-    message.success(result.message);
   } catch (error) {
     message.error(error.message);
   }
@@ -80,7 +79,7 @@ export const resetPassword = async (id) => {
       throw new Error(result.message);
     }
 
-    message.success("Reset mật khẩu thành công");
+    message.success("Đã đặt lại mật khẩu mặc định: 12345678");
   } catch (error) {
     message.error(error.message);
   }

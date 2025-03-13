@@ -10,11 +10,7 @@ export default function Footer() {
         <div className="container">
           <div className="section-1">
             <div style={{ display: "flex", alignItems: "center" }}>
-              <img
-                src="/logo/image_processing20221028-18903-1oprry3.jpg"
-                alt="logo"
-              />
-              <h1>SHOPAPP</h1>
+              <img src="/logo/logo.webp" alt="logo" style={{ width: 200 }} />
             </div>
 
             <div
@@ -95,11 +91,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li style={{ marginBottom: "10px" }}>
-                <Link to={"/news"} className="primary-link">
-                  Bài viết
-                </Link>
-              </li>
-              <li style={{ marginBottom: "10px" }}>
                 <Link to={"/contact"} className="primary-link">
                   Liên hệ
                 </Link>
@@ -134,7 +125,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li style={{ marginBottom: "10px" }}>
-                <Link to={"#"} className="primary-link">
+                <Link to={"/check-order"} className="primary-link">
                   Tra cứu đơn hàng
                 </Link>
               </li>
@@ -186,7 +177,7 @@ export default function Footer() {
         </div>
 
         <div className="container-end">
-          <div className="footer-end">© Bản quyền thuộc về ABC</div>
+          <div className="footer-end">© Bản quyền thuộc về VNN</div>
         </div>
       </footer>
     </>
