@@ -10,6 +10,7 @@ import {
   InputNumber,
   List,
   message,
+  Popconfirm,
   Rate,
   Row,
   Skeleton,
@@ -26,12 +27,13 @@ import { useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addCartItem } from "../../api/cart";
 import { getProductByCode, searchProduct } from "../../api/product";
-import { getProductReviews } from "../../api/review";
+import { deleteReiew, getProductReviews } from "../../api/review";
 import MyButton from "../../components/MyButton";
 import ProductItem from "../../components/ProductItem";
 import { useCategories } from "../../context/CategoryContext";
 import { getToken } from "../../services/localStorageService";
 import { useSuppliers } from "../../context/SupplierContext";
+import { hasPermission } from "../../services/authService";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -84,7 +86,7 @@ export default function ProductDetail() {
       // Lấy 5 sản phẩm thay vì 4 để đề phòng trường hợp 1 sản phẩm bị loại bỏ
       const response = await searchProduct(request, 1, 5);
       const data = response.data;
-      
+
       // Lọc bỏ sản phẩm hiện tại (giả sử sản phẩm có thuộc tính id để so sánh)
       const filteredData = data.filter((item) => item.id !== productDetail?.id);
 
@@ -189,6 +191,10 @@ export default function ProductDetail() {
       </div>
     );
   }
+
+  const handleDelReview = async (id) => {
+    await deleteReiew(id);
+  };
 
   return (
     <>
@@ -476,6 +482,18 @@ export default function ProductDetail() {
                           {formatDate(item.createdDate)}
                         </Text>
                       </Tooltip>
+                      {hasPermission(["ROLE_ADMIN"]) && (
+                        <Popconfirm
+                          title="Bạn chắc chắn muốn xóa đánh giá này?"
+                          onConfirm={() => handleDelReview(item.id)}
+                          okText="Yes"
+                          cancelText="No"
+                        >
+                          <Button type="link" danger>
+                            Xóa
+                          </Button>
+                        </Popconfirm>
+                      )}
                     </Space>
                   }
                   description={

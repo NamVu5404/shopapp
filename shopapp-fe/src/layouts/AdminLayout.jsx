@@ -114,7 +114,7 @@ const AdminLayout = () => {
           ),
         ]
       : []),
-    ...(hasPermission(["ROLE_ADMIN"])
+    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"])
       ? [
           getItem(
             "Quản lý mã giảm giá",
@@ -130,6 +130,15 @@ const AdminLayout = () => {
             "/admin/contacts",
             <FaEnvelopeOpenText />,
             unreadMessages
+          ),
+        ]
+      : []),
+    ...(hasPermission(["ROLE_ADMIN"])
+      ? [
+          getItem(
+            "Báo cáo & Thống kê",
+            "/admin/statistics",
+            <FaEnvelopeOpenText />,
           ),
         ]
       : []),

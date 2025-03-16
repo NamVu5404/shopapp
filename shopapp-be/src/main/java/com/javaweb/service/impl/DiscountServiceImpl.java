@@ -11,6 +11,8 @@ import com.javaweb.service.DiscountService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -22,9 +24,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class DiscountServiceImpl implements DiscountService {
     DiscountRepository discountRepository;
     ProductRepository productRepository;
+    ModelMapper modelMapper;
 
     @Override
     public List<Discount> getAll() {
@@ -34,14 +38,36 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
-    public Discount createOrUpdate(Discount discount) {
+    @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
+    public Discount create(Discount discount) {
+        log.info("discount: {}", discount);
         return discountRepository.save(discount);
     }
 
     @Override
     @Transactional
-    @PreAuthorize("hasAuthority('ADD_DISCOUNT')")
+    @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
+    public Discount update(String id, Discount request) {
+        Discount discount = discountRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
+
+        List<Product> products = discount.getProducts().stream()
+                .peek(product -> {
+                    product.setDiscount(discount);
+                    product.setDiscountPrice(Math.round(product.getPrice()
+                            * (100 - request.getPercent()) / 100.0));
+                })
+                .collect(Collectors.toList());
+
+        discount.setProducts(products);
+
+        modelMapper.map(request, discount);
+        return discountRepository.save(discount);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
     public Discount addDiscountProducts(String id, DiscountProductRequest request) {
         Discount discount = discountRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
@@ -65,7 +91,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
     public void delete(String id) {
         Discount discount = discountRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));

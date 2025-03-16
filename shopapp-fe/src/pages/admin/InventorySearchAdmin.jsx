@@ -23,7 +23,7 @@ import {
   Typography,
 } from "antd";
 import dayjs from "dayjs";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { searchInventory } from "../../api/inventoryReceipt";
 
@@ -55,7 +55,7 @@ export default function InventorySearchAdmin() {
   });
 
   // Parse URL search params to get query values
-  const parseUrlParams = () => {
+  const parseUrlParams = useCallback(() => {
     const params = new URLSearchParams(location.search);
     const values = {};
 
@@ -71,7 +71,62 @@ export default function InventorySearchAdmin() {
     const size = parseInt(params.get("size")) || 10;
 
     return { values, page, size };
-  };
+  }, [location.search]);
+
+  // Update URL with search params and pagination
+  const updateUrl = useCallback(
+    (searchValues, page, size) => {
+      const params = new URLSearchParams();
+
+      // Add search parameters
+      Object.entries(searchValues).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, value);
+        }
+      });
+
+      // Add pagination parameters
+      params.append("page", page);
+      params.append("size", size);
+
+      // Update URL without triggering navigation (to avoid loop)
+      navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString(),
+        },
+        { replace: true }
+      );
+    },
+    [location.pathname, navigate]
+  );
+
+  // Fetch data from API with form values
+  const fetchData = useCallback(
+    async (formValues, page = 1, size = 10) => {
+      setLoading(true);
+
+      try {
+        // Format search values for API
+        const formattedValues = formatValues(formValues);
+
+        // Update URL
+        updateUrl(formattedValues, page, size);
+
+        // Call API
+        const result = await searchInventory(formattedValues, page, size);
+
+        if (result) {
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error fetching inventory data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [updateUrl]
+  );
 
   // Load initial data from URL params when component mounts
   useEffect(() => {
@@ -90,7 +145,7 @@ export default function InventorySearchAdmin() {
     if (Object.keys(values).length > 0 || page > 1) {
       fetchData(values, page, size);
     }
-  }, []); // Only run once on component mount
+  }, [fetchData, form, parseUrlParams]); // Only run once on component mount
 
   // Convert form values to API format
   const formatValues = (values) => {
@@ -103,55 +158,6 @@ export default function InventorySearchAdmin() {
         : undefined,
       endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : undefined,
     };
-  };
-
-  // Update URL with search params and pagination
-  const updateUrl = (searchValues, page, size) => {
-    const params = new URLSearchParams();
-
-    // Add search parameters
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        params.append(key, value);
-      }
-    });
-
-    // Add pagination parameters
-    params.append("page", page);
-    params.append("size", size);
-
-    // Update URL without triggering navigation (to avoid loop)
-    navigate(
-      {
-        pathname: location.pathname,
-        search: params.toString(),
-      },
-      { replace: true }
-    );
-  };
-
-  // Fetch data from API with form values
-  const fetchData = async (formValues, page = 1, size = 10) => {
-    setLoading(true);
-
-    try {
-      // Format search values for API
-      const formattedValues = formatValues(formValues);
-
-      // Update URL
-      updateUrl(formattedValues, page, size);
-
-      // Call API
-      const result = await searchInventory(formattedValues, page, size);
-
-      if (result) {
-        setData(result);
-      }
-    } catch (error) {
-      console.error("Error fetching inventory data:", error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Handle form submission

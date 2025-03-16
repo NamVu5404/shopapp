@@ -188,7 +188,7 @@ export default function Contact() {
                 rules={[{ required: true, message: "Vui lòng nhập nội dung!" }]}
               >
                 <TextArea
-                  maxLength={1000}
+                  maxLength={500}
                   showCount
                   rows={6}
                   placeholder="Nhập nội dung liên hệ"

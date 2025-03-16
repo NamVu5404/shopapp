@@ -89,6 +89,7 @@ const OrderSuccess = () => {
         <div
           style={{
             background: "linear-gradient(135deg, #1890ff 0%, #096dd9 100%)",
+            // background: "var(--primary-color)",
             padding: "35px 20px",
             borderRadius: "8px 8px 0 0",
             textAlign: "center",
@@ -111,6 +112,7 @@ const OrderSuccess = () => {
                 padding: "6px 12px",
                 borderRadius: "4px",
               }}
+              copyable={{ text: order.id }}
             >
               Đơn hàng #{order.id}
             </Text>
@@ -263,6 +265,7 @@ const OrderSuccess = () => {
                         borderRadius: "6px",
                         background:
                           "linear-gradient(to right, #1890ff, #096dd9)",
+                        // background: "var(--primary-color)",
                       }}
                     >
                       Tiếp tục mua hàng

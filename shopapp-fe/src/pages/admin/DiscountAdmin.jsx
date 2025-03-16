@@ -17,9 +17,10 @@ import {
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import {
-  createOrUpdateDiscount,
+  createDiscount,
   deleteDiscount,
   getAllDiscount,
+  updateDiscount,
 } from "../../api/discount";
 import MyButton from "../../components/MyButton";
 import { Link } from "react-router-dom";
@@ -77,7 +78,11 @@ export default function DiscountAdmin() {
       endDate: values.range ? values.range[1].format("YYYY-MM-DD") : null,
     };
 
-    await createOrUpdateDiscount(formattedValues);
+    if (values?.id) {
+      await updateDiscount(values.id, formattedValues);
+    } else {
+      await createDiscount(formattedValues);
+    }
 
     // Reload data after update
     const data = await getAllDiscount();
@@ -245,7 +250,7 @@ export default function DiscountAdmin() {
           >
             <InputNumber
               min={0}
-              max={100}
+              max={99}
               addonAfter="%"
               placeholder="Nhập phần trăm giảm giá"
               style={{ width: "100%" }}

@@ -551,6 +551,7 @@ export default function Checkout() {
 
             <Form.Item name="note" label="Ghi chú">
               <TextArea
+                maxLength={255}
                 prefix={
                   <FileTextOutlined style={{ color: "rgba(0,0,0,.25)" }} />
                 }

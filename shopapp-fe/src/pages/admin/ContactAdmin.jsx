@@ -19,7 +19,7 @@ import {
   Tabs,
   Typography,
 } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   getContactByIsRead,
@@ -34,48 +34,42 @@ const ContactAdmin = () => {
   const [activeTab, setActiveTab] = useState("unread");
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 20,
-    total: 0,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
+  const [totalItems, setTotalItems] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Fetch contacts based on active tab
-  const fetchContacts = async () => {
+  // Fetch contacts based on active tab and pagination
+  const fetchContacts = useCallback(() => {
     setLoading(true);
-    try {
-      const isRead = activeTab === "read";
-      const result = await getContactByIsRead(
-        isRead,
-        pagination.current,
-        pagination.pageSize
-      );
+    const isRead = activeTab === "read";
 
-      if (result && result.data) {
-        setContacts(result.data);
-        setPagination({
-          ...pagination,
-          total: result.totalElements || 0,
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
-      message.error("Không thể tải dữ liệu liên hệ");
-    } finally {
-      setLoading(false);
-    }
-  };
+    getContactByIsRead(isRead, currentPage, pageSize)
+      .then((result) => {
+        if (result && result.data) {
+          setContacts(result.data);
+          setTotalItems(result.totalElements || 0);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching contacts:", error);
+        message.error("Không thể tải dữ liệu liên hệ");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [activeTab, currentPage]);
 
   // Fetch unread count
-  const fetchUnreadCount = async () => {
-    try {
-      const count = await getUnreadCount();
-      setUnreadCount(count || 0);
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-    }
-  };
+  const fetchUnreadCount = useCallback(() => {
+    getUnreadCount()
+      .then((count) => {
+        setUnreadCount(count || 0);
+      })
+      .catch((error) => {
+        console.error("Error fetching unread count:", error);
+      });
+  }, []);
 
   // Mark contact as read
   const handleMarkAsRead = async (id) => {
@@ -93,25 +87,25 @@ const ContactAdmin = () => {
   // Handle tab change
   const handleTabChange = (key) => {
     setActiveTab(key);
-    setPagination({ ...pagination, current: 1 });
+    setCurrentPage(1);
   };
 
   // Handle pagination change
-  const handlePageChange = (page, pageSize) => {
-    setPagination({ ...pagination, current: page, pageSize: pageSize });
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  // Initial load and when dependencies change
+  // Effect for fetching contacts
   useEffect(() => {
     fetchContacts();
-  }, [activeTab, pagination.current, pagination.pageSize]);
+  }, [fetchContacts]);
 
-  // Fetch unread count periodically
+  // Effect for fetching unread count periodically
   useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchUnreadCount]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -272,9 +266,9 @@ const ContactAdmin = () => {
           }}
         >
           <Pagination
-            current={pagination.current}
-            pageSize={pagination.pageSize}
-            total={pagination.total}
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalItems}
             onChange={handlePageChange}
           />
         </div>

@@ -28,7 +28,7 @@ export const getAllDiscount = async () => {
   }
 };
 
-export const createOrUpdateDiscount = async (data) => {
+export const createDiscount = async (data) => {
   try {
     const response = await fetch(`${API}/discounts`, {
       method: "POST",
@@ -57,9 +57,38 @@ export const createOrUpdateDiscount = async (data) => {
   }
 };
 
-export const addDiscountProduct = async (id, data) => {
+export const updateDiscount = async (id, data) => {
   try {
     const response = await fetch(`${API}/discounts/${id}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Thành công");
+    return result.result;
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const addDiscountProduct = async (id, data) => {
+  try {
+    const response = await fetch(`${API}/discounts/${id}/products`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${getToken()}`,

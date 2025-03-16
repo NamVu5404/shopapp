@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import Footer from "../components/footer/Footer";
 import Header from "../components/header/Header";
 import ScrollToTopButton from "../components/ScrollToTopButton";
+import SocialFloatButton from "../components/SocialFloatButton";
 
 const MainLayout = () => {
   return (
@@ -25,6 +26,7 @@ const MainLayout = () => {
       </div>
       <Footer />
       <ScrollToTopButton />
+      <SocialFloatButton />
     </div>
   );
 };

@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,14 +45,14 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = createReviewFromRequest(request, order);
         reviewRepository.save(review);
 
-        updateProductRatingAndPoint(review.getProduct().getId(), review.getRating());
+        updateProductRatingAndPoint(review.getProduct().getId(), review.getRating(), true);
 
         return mapToResponse(review);
     }
 
     @Override
     public PageResponse<ReviewResponse> getByProductId(String productId, Pageable pageable) {
-        Page<Review> reviews = reviewRepository.findByProductId(productId, pageable);
+        Page<Review> reviews = reviewRepository.findByProductIdAndIsActive(productId, StatusConstant.ACTIVE, pageable);
 
         List<ReviewResponse> reviewResponses = reviews.stream()
                 .map(this::mapToResponse)
@@ -64,6 +65,17 @@ public class ReviewServiceImpl implements ReviewService {
                 .totalElements(reviews.getTotalElements())
                 .data(reviewResponses)
                 .build();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(String id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_EXISTS));
+
+        updateProductRatingAndPoint(review.getProduct().getId(), review.getRating(), false);
+        review.setIsActive(StatusConstant.INACTIVE);
+        reviewRepository.save(review);
     }
 
     private Order validateOrderAndUser(ReviewRequest request) {
@@ -117,18 +129,29 @@ public class ReviewServiceImpl implements ReviewService {
      * @param productId ID của sản phẩm
      * @param newRating Điểm đánh giá mới
      */
-    private void updateProductRatingAndPoint(String productId, int newRating) {
+    private void updateProductRatingAndPoint(String productId, int newRating, boolean isAdd) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
 
-        // Cập nhật avgRating theo công thức tăng dần
+        // Cập nhật avgRating
         int reviewCount = product.getReviewCount();
-        double currentAvgRating = product.getAvgRating();
-        double newAvgRating = reviewCount == 0 ? newRating :
-                (currentAvgRating * reviewCount + newRating) / (reviewCount + 1);
+        double newAvgRating;
 
-        product.setAvgRating(newAvgRating);
-        product.setReviewCount(reviewCount + 1);
+        if (isAdd) {
+            double currentAvgRating = product.getAvgRating();
+            newAvgRating = reviewCount == 0 ? newRating :
+                    (currentAvgRating * reviewCount + newRating) / (reviewCount + 1);
+
+            product.setAvgRating(newAvgRating);
+            product.setReviewCount(reviewCount + 1);
+        } else {
+            double currentAvgRating = product.getAvgRating();
+            newAvgRating = reviewCount - 1 == 0 ? 2.5 :
+                    (currentAvgRating * reviewCount - newRating) / (reviewCount - 1);
+
+            product.setAvgRating(newAvgRating);
+            product.setReviewCount(reviewCount - 1);
+        }
 
         // Tính lại point với soldQuantity và avgRating mới
         double point = PointCalculator
@@ -140,6 +163,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private ReviewResponse mapToResponse(Review review) {
         return ReviewResponse.builder()
+                .id(review.getId())
                 .userId(review.getUser().getId())
                 .fullName(review.getUser().getFullName())
                 .orderId(review.getOrder().getId())

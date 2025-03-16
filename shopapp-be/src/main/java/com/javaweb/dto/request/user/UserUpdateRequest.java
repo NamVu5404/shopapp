@@ -26,7 +26,7 @@ public class UserUpdateRequest {
     @Pattern(regexp = "^0\\d{9}$", message = "INVALID_PHONE")
     String phone;
 
-    @DobConstraint(min = 13, message = "INVALID_DOB")
+    @DobConstraint(min = 6, max = 80, message = "INVALID_DOB")
     LocalDate dob;
 
     byte isGuest;

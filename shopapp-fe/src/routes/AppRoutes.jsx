@@ -14,6 +14,7 @@ import OrderSearchAdmin from "../pages/admin/OrderSearchAdmin";
 import ProductAdmin from "../pages/admin/ProductAdmin";
 import ProductDetailAdmin from "../pages/admin/ProductDetailAdmin";
 import ReceiptByProductAdmin from "../pages/admin/ReceiptByProductAdmin";
+import StatisticsAdmin from "../pages/admin/StatisticsAdmin";
 import SupplierAdmin from "../pages/admin/SupplierAdmin";
 import UserAdmin from "../pages/admin/UserAdmin";
 import UserDetailAdmin from "../pages/admin/UserDetailAdmin";
@@ -232,7 +233,7 @@ const AppRoutes = () => {
             element={
               <PrivateRoute
                 element={<DiscountAdmin />}
-                requiredRoles={["ROLE_ADMIN"]}
+                requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_SALE"]}
               />
             }
           />
@@ -242,6 +243,15 @@ const AppRoutes = () => {
               <PrivateRoute
                 element={<ContactAdmin />}
                 requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_CUSTOMER_SERVICE"]}
+              />
+            }
+          />
+          <Route
+            path="statistics"
+            element={
+              <PrivateRoute
+                element={<StatisticsAdmin />}
+                requiredRoles={["ROLE_ADMIN"]}
               />
             }
           />

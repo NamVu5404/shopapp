@@ -9,4 +9,6 @@ public interface ReviewService {
     ReviewResponse create(ReviewRequest request);
 
     PageResponse<ReviewResponse> getByProductId(String productId, Pageable pageable);
+
+    void delete(String id);
 }

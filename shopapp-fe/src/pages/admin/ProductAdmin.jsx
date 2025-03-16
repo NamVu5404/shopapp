@@ -36,6 +36,7 @@ import { createProduct, searchProduct } from "../../api/product";
 import ProductSeachForm from "../../components/ProductSeachForm";
 import { useCategories } from "../../context/CategoryContext";
 import { useSuppliers } from "../../context/SupplierContext";
+import { hasPermission } from "../../services/authService";
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -560,7 +561,7 @@ const ProductAdmin = () => {
           alignItems: "center",
         }}
       >
-        <Space>
+        {hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"]) && <Space>
           <Text strong>
             Tổng số: {productData?.totalElements || 0} sản phẩm
           </Text>
@@ -573,7 +574,7 @@ const ProductAdmin = () => {
           >
             Thêm mã giảm giá ({selectedProducts.length})
           </Button>
-        </Space>
+        </Space>}
         <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
           Thêm mới
         </Button>

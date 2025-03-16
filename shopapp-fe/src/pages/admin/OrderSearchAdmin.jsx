@@ -26,7 +26,7 @@ import {
   Table,
   Typography,
 } from "antd";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { searchOrder } from "../../api/order";
 import dayjs from "dayjs";
@@ -45,6 +45,61 @@ export default function OrderSearchAdmin() {
     current: 1,
     pageSize: 10,
   });
+  
+  // Update URL with search params and pagination
+  const updateUrl = useCallback(
+    (searchValues, page, size) => {
+      const params = new URLSearchParams();
+
+      // Add search parameters
+      Object.entries(searchValues).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          params.append(key, value);
+        }
+      });
+
+      // Add pagination parameters
+      params.append("page", page);
+      params.append("size", size);
+
+      // Update URL without triggering navigation (to avoid loop)
+      navigate(
+        {
+          pathname: location.pathname,
+          search: params.toString(),
+        },
+        { replace: true }
+      );
+    },
+    [location.pathname, navigate]
+  );
+
+  // Fetch data from API with form values
+  const fetchData = useCallback(
+    async (formValues, page = 1, size = 10) => {
+      setLoading(true);
+
+      try {
+        // Format search values for API
+        const formattedValues = formatValues(formValues);
+
+        // Update URL
+        updateUrl(formattedValues, page, size);
+
+        // Call API
+        const result = await searchOrder(formattedValues, page, size);
+
+        if (result) {
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error fetching order data:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [updateUrl]
+  );
 
   // Parse URL params and fill form on component mount
   useEffect(() => {
@@ -90,7 +145,7 @@ export default function OrderSearchAdmin() {
     if (Object.keys(filteredValues).length > 0 || page > 1) {
       fetchData(filteredValues, page, size);
     }
-  }, []);
+  }, [fetchData, form, location.search]);
 
   // Convert form values to API format
   const formatValues = (values) => {
@@ -103,55 +158,6 @@ export default function OrderSearchAdmin() {
         : undefined,
       endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : undefined,
     };
-  };
-
-  // Update URL with search params and pagination
-  const updateUrl = (searchValues, page, size) => {
-    const params = new URLSearchParams();
-
-    // Add search parameters
-    Object.entries(searchValues).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        params.append(key, value);
-      }
-    });
-
-    // Add pagination parameters
-    params.append("page", page);
-    params.append("size", size);
-
-    // Update URL without triggering navigation (to avoid loop)
-    navigate(
-      {
-        pathname: location.pathname,
-        search: params.toString(),
-      },
-      { replace: true }
-    );
-  };
-
-  // Fetch data from API with form values
-  const fetchData = async (formValues, page = 1, size = 10) => {
-    setLoading(true);
-
-    try {
-      // Format search values for API
-      const formattedValues = formatValues(formValues);
-
-      // Update URL
-      updateUrl(formattedValues, page, size);
-
-      // Call API
-      const result = await searchOrder(formattedValues, page, size);
-
-      if (result) {
-        setData(result);
-      }
-    } catch (error) {
-      console.error("Error fetching order data:", error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Handle form submission

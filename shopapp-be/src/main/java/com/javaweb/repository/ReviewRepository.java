@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ReviewRepository extends JpaRepository<Review, String> {
     boolean existsByUserIdAndOrderIdAndProductId(String userId, String orderId, String productId);
 
-    Page<Review> findByProductId(String productId, Pageable pageable);
+    Page<Review> findByProductIdAndIsActive(String productId, byte isActive, Pageable pageable);
 }

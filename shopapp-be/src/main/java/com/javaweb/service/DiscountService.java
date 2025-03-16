@@ -8,7 +8,9 @@ import java.util.List;
 public interface DiscountService {
     List<Discount> getAll();
 
-    Discount createOrUpdate(Discount discount);
+    Discount create(Discount discount);
+
+    Discount update(String id, Discount request);
 
     Discount addDiscountProducts(String id, DiscountProductRequest request);
 

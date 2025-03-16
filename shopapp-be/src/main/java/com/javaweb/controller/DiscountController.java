@@ -26,13 +26,20 @@ public class DiscountController {
     }
 
     @PostMapping
-    public ApiResponse<Discount> createOrUpdate(@RequestBody Discount request) {
+    public ApiResponse<Discount> create(@RequestBody Discount request) {
         return ApiResponse.<Discount>builder()
-                .result(discountService.createOrUpdate(request))
+                .result(discountService.create(request))
                 .build();
     }
 
     @PostMapping("/{id}")
+    public ApiResponse<Discount> update(@PathVariable String id, @RequestBody Discount request) {
+        return ApiResponse.<Discount>builder()
+                .result(discountService.update(id, request))
+                .build();
+    }
+
+    @PostMapping("/{id}/products")
     public ApiResponse<Discount> addDiscountProducts(@PathVariable String id,
                                                      @RequestBody DiscountProductRequest request) {
         return ApiResponse.<Discount>builder()

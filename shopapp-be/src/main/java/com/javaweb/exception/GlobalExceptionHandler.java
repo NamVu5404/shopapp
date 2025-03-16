@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
 //    @ExceptionHandler(value = Exception.class)
-//    public ResponseEntity<ApiResponse<?>> exceptionHandler(Exception e) {
+//    public ResponseEntity<ApiResponse<?>> exceptionHandler() {
 //        ApiResponse<?> apiResponse = ApiResponse.builder()
 //                .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
 //                .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    public ResponseEntity<ApiResponse<?>> accessDeniedExceptionHandler(AccessDeniedException e) {
+    public ResponseEntity<ApiResponse<?>> accessDeniedExceptionHandler() {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity
