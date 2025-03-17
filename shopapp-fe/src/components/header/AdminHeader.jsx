@@ -38,7 +38,7 @@ export default function AdminHeader() {
             </div>
           </Link>
 
-          <h1>Trang Quản Trị Viên</h1>
+          <h1>Quản Trị Viên</h1>
 
           <div
             style={{

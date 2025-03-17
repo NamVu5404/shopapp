@@ -1,6 +1,7 @@
 import { message } from "antd";
 import { API } from "./auth";
 import { getToken } from "../services/localStorageService";
+import { validateInput } from "../utils/ValidateInputUtil";
 
 export const getAll = async () => {
   try {
@@ -33,7 +34,7 @@ export const createSupplier = async (data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {

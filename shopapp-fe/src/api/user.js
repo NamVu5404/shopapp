@@ -2,6 +2,7 @@ import { message } from "antd";
 import { setUserInfo } from "../reducers/userReducer";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
+import { validateInput } from "../utils/ValidateInputUtil";
 
 export const createUser = async (data) => {
   try {
@@ -10,7 +11,7 @@ export const createUser = async (data) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -39,7 +40,7 @@ export const createGuest = async (data) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -68,7 +69,7 @@ export const updateUser = async (data, id) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {

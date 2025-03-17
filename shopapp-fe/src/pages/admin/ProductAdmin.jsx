@@ -151,6 +151,8 @@ const ProductAdmin = () => {
   const [supplierCode, setSupplierCode] = useState(
     queryParams.get("supplierCode") || ""
   );
+  const direc = queryParams.get("direction");
+
   const [code, setCode] = useState(queryParams.get("code") || "");
   const [name, setName] = useState(queryParams.get("name") || "");
   const [minPrice, setMinPrice] = useState(queryParams.get("minPrice") || "");
@@ -168,6 +170,7 @@ const ProductAdmin = () => {
   const [loading, setLoading] = useState(false);
   const categories = useCategories();
   const suppliers = useSuppliers();
+  const [direction, setDirection] = useState(direc || "DESC");
 
   // Get category and supplier names from codes
   const getCategoryName = (categoryCode) => {
@@ -220,6 +223,7 @@ const ProductAdmin = () => {
     setMinPrice("");
     setMaxPrice("");
     setSortBy("point");
+    setDirection("DESC");
     form.resetFields();
 
     updateURL({}); // Reset URL when clearing filters
@@ -235,6 +239,7 @@ const ProductAdmin = () => {
       minPrice: values.minPrice ?? minPrice,
       maxPrice: values.maxPrice ?? maxPrice,
       sortBy: values.sortBy ?? sortBy,
+      direction: values.direction ?? direction,
       page: 1, // Reset to first page with new filters
     };
 
@@ -247,6 +252,7 @@ const ProductAdmin = () => {
     setMinPrice(newParams.minPrice);
     setMaxPrice(newParams.maxPrice);
     setSortBy(newParams.sortBy);
+    setDirection(newParams.direction);
 
     updateURL(newParams); // Update URL with new filters
   };
@@ -281,7 +287,8 @@ const ProductAdmin = () => {
           request,
           currentPage,
           pageSize,
-          sortBy
+          sortBy,
+          direction
         );
         setProductData(data);
       } catch (error) {
@@ -312,6 +319,7 @@ const ProductAdmin = () => {
     minPrice,
     maxPrice,
     sortBy,
+    direction,
     currentPage,
     pageSize,
     form,

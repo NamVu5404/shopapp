@@ -24,6 +24,7 @@ const sortOptions = [
   { label: "Phổ biến", value: "point" },
   { label: "Bán chạy", value: "soldQuantity" },
   { label: "Mới nhất", value: "createdDate" },
+  { label: "Giá", value: "price" },
 ];
 
 export default function ProductSeachForm({ form, onSearch, handleCancel }) {
@@ -58,7 +59,10 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
 
           <Col xl={8} lg={8} md={12} sm={24} xs={24}>
             <Form.Item name="name" label="Tên sản phẩm">
-              <Input placeholder="Nhập tến sản phẩm" prefix={<ShopOutlined />} />
+              <Input
+                placeholder="Nhập tến sản phẩm"
+                prefix={<ShopOutlined />}
+              />
             </Form.Item>
           </Col>
 
@@ -132,15 +136,27 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
           </Col>
 
           <Col xl={8} lg={8} md={12} sm={24} xs={24}>
-            <Form.Item name="sortBy" label="Sắp xếp theo">
-              <Radio.Group defaultValue="point">
-                {sortOptions.map((option) => (
-                  <Radio key={option.value} value={option.value}>
-                    {option.label}
-                  </Radio>
-                ))}
-              </Radio.Group>
-            </Form.Item>
+            <Row gutter={16} align="middle">
+              <Col span={14}>
+                <Form.Item name="sortBy" label="Sắp xếp theo">
+                  <Select defaultValue="point">
+                    {sortOptions.map((option) => (
+                      <Select.Option key={option.value} value={option.value}>
+                        {option.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col span={10}>
+                <Form.Item name="direction" noStyle>
+                  <Radio.Group defaultValue="DESC">
+                    <Radio value="DESC">Giảm dần</Radio>
+                    <Radio value="ASC">Tăng dần</Radio>
+                  </Radio.Group>
+                </Form.Item>
+              </Col>
+            </Row>
           </Col>
 
           {isAdminPath ? (

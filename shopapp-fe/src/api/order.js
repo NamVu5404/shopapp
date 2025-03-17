@@ -1,6 +1,7 @@
 import { message } from "antd";
 import { API } from "./auth";
 import { getToken } from "../services/localStorageService";
+import { validateInput } from "../utils/ValidateInputUtil";
 
 export const createOrder = async (data) => {
   try {
@@ -9,7 +10,7 @@ export const createOrder = async (data) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -151,7 +152,7 @@ export const updateOrderStatus = async (id, data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {

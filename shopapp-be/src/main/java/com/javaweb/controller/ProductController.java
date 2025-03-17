@@ -28,9 +28,12 @@ public class ProductController {
             ProductSearchRequest request,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sortBy", defaultValue = "point") String sortBy
+            @RequestParam(value = "sortBy", defaultValue = "point") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") String direction
     ) {
-        Sort sort = Sort.by(Sort.Direction.DESC, sortBy)
+        Sort.Direction sortDirection = Sort.Direction.fromString(direction);
+
+        Sort sort = Sort.by(sortDirection, sortBy)
                 .and(Sort.by(Sort.Direction.DESC, "inventoryQuantity"))
                 .and(Sort.by(Sort.Direction.ASC, "id"));
 

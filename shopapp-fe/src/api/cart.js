@@ -1,6 +1,7 @@
 import { message } from "antd";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
+import { validateInput } from "../utils/ValidateInputUtil";
 
 export const getTotalItemsByUser = async (userId) => {
   try {
@@ -88,7 +89,7 @@ export const addCartItem = async (data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {

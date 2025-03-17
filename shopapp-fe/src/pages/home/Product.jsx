@@ -17,6 +17,7 @@ export default function Product() {
   const supplierQuery = queryParams.get("supplierCode");
   const page = queryParams.get("page");
   const sort = queryParams.get("sortBy");
+  const direc = queryParams.get("direction");
 
   const [id, setId] = useState(queryParams.get("id") || "");
   const [categoryCode, setCategoryCode] = useState(categoryQuery || "");
@@ -32,6 +33,7 @@ export default function Product() {
   const [form] = Form.useForm();
   const [data, setData] = useState(null);
   const [sortBy, setSortBy] = useState(sort || "point");
+  const [direction, setDirection] = useState(direc || "DESC");
 
   // ✅ Hàm cập nhật URL
   const updateURL = (newParams) => {
@@ -57,6 +59,7 @@ export default function Product() {
     setMinPrice("");
     setMaxPrice("");
     setSortBy("point");
+    setDirection("DESC");
     form.resetFields();
 
     updateURL({}); // ✅ Reset URL khi xoá bộ lọc
@@ -73,6 +76,7 @@ export default function Product() {
       maxPrice: values.maxPrice ?? maxPrice,
       page: 1, // Reset về trang đầu khi lọc mới
       sortBy: values.sortBy ?? sortBy,
+      direction: values.direction ?? direction,
     };
 
     setCurrentPage(1);
@@ -84,6 +88,7 @@ export default function Product() {
     setMinPrice(newParams.minPrice);
     setMaxPrice(newParams.maxPrice);
     setSortBy(newParams.sortBy);
+    setDirection(newParams.direction);
 
     updateURL(newParams); // ✅ Cập nhật URL khi thay đổi bộ lọc
   };
@@ -94,6 +99,7 @@ export default function Product() {
     setName(nameQuery || "");
     setCurrentPage(page || 1);
     setSortBy(sort || "point");
+    setDirection(direc || "DESC");
 
     form.setFieldsValue({
       name: nameQuery || "",
@@ -101,8 +107,9 @@ export default function Product() {
       supplierCode: supplierQuery || "",
       currentPage: page || 1,
       sortBy: sort || "point",
+      direction: direc || "DESC",
     });
-  }, [categoryQuery, supplierQuery, nameQuery, page, sort, form]);
+  }, [categoryQuery, supplierQuery, nameQuery, page, sort, direc, form]);
 
   useEffect(() => {
     const getProduct = async () => {
@@ -116,7 +123,13 @@ export default function Product() {
         maxPrice,
       };
 
-      const data = await searchProduct(request, currentPage, pageSize, sortBy);
+      const data = await searchProduct(
+        request,
+        currentPage,
+        pageSize,
+        sortBy,
+        direction
+      );
       setData(data);
     };
 
@@ -142,6 +155,7 @@ export default function Product() {
     currentPage,
     pageSize,
     sortBy,
+    direction,
     form,
   ]);
 

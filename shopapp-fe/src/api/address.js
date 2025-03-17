@@ -1,6 +1,7 @@
 import { message } from "antd";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
+import { validateInput } from "../utils/ValidateInputUtil";
 
 export const getAddressesByUserId = async (userId) => {
   try {
@@ -35,7 +36,7 @@ export const createAddress = async (data) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -63,7 +64,7 @@ export const updateAddress = async (addressId, data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -77,7 +78,7 @@ export const updateAddress = async (addressId, data) => {
       throw new Error(result.message);
     }
 
-    message.success("Cập nhật địa chỉ thành công")
+    message.success("Cập nhật địa chỉ thành công");
     return result.result;
   } catch (error) {
     message.error(error.message);

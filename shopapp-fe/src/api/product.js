@@ -1,11 +1,20 @@
 import { message } from "antd";
 import { getToken } from "../services/localStorageService";
 import { API } from "./auth";
+import { validateInput } from "../utils/ValidateInputUtil";
 
-export const searchProduct = async (request, page, size, sortBy) => {
+export const searchProduct = async (request, page, size, sortBy, direction) => {
   try {
     const response = await fetch(
-      `${API}/products?id=${request.id}&categoryCode=${request.categoryCode}&supplierCode=${request.supplierCode}&code=${request.code}&name=${request.name}&minPrice=${request.minPrice}&maxPrice=${request.maxPrice}&page=${page}&size=${size}&sortBy=${sortBy || ""}`,
+      `${API}/products?id=${request.id}&categoryCode=${
+        request.categoryCode
+      }&supplierCode=${request.supplierCode}&code=${
+        request.code
+      }&name=${validateInput(request.name)}&minPrice=${
+        request.minPrice
+      }&maxPrice=${request.maxPrice}&page=${page}&size=${size}&sortBy=${
+        sortBy || ""
+      }&direction=${direction || ""}`,
       {
         method: "GET",
       }
@@ -59,7 +68,7 @@ export const createProduct = async (data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
@@ -89,7 +98,7 @@ export const updateProduct = async (id, data) => {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(validateInput(data)),
     });
 
     if (!response.ok) {
