@@ -7,11 +7,16 @@ import {
   FaEnvelopeOpenText,
   FaShoppingCart,
   FaUsers,
+  FaTachometerAlt,
+  FaBars,
 } from "react-icons/fa";
 import {
   MdOutlineDiscount,
   MdOutlineHomeWork,
   MdOutlineInventory2,
+  MdOutlineNotifications,
+  MdOutlineMessage,
+  MdOutlineSearch,
 } from "react-icons/md";
 import { Outlet, useNavigate } from "react-router-dom";
 import { getUnreadCount } from "../api/contact";
@@ -76,6 +81,7 @@ const AdminLayout = () => {
   }, []);
 
   const items = [
+    getItem("Dashboard", "/admin", <FaTachometerAlt />),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"])
       ? [
           getItem(
@@ -145,56 +151,131 @@ const AdminLayout = () => {
   ];
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <AdminHeader />
+    <div className="nice-admin-layout">
+      <AdminHeader 
+        collapsed={collapsed}
+        toggleSidebar={() => setCollapsed(!collapsed)}
+      />
 
-      <div style={{ marginTop: 90 }}>
-        <Layout
-          style={{
-            minHeight: "calc(100vh - 90px)",
-          }}
+      <div className="nice-admin-container">
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+          className="nice-admin-sidebar"
+          trigger={null}
+          width={280}
         >
-          <Sider
-            collapsible
-            collapsed={collapsed}
-            onCollapse={(value) => setCollapsed(value)}
+          <div className="sidebar-header">
+            <div className="d-flex justify-content-between align-items-center">
+              {!collapsed && (
+                <a href="/admin" className="logo d-flex align-items-center">
+                  <img src="/logo/logo.webp" alt="Logo" />
+                  <span className="d-none d-lg-block">Admin</span>
+                </a>
+              )}
+              {collapsed && (
+                <a href="/admin" className="logo-small d-flex justify-content-center">
+                  <img src="/logo/logo.webp" alt="Logo" />
+                </a>
+              )}
+            </div>
+          </div>
+
+          <Menu
             theme="light"
-          >
-            <Menu
-              theme="light"
-              mode="inline"
-              items={items}
-              onClick={(e) => navigate(e.key)}
-            />
-          </Sider>
-          <Layout>
-            <Content
+            mode="inline"
+            items={items}
+            onClick={(e) => navigate(e.key)}
+            className="nice-admin-menu"
+          />
+        </Sider>
+        <Layout className="nice-admin-content-container">
+          <Content className="nice-admin-content">
+            <div
+              className="nice-admin-content-inner"
               style={{
-                padding: "20px",
+                background: colorBgContainer,
+                borderRadius: borderRadiusLG,
               }}
             >
-              <div
-                style={{
-                  padding: 40,
-                  minHeight: 360,
-                  background: colorBgContainer,
-                  borderRadius: borderRadiusLG,
-                }}
-              >
-                <Outlet />
-              </div>
-            </Content>
-          </Layout>
+              <Outlet />
+            </div>
+          </Content>
         </Layout>
       </div>
 
       <ScrollToTopButton />
+
+      <style jsx>{`
+        .nice-admin-layout {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .nice-admin-container {
+          display: flex;
+          flex: 1;
+          margin-top: 60px;
+        }
+        .nice-admin-sidebar {
+          background-color: #fff !important;
+          box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+          border-right: none !important;
+          height: calc(100vh - 60px);
+          position: fixed !important;
+          left: 0;
+          top: 60px;
+          z-index: 996;
+        }
+        .nice-admin-sidebar .ant-layout-sider-children {
+          overflow-y: auto;
+          height: 100%;
+        }
+        .sidebar-header {
+          padding: 10px 20px;
+          background: #fff;
+          border-bottom: 1px solid #eee;
+        }
+        .logo img {
+          max-height: 40px;
+          margin-right: 10px;
+        }
+        .logo-small img {
+          max-height: 30px;
+        }
+        .nice-admin-menu {
+          border-right: none !important;
+        }
+        .nice-admin-menu .ant-menu-item {
+          height: 50px;
+          line-height: 50px;
+          margin: 0;
+          padding: 0 20px !important;
+          font-size: 15px;
+        }
+        .nice-admin-menu .ant-menu-item-selected {
+          background-color: #f6f9ff !important;
+          color: #4154f1;
+          border-left: 3px solid #4154f1;
+        }
+        .nice-admin-content-container {
+          margin-left: ${collapsed ? '80px' : '280px'};
+          transition: all 0.3s;
+          width: calc(100% - ${collapsed ? '80px' : '280px'});
+        }
+        .nice-admin-content {
+          padding: 20px;
+          margin-top: 10px;
+        }
+        .nice-admin-content-inner {
+          padding: 30px;
+          min-height: calc(100vh - 120px);
+          background: #fff;
+          border-radius: 8px;
+          box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+        }
+      `}</style>
     </div>
   );
 };

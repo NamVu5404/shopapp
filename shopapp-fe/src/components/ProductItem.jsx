@@ -180,11 +180,11 @@ export default function ProductItem({ data }) {
                     }}
                   >
                     <img
-                      src="/logo/wallpaperflare.com_wallpaper.jpg"
+                      src={product.imageUrls[0]}
                       alt={product.name}
                       style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
+                        width: "100%",
+                        height: "100%",
                         objectFit: "contain",
                       }}
                     />

@@ -224,10 +224,10 @@ export default function ProductDetail() {
               }}
             >
               <img
-                src="/logo/wallpaperflare.com_wallpaper.jpg"
+                src={productDetail.imageUrls[0]}
                 alt={productDetail.name}
                 style={{
-                  maxWidth: "100%",
+                  width: "100%",
                   maxHeight: 500,
                   objectFit: "contain",
                 }}
