@@ -6,22 +6,29 @@ import com.NamVu.dto.request.product.ProductUpdateRequest;
 import com.NamVu.dto.response.ApiResponse;
 import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.product.ProductResponse;
+import com.NamVu.service.FileService;
 import com.NamVu.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/products")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class ProductController {
     ProductService productService;
+    FileService fileService;
 
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> search(
@@ -73,5 +80,36 @@ public class ProductController {
         return ApiResponse.<Void>builder()
                 .message("Deleted successfully")
                 .build();
+    }
+
+    @PostMapping("/{id}/images")
+    public ApiResponse<Void> uploadProductImages(@PathVariable String id,
+                                                 @RequestParam("files") MultipartFile[] files) {
+        try {
+            List<String> fileNames = fileService.uploadFiles(files);
+            productService.saveProductImages(id, fileNames);
+
+            return ApiResponse.<Void>builder().build();
+        } catch (Exception e) {
+            return ApiResponse.<Void>builder()
+                    .message(e.getMessage())
+                    .build();
+        }
+    }
+
+    @PutMapping("/{id}/images")
+    public ApiResponse<Void> updateProductImages(@PathVariable String id,
+                                                 @RequestParam(required = false) List<String> keepImages,
+                                                 @RequestParam(required = false) MultipartFile[] newImages) {
+        try {
+            List<String> fileNames = fileService.uploadFiles(newImages);
+            productService.updateProductImages(id, keepImages, fileNames);
+
+            return ApiResponse.<Void>builder().build();
+        } catch (Exception e) {
+            return ApiResponse.<Void>builder()
+                    .message(e.getMessage())
+                    .build();
+        }
     }
 }

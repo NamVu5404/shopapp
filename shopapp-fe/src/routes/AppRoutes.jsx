@@ -247,13 +247,8 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="statistics"
-            element={
-              <PrivateRoute
-                element={<StatisticsAdmin />}
-                requiredRoles={["ROLE_ADMIN"]}
-              />
-            }
+            index
+            element={<PrivateRoute element={<StatisticsAdmin />} />}
           />
         </Route>
 

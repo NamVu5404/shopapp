@@ -23,6 +23,7 @@ import { addCartItem } from "../api/cart";
 import { getWishListByUser, toggleWishlist } from "../api/wishList";
 import { useCategories } from "../context/CategoryContext";
 import { getToken } from "../services/localStorageService";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../api/auth";
 
 const { Text, Title } = Typography;
 
@@ -180,12 +181,17 @@ export default function ProductItem({ data }) {
                     }}
                   >
                     <img
-                      src={product.imageUrls[0]}
+                      src={
+                        product.images.length !== 0
+                          ? `${IMAGE_URL}/${product.images[0]}`
+                          : DEFAULT_IMAGE
+                      }
                       alt={product.name}
                       style={{
                         width: "100%",
                         height: "100%",
                         objectFit: "contain",
+                        border: "1px solid #ddd",
                       }}
                     />
                   </div>

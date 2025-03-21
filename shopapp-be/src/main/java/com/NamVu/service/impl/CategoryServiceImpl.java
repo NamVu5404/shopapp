@@ -6,7 +6,7 @@ import com.NamVu.dto.request.category.CategoryCreateRequest;
 import com.NamVu.dto.request.category.CategoryUpdateRequest;
 import com.NamVu.dto.response.category.CategoryResponse;
 import com.NamVu.entity.Category;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.CategoryRepository;
 import com.NamVu.service.CategoryService;
@@ -41,7 +41,7 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public CategoryResponse create(CategoryCreateRequest request) {
         if (categoryRepository.existsByCode(request.getCode()))
-            throw new CustomException(ErrorCode.CATEGORY_EXISTS);
+            throw new AppException(ErrorCode.CATEGORY_EXISTED);
 
         Category category = categoryConverter.toEntity(request);
         categoryRepository.save(category);
@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public CategoryResponse update(String code, CategoryUpdateRequest request) {
         Category existedCategory = categoryRepository.findByCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
         Category updatedCategory = categoryConverter.toEntity(existedCategory, request);
         categoryRepository.save(updatedCategory);
@@ -67,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public void delete(String code) {
         Category category = categoryRepository.findByCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
         category.setIsActive(StatusConstant.INACTIVE);
         categoryRepository.save(category);

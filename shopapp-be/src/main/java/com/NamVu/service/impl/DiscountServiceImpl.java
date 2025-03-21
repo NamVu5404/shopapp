@@ -3,7 +3,7 @@ package com.NamVu.service.impl;
 import com.NamVu.dto.request.product.DiscountProductRequest;
 import com.NamVu.entity.Discount;
 import com.NamVu.entity.Product;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.DiscountRepository;
 import com.NamVu.repository.ProductRepository;
@@ -49,7 +49,7 @@ public class DiscountServiceImpl implements DiscountService {
     @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
     public Discount update(String id, Discount request) {
         Discount discount = discountRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_EXISTED));
 
         List<Product> products = discount.getProducts().stream()
                 .peek(product -> {
@@ -70,12 +70,12 @@ public class DiscountServiceImpl implements DiscountService {
     @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
     public Discount addDiscountProducts(String id, DiscountProductRequest request) {
         Discount discount = discountRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_EXISTED));
 
         // Lấy danh sách mới từ request
         List<Product> products = request.getProductIds().stream()
                 .map(pid -> productRepository.findById(pid)
-                        .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS)))
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED)))
                 .collect(Collectors.toList());
 
         // Thiết lập quan hệ ngược lại và cập nhật danh sách mới và
@@ -94,7 +94,7 @@ public class DiscountServiceImpl implements DiscountService {
     @PreAuthorize("hasAuthority('CUD_DISCOUNT')")
     public void delete(String id) {
         Discount discount = discountRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_EXISTED));
 
         discount.getProducts().forEach(product -> {
             product.setDiscount(null);

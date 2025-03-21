@@ -8,7 +8,8 @@ import com.NamVu.dto.request.product.ProductUpdateRequest;
 import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.product.ProductResponse;
 import com.NamVu.entity.Product;
-import com.NamVu.exception.CustomException;
+import com.NamVu.entity.ProductImage;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.ProductRepository;
 import com.NamVu.service.ProductService;
@@ -16,6 +17,7 @@ import com.NamVu.specifications.ProductSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,9 +25,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class ProductServiceImpl implements ProductService {
     ProductRepository productRepository;
     ProductConverter productConverter;
@@ -57,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse getByCode(String code) {
         return productConverter.toResponse(productRepository
                 .findByCodeAndIsActive(code, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS)));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED)));
     }
 
     @Override
@@ -65,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasAuthority('CUD_PRODUCT')")
     public ProductResponse create(ProductCreateRequest request) {
         if (productRepository.existsByCode(request.getCode()))
-            throw new CustomException(ErrorCode.PRODUCT_EXISTS);
+            throw new AppException(ErrorCode.PRODUCT_EXISTED);
 
         Product product = productConverter.toEntity(request);
         productRepository.save(product);
@@ -78,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasAuthority('CUD_PRODUCT')")
     public ProductResponse update(String id, ProductUpdateRequest request) {
         Product existedProduct = productRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         Product updatedProduct = productConverter.toEntity(existedProduct, request);
         productRepository.save(updatedProduct);
@@ -91,9 +96,48 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasAuthority('CUD_PRODUCT')")
     public void delete(String id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         product.setIsActive(StatusConstant.INACTIVE);
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAuthority('CUD_PRODUCT')")
+    public void saveProductImages(String id, List<String> fileNames) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+
+        List<ProductImage> productImages = fileNames.stream()
+                .map(fileName -> new ProductImage(fileName, product))
+                .toList();
+
+        product.getImages().clear();
+        product.getImages().addAll(productImages);
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAuthority('CUD_PRODUCT')")
+    public void updateProductImages(String id, List<String> keepImages, List<String> newFileNames) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+
+        // Xóa ảnh cũ nếu ko có trong keepImages
+        if (keepImages == null) {
+            product.getImages().clear();
+        } else {
+            product.getImages().removeIf(image -> !keepImages.contains(image.getImagePath()));
+        }
+
+        // add ảnh mới
+        List<ProductImage> newProductImages = newFileNames.stream()
+                .map(fileName -> new ProductImage(fileName, product))
+                .toList();
+
+        product.getImages().addAll(newProductImages);
         productRepository.save(product);
     }
 }

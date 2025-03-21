@@ -10,7 +10,7 @@ import com.NamVu.entity.InventoryReceipt;
 import com.NamVu.entity.InventoryReceiptDetail;
 import com.NamVu.entity.Product;
 import com.NamVu.enums.InventoryStatus;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.InventoryReceiptRepository;
 import com.NamVu.repository.ProductRepository;
@@ -83,7 +83,7 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
     @PreAuthorize("hasAuthority('CRU_RECEIPT')")
     public InventoryReceiptResponse getById(String id) {
         InventoryReceipt receipt = receiptRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTED));
 
         return converter.toResponse(receipt, receipt.getDetails());
     }
@@ -113,11 +113,11 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
     @PreAuthorize("hasAuthority('CRU_RECEIPT')")
     public InventoryReceiptResponse update(String id, InventoryReceiptRequest request) {
         InventoryReceipt receipt = receiptRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTED));
 
         // Chỉ update khi ở trạng thái pending
         if (!InventoryStatus.PENDING.equals(receipt.getStatus()))
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
 
         // save updated receipt
         receipt.setTotalAmount(request.getTotalAmount());
@@ -139,11 +139,11 @@ public class InventoryReceiptServiceImpl implements InventoryReceiptService {
     @PreAuthorize("hasRole('ADMIN')")
     public InventoryReceiptResponse updateStatus(String id, InventoryStatusRequest request) {
         InventoryReceipt receipt = receiptRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_RECEIPT_NOT_EXISTED));
 
         // Chỉ update khi ở trạng thái pending
         if (!InventoryStatus.PENDING.equals(receipt.getStatus()))
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
 
         // New status: COMPLETED, update số lượng sản phẩm
         if (InventoryStatus.COMPLETED.equals(request.getStatus())) {

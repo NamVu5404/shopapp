@@ -6,7 +6,7 @@ import com.NamVu.dto.request.address.AddressUpdateRequest;
 import com.NamVu.dto.response.address.AddressResponse;
 import com.NamVu.entity.Address;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.UserRepository;
 import com.NamVu.utils.AddressUtils;
@@ -25,7 +25,7 @@ public class AddressConverter {
     // create
     public Address toEntity(AddressCreateRequest request) {
         User user = userRepository.findByIdAndIsActive(request.getUserId(), StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Address address = modelMapper.map(request, Address.class);
         address.setUser(user);

@@ -7,6 +7,8 @@ import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.product.ProductResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface ProductService {
     PageResponse<ProductResponse> search(ProductSearchRequest request, Pageable pageable);
 
@@ -17,4 +19,8 @@ public interface ProductService {
     ProductResponse update(String id, ProductUpdateRequest request);
 
     void delete(String id);
+
+    void saveProductImages(String id, List<String> fileNames);
+
+    void updateProductImages(String id, List<String> keepImages, List<String> newFileNames);
 }

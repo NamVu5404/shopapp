@@ -28,6 +28,7 @@ import {
 import { useSelector } from "react-redux";
 import { getToken } from "../../services/localStorageService";
 import { Link, useNavigate } from "react-router-dom";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Title, Text } = Typography;
 
@@ -144,12 +145,16 @@ export default function Cart() {
       render: (_, item) => (
         <Space>
           <img
-            src="/logo/wallpaperflare.com_wallpaper.jpg"
+            src={
+              item.images.length !== 0
+                ? `${IMAGE_URL}/${item.images[0]}`
+                : DEFAULT_IMAGE
+            }
             alt={item.productName}
             style={{
               width: 50,
               height: 50,
-              objectFit: "cover",
+              objectFit: "contain",
               borderRadius: 4,
             }}
           />

@@ -1,4 +1,4 @@
-package com.NamVu.clients.facebook;
+package com.NamVu.httpclient.facebook;
 
 import com.NamVu.dto.request.auth.ExchangeTokenRequest;
 import com.NamVu.dto.response.auth.ExchangeTokenResponse;

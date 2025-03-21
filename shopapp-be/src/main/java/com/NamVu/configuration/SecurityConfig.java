@@ -23,13 +23,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/api/v1/categories", "/api/v1/roles", "/api/v1/permissions", "/api/v1/suppliers", "/api/v1/products/**",
-            "/api/v1/reviews/product/**", "/api/v1/orders/check"
+            "/categories", "/roles", "/permissions", "/suppliers", "/products/**", "/reviews/product/**",
+            "/orders/check", "/uploads/**"
     };
 
     private final String[] PUBLIC_POST_ENDPOINTS = {
-            "/api/v1/users", "/api/v1/users/guests", "/api/v1/auth/**", "/api/v1/addresses", "/api/v1/orders",
-            "/api/v1/contacts"
+            "/users", "/users/guests", "/auth/**", "/addresses", "/orders", "/contacts"
     };
 
     @Autowired

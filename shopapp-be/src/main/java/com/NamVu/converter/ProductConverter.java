@@ -3,15 +3,13 @@ package com.NamVu.converter;
 import com.NamVu.dto.request.product.ProductCreateRequest;
 import com.NamVu.dto.request.product.ProductUpdateRequest;
 import com.NamVu.dto.response.product.ProductResponse;
-import com.NamVu.entity.Category;
-import com.NamVu.entity.Discount;
-import com.NamVu.entity.Product;
-import com.NamVu.entity.Supplier;
-import com.NamVu.exception.CustomException;
+import com.NamVu.entity.*;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.CategoryRepository;
 import com.NamVu.repository.DiscountRepository;
 import com.NamVu.repository.SupplierRepository;
+import com.NamVu.service.FileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,6 +28,9 @@ public class ProductConverter {
     @Autowired
     private DiscountRepository discountRepository;
 
+    @Autowired
+    private FileService fileService;
+
     public ProductResponse toResponse(Product product) {
         ProductResponse response = modelMapper.map(product, ProductResponse.class);
 
@@ -37,6 +38,14 @@ public class ProductConverter {
         response.setSupplierCode(product.getSupplier().getCode());
         if (product.getDiscount() != null)
             response.setDiscountName(product.getDiscount().getName());
+
+        if (product.getImages() != null) {
+            response.setImages(
+                    product.getImages().stream()
+                            .map(ProductImage::getImagePath)
+                            .toList()
+            );
+        }
 
         return response;
     }
@@ -53,7 +62,7 @@ public class ProductConverter {
 
         if (request.getDiscountId() != null) {
             Discount discount = discountRepository.findById(request.getDiscountId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.DISCOUNT_NOT_EXISTS));
+                    .orElseThrow(() -> new AppException(ErrorCode.DISCOUNT_NOT_EXISTED));
 
             existedProduct.setDiscount(discount);
 
@@ -69,11 +78,11 @@ public class ProductConverter {
 
     private Product getProduct(Product product, String categoryId, String supplierId) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CATEGORY_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
         product.setCategory(category);
 
         Supplier supplier = supplierRepository.findById(supplierId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SUPPLIER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXISTED));
         product.setSupplier(supplier);
 
         return product;

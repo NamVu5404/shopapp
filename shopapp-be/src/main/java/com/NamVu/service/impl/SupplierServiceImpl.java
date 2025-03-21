@@ -6,7 +6,7 @@ import com.NamVu.dto.request.supplier.SupplierCreateRequest;
 import com.NamVu.dto.request.supplier.SupplierUpdateRequest;
 import com.NamVu.dto.response.supplier.SupplierResponse;
 import com.NamVu.entity.Supplier;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.SupplierRepository;
 import com.NamVu.service.SupplierService;
@@ -41,7 +41,7 @@ public class SupplierServiceImpl implements SupplierService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public SupplierResponse create(SupplierCreateRequest request) {
         if (supplierRepository.existsByCode(request.getCode()))
-            throw new CustomException(ErrorCode.SUPPLIER_EXISTS);
+            throw new AppException(ErrorCode.SUPPLIER_EXISTED);
 
         Supplier supplier = supplierConverter.toEntity(request);
         supplierRepository.save(supplier);
@@ -54,7 +54,7 @@ public class SupplierServiceImpl implements SupplierService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public SupplierResponse update(String code, SupplierUpdateRequest request) {
         Supplier supplier = supplierRepository.findByCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.SUPPLIER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXISTED));
 
         supplier.setName(request.getName());
         supplierRepository.save(supplier);
@@ -67,7 +67,7 @@ public class SupplierServiceImpl implements SupplierService {
     @PreAuthorize("hasAuthority('CUD_CATEGORY_SUPPLIER')")
     public void delete(String code) {
         Supplier supplier = supplierRepository.findByCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.SUPPLIER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXISTED));
 
         supplier.setIsActive(StatusConstant.INACTIVE);
         supplierRepository.save(supplier);

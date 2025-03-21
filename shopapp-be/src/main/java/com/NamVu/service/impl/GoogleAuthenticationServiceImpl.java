@@ -1,7 +1,7 @@
 package com.NamVu.service.impl;
 
-import com.NamVu.clients.google.GoogleAuthClient;
-import com.NamVu.clients.google.GoogleUserClient;
+import com.NamVu.httpclient.google.GoogleAuthClient;
+import com.NamVu.httpclient.google.GoogleUserClient;
 import com.NamVu.dto.request.auth.ExchangeTokenRequest;
 import com.NamVu.dto.response.auth.AuthenticationResponse;
 import com.NamVu.dto.response.auth.ExchangeTokenResponse;
@@ -14,12 +14,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service("google")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class GoogleAuthenticationServiceImpl implements OutboundAuthenticationService {
 
     GoogleAuthClient googleAuthClient;
@@ -49,6 +51,7 @@ public class GoogleAuthenticationServiceImpl implements OutboundAuthenticationSe
 
         // Get user info
         OutboundUserResponse userInfo = getUserInfo(response);
+//        log.info("user: {}", userInfo);
 
         // Onboard user
         User user = outboundUserService.onboardUser(userInfo);

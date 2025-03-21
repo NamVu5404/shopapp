@@ -45,6 +45,7 @@ import { getToken } from "../../services/localStorageService";
 
 // Giả sử API để lấy thông tin sản phẩm bằng productCode
 import { getProductByCode } from "../../api/product"; // Cần định nghĩa hàm này
+import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Text } = Typography;
 
@@ -128,12 +129,16 @@ export default function Checkout() {
       render: (_, item) => (
         <Space>
           <img
-            src="/logo/wallpaperflare.com_wallpaper.jpg"
+            src={
+              item.images.length !== 0
+                ? `${IMAGE_URL}/${item.images[0]}`
+                : DEFAULT_IMAGE
+            }
             alt={item.productName}
             style={{
               width: 50,
               height: 50,
-              objectFit: "cover",
+              objectFit: "contain",
               borderRadius: 4,
             }}
           />

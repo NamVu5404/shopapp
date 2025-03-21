@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,6 +17,7 @@ public class OrderDetailResponse {
     String productName;
     int quantity;
     Long priceAtPurchase;
+    List<String> images;
 
     @JsonProperty("isReviewed")
     boolean isReviewed;

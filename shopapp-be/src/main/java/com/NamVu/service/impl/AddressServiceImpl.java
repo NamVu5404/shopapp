@@ -7,7 +7,7 @@ import com.NamVu.dto.request.address.AddressUpdateRequest;
 import com.NamVu.dto.response.address.AddressResponse;
 import com.NamVu.entity.Address;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.AddressRepository;
 import com.NamVu.repository.UserRepository;
@@ -80,14 +80,14 @@ public class AddressServiceImpl implements AddressService {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User currentUser = userRepository.findByUsernameAndIsActive(currentUsername, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED));
 
         if (!address.getUser().getId().equals(currentUser.getId())
                 && !AuthUtils.hasPermission("RUD_ADDRESS")) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         return address;

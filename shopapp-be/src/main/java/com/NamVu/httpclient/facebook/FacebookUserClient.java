@@ -1,4 +1,4 @@
-package com.NamVu.clients.facebook;
+package com.NamVu.httpclient.facebook;
 
 import com.NamVu.dto.response.user.OutboundUserResponse;
 import org.springframework.cloud.openfeign.FeignClient;

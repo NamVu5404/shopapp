@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product")
 @Getter
@@ -51,4 +53,7 @@ public class Product extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "discount_id")
     Discount discount;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductImage> images;
 }

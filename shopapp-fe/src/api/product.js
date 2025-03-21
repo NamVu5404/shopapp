@@ -144,3 +144,69 @@ export const deleteProduct = async (id) => {
     message.error(error.message);
   }
 };
+
+export const uploadProductImages = async (id, files) => {
+  try {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const response = await fetch(`${API}/products/${id}/images`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Tải ảnh lên thành công!");
+    return result.result;
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const updateProductImages = async (id, keepImages, files) => {
+  try {
+    const formData = new FormData();
+    
+    keepImages.forEach((image) => formData.append("keepImages", image));
+
+    files.forEach((file) => formData.append("newImages", file));
+
+    const response = await fetch(`${API}/products/${id}/images`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Cập nhật ảnh thất bại!");
+    }
+
+    const result = await response.json();
+
+    if (result.code !== 1000) {
+      throw new Error(result.message);
+    }
+
+    message.success("Cập nhật ảnh thành công!");
+    return result.result;
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+

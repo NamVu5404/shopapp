@@ -23,6 +23,7 @@ import { debounce } from "lodash";
 import { useEffect, useState } from "react";
 import { FaTruckFast } from "react-icons/fa6";
 import { MdSwapHorizontalCircle } from "react-icons/md";
+import { IoArrowForward, IoArrowBack } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { addCartItem } from "../../api/cart";
@@ -34,6 +35,7 @@ import { useCategories } from "../../context/CategoryContext";
 import { getToken } from "../../services/localStorageService";
 import { useSuppliers } from "../../context/SupplierContext";
 import { hasPermission } from "../../services/authService";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -51,6 +53,9 @@ export default function ProductDetail() {
   const userId = useSelector((state) => state.user.id);
   const categories = useCategories();
   const suppliers = useSuppliers();
+
+  // Thêm state cho phần hiển thị hình ảnh
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const categoryMap = categories.reduce((acc, category) => {
     acc[category.code] = category.name;
@@ -196,6 +201,37 @@ export default function ProductDetail() {
     await deleteReiew(id);
   };
 
+  // Các hàm xử lý hiển thị hình ảnh sản phẩm
+  const hasMultipleImages =
+    productDetail.images && productDetail.images.length > 0;
+
+  const getProductMainImage = () => {
+    if (hasMultipleImages) {
+      return `${IMAGE_URL}/${productDetail.images[currentImageIndex]}`;
+    }
+    return DEFAULT_IMAGE;
+  };
+
+  const handlePrevImage = () => {
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? productDetail.images.length - 1 : prev - 1
+      );
+    }
+  };
+
+  const handleNextImage = () => {
+    if (hasMultipleImages) {
+      setCurrentImageIndex((prev) =>
+        prev === productDetail.images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
+
   return (
     <>
       {/* Breadcrumb navigation */}
@@ -210,7 +246,7 @@ export default function ProductDetail() {
 
       <Card bordered={false} style={{ marginBottom: 24, overflow: "hidden" }}>
         <Row gutter={[40, 20]}>
-          {/* Product image */}
+          {/* Product image section - được cập nhật */}
           <Col xs={24} sm={24} md={12} lg={14} xl={14}>
             <div
               style={{
@@ -218,20 +254,98 @@ export default function ProductDetail() {
                 borderRadius: 8,
                 padding: 16,
                 display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 400,
+                flexDirection: "column",
+                gap: 16,
               }}
             >
-              <img
-                src={productDetail.imageUrls[0]}
-                alt={productDetail.name}
+              {/* Main image container with navigation buttons */}
+              <div
                 style={{
-                  width: "100%",
-                  maxHeight: 500,
-                  objectFit: "contain",
+                  position: "relative",
+                  minHeight: 400,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "hidden",
                 }}
-              />
+              >
+                <img
+                  src={getProductMainImage()}
+                  alt={productDetail.name}
+                  style={{
+                    width: "100%",
+                    maxHeight: 500,
+                    objectFit: "contain",
+                  }}
+                />
+
+                {hasMultipleImages && productDetail.images.length > 1 && (
+                  <>
+                    <Button
+                      shape="circle"
+                      icon={<IoArrowBack />}
+                      onClick={handlePrevImage}
+                      style={{
+                        position: "absolute",
+                        left: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        opacity: 0.7,
+                      }}
+                    />
+                    <Button
+                      shape="circle"
+                      icon={<IoArrowForward />}
+                      onClick={handleNextImage}
+                      style={{
+                        position: "absolute",
+                        right: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        opacity: 0.7,
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails row */}
+              {hasMultipleImages && productDetail.images.length > 1 && (
+                <Row gutter={[8, 8]} justify="center">
+                  {productDetail.images.map((image, index) => (
+                    <Col key={index}>
+                      <div
+                        onClick={() => handleThumbnailClick(index)}
+                        style={{
+                          width: 64,
+                          height: 64,
+                          border:
+                            index === currentImageIndex
+                              ? "2px solid #1890ff"
+                              : "1px solid #d9d9d9",
+                          borderRadius: 4,
+                          overflow: "hidden",
+                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          padding: 2,
+                        }}
+                      >
+                        <img
+                          src={`${IMAGE_URL}/${image}`}
+                          alt={`Thumbnail ${index + 1}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              )}
             </div>
           </Col>
 

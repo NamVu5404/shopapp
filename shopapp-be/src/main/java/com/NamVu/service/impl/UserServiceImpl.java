@@ -9,7 +9,7 @@ import com.NamVu.dto.request.user.UserUpdateRequest;
 import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.user.UserResponse;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.UserRepository;
 import com.NamVu.service.UserService;
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
         // Tồn tại user và ko là guest -> throw ex
         if (user.getIsGuest() == StatusConstant.USER) {
-            throw new CustomException(ErrorCode.USER_EXISTS);
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
 
         // Là guest, -> user
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('RU_USER') or authentication.name == #request.username")
     public UserResponse update(String id, UserUpdateRequest request) {
         User currentUser = userRepository.findByIdAndIsActive(id, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         User updatedUser = userConverter.toEntity(currentUser, request);
 
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
     public void delete(List<String> ids) {
         List<User> users = ids.stream()
                 .map(id -> userRepository.findById(id)
-                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)))
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)))
                 .collect(Collectors.toList());
 
         users.forEach(user -> user.setIsActive(StatusConstant.INACTIVE));
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return userConverter.toResponse(user);
     }
@@ -140,6 +140,6 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasAuthority('RU_USER')")
     public UserResponse getById(String id) {
         return userConverter.toResponse(
-                userRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)));
+                userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 }

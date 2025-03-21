@@ -1,7 +1,7 @@
 package com.NamVu.service.impl;
 
-import com.NamVu.clients.facebook.FacebookAuthClient;
-import com.NamVu.clients.facebook.FacebookUserClient;
+import com.NamVu.httpclient.facebook.FacebookAuthClient;
+import com.NamVu.httpclient.facebook.FacebookUserClient;
 import com.NamVu.dto.request.auth.ExchangeTokenRequest;
 import com.NamVu.dto.response.auth.AuthenticationResponse;
 import com.NamVu.dto.response.auth.ExchangeTokenResponse;
@@ -14,12 +14,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service("facebook")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class FacebookAuthenticationServiceImpl implements OutboundAuthenticationService {
 
     FacebookAuthClient facebookAuthClient;
@@ -49,6 +51,7 @@ public class FacebookAuthenticationServiceImpl implements OutboundAuthentication
 
         // Get user info
         OutboundUserResponse userInfo = getUserInfo(response);
+//        log.info("user info: {}", userInfo);
 
         // Onboard user
         User user = outboundUserService.onboardUser(userInfo);

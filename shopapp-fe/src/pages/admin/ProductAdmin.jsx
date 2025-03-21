@@ -17,6 +17,7 @@ import {
   Form,
   Input,
   InputNumber,
+  message,
   Modal,
   Pagination,
   Rate,
@@ -27,29 +28,60 @@ import {
   Tag,
   Tooltip,
   Typography,
+  Upload,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { addDiscountProduct, getAllDiscount } from "../../api/discount";
-import { createProduct, searchProduct } from "../../api/product";
+import {
+  createProduct,
+  searchProduct,
+  uploadProductImages,
+} from "../../api/product";
 import ProductSeachForm from "../../components/ProductSeachForm";
 import { useCategories } from "../../context/CategoryContext";
 import { useSuppliers } from "../../context/SupplierContext";
 import { hasPermission } from "../../services/authService";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Panel } = Collapse;
 const { Text } = Typography;
 
-// Improved ProductForm component
+// Improved ProductForm component with image upload
 const ProductFormImproved = ({ onSubmit }) => {
   const [form] = Form.useForm();
   const categories = useCategories();
   const suppliers = useSuppliers();
+  const [fileList, setFileList] = useState([]);
 
   const onFinish = (values) => {
-    onSubmit(values);
+    // Add fileList to values
+    const formData = {
+      ...values,
+      imageFiles: fileList,
+    };
+    onSubmit(formData);
     form.resetFields();
+    setFileList([]);
+  };
+
+  const uploadProps = {
+    beforeUpload: (file) => {
+      // Validate file type
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error("Bạn chỉ có thể tải lên file hình ảnh!");
+        return Upload.LIST_IGNORE;
+      }
+      return false; // Prevent auto upload
+    },
+    onChange: ({ fileList: newFileList }) => {
+      setFileList(newFileList);
+    },
+    fileList,
+    multiple: true,
+    listType: "picture-card",
   };
 
   return (
@@ -127,6 +159,18 @@ const ProductFormImproved = ({ onSubmit }) => {
           placeholder="Nhập mô tả sản phẩm"
           prefix={<FileTextOutlined />}
         />
+      </Form.Item>
+
+      <Form.Item label="Hình ảnh sản phẩm">
+        <Upload {...uploadProps}>
+          <div>
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Tải lên</div>
+          </div>
+        </Upload>
+        <div style={{ marginTop: 8 }}>
+          <Text type="secondary">Có thể tải lên nhiều hình ảnh cùng lúc</Text>
+        </div>
       </Form.Item>
 
       <Form.Item>
@@ -355,7 +399,24 @@ const ProductAdmin = () => {
 
   const handleCreateProduct = async (values) => {
     try {
-      await createProduct(values);
+      // Extract image files from the form values
+      const { imageFiles, ...productData } = values;
+
+      // Create the product
+      const product = await createProduct(productData);
+
+      // Upload images if there are any
+      if (imageFiles && imageFiles.length > 0) {
+        // Create FormData for image upload
+        const formData = new FormData();
+        imageFiles.forEach((file) => {
+          formData.append("files", file.originFileObj);
+        });
+
+        // Upload images
+        await uploadProductImages(product.id, formData);
+      }
+
       setIsModalVisible(false);
 
       // Refresh product list after creating new product
@@ -409,12 +470,16 @@ const ProductAdmin = () => {
       render: (_, record) => (
         <Space>
           <img
-            src="/logo/wallpaperflare.com_wallpaper.jpg"
+            src={
+              record.images.length !== 0
+                ? `${IMAGE_URL}/${record.images[0]}`
+                : DEFAULT_IMAGE
+            }
             alt={record.productName}
             style={{
               width: 50,
               height: 50,
-              objectFit: "cover",
+              objectFit: "contain",
               borderRadius: 4,
             }}
           />
@@ -569,20 +634,22 @@ const ProductAdmin = () => {
           alignItems: "center",
         }}
       >
-        {hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"]) && <Space>
-          <Text strong>
-            Tổng số: {productData?.totalElements || 0} sản phẩm
-          </Text>
-          <Button
-            type="primary"
-            danger
-            disabled={!selectedProducts.length}
-            onClick={showDiscountModal}
-            icon={<TagOutlined />}
-          >
-            Thêm mã giảm giá ({selectedProducts.length})
-          </Button>
-        </Space>}
+        {hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"]) && (
+          <Space>
+            <Text strong>
+              Tổng số: {productData?.totalElements || 0} sản phẩm
+            </Text>
+            <Button
+              type="primary"
+              danger
+              disabled={!selectedProducts.length}
+              onClick={showDiscountModal}
+              icon={<TagOutlined />}
+            >
+              Thêm mã giảm giá ({selectedProducts.length})
+            </Button>
+          </Space>
+        )}
         <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
           Thêm mới
         </Button>

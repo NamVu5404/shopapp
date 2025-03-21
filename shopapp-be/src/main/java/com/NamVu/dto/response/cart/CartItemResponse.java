@@ -3,6 +3,8 @@ package com.NamVu.dto.response.cart;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,6 +14,7 @@ public class CartItemResponse {
     String productId;
     String productCode;
     String productName;
+    List<String> images;
     long price;
     Long discountPrice;
     int quantity;

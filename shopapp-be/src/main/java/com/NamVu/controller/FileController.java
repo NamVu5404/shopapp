@@ -1,53 +1,34 @@
 package com.NamVu.controller;
 
-import com.NamVu.dto.request.address.AddressCreateRequest;
-import com.NamVu.dto.request.address.AddressUpdateRequest;
-import com.NamVu.dto.response.ApiResponse;
-import com.NamVu.dto.response.address.AddressResponse;
-import com.NamVu.service.AddressService;
-import jakarta.validation.Valid;
+import com.NamVu.service.FileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.net.MalformedURLException;
 
 @RestController
-@RequestMapping("/api/v1/addresses")
+@RequestMapping("/uploads")
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AddressController {
-    AddressService addressService;
+public class FileController {
+    FileService fileService;
 
-    @GetMapping
-    public ApiResponse<List<AddressResponse>> getAllByUserId(@RequestParam("userId") String userId) {
-        return ApiResponse.<List<AddressResponse>>builder()
-                .result(addressService.getAllByUserId(userId))
-                .build();
-    }
+    @GetMapping("/{fileName}")
+    public ResponseEntity<Resource> getFile(@PathVariable String fileName) throws MalformedURLException {
+        Resource resource = fileService.loadFileAsResource(fileName);
 
-    @PostMapping
-    public ApiResponse<AddressResponse> create(@RequestBody @Valid AddressCreateRequest request) {
-        return ApiResponse.<AddressResponse>builder()
-                .result(addressService.create(request))
-                .build();
-    }
-
-    @PostMapping("/{addressId}")
-    public ApiResponse<AddressResponse> update(@PathVariable String addressId,
-                                               @RequestBody @Valid AddressUpdateRequest request) {
-        return ApiResponse.<AddressResponse>builder()
-                .result(addressService.update(addressId, request))
-                .build();
-    }
-
-    @DeleteMapping("/{addressId}")
-    public ApiResponse<Void> delete(@PathVariable String addressId) {
-        addressService.delete(addressId);
-
-        return ApiResponse.<Void>builder()
-                .message("Delete successfully")
-                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
     }
 }

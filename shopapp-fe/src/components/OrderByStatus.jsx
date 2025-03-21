@@ -7,7 +7,6 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import {
-  Avatar,
   Badge,
   Button,
   Card,
@@ -22,6 +21,7 @@ import {
 } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../api/auth";
 import { countTotalPendingOrders } from "../api/order";
 import MyButton from "./MyButton";
 
@@ -150,11 +150,19 @@ const OrderByStatus = ({
                     <React.Fragment key={index}>
                       {index > 0 && <Divider style={{ margin: "8px 0" }} />}
                       <Space align="start" style={{ width: "100%" }}>
-                        <Avatar
-                          shape="square"
-                          size={70}
-                          src="/logo/wallpaperflare.com_wallpaper.jpg"
+                        <img
+                          src={
+                            detail.images.length !== 0
+                              ? `${IMAGE_URL}/${detail.images[0]}`
+                              : DEFAULT_IMAGE
+                          }
                           alt={detail.productName}
+                          style={{
+                            width: 80,
+                            height: 80,
+                            objectFit: "contain",
+                            borderRadius: 4,
+                          }}
                         />
                         <Space
                           direction="vertical"
@@ -326,9 +334,11 @@ const OrderByStatus = ({
         }}
       >
         <Text strong>Tổng số: {data?.totalElements || 0} đơn hàng</Text>
-        {isAdminView && <Link to={"/admin/orders"}>
-          <MyButton icon={<SearchOutlined />}>Tìm kiếm</MyButton>
-        </Link>}
+        {isAdminView && (
+          <Link to={"/admin/orders"}>
+            <MyButton icon={<SearchOutlined />}>Tìm kiếm</MyButton>
+          </Link>
+        )}
       </div>
 
       {data ? (

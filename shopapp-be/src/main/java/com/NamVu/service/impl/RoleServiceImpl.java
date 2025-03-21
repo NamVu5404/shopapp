@@ -4,7 +4,7 @@ import com.NamVu.converter.RoleConverter;
 import com.NamVu.dto.request.role.RoleRequest;
 import com.NamVu.dto.response.role.RoleResponse;
 import com.NamVu.entity.Role;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.RoleRepository;
 import com.NamVu.service.RoleService;
@@ -40,9 +40,9 @@ public class RoleServiceImpl implements RoleService {
         String id = request.getId();
 
         if (id == null && roleRepository.existsByCode(request.getCode())) {
-            throw new CustomException(ErrorCode.ROLE_EXISTS);
+            throw new AppException(ErrorCode.ROLE_EXISTED);
         } else if (id != null && !roleRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.ROLE_NOT_EXISTS);
+            throw new AppException(ErrorCode.ROLE_NOT_EXISTED);
         }
 
         Role role = roleConverter.toEntity(request);
@@ -56,12 +56,12 @@ public class RoleServiceImpl implements RoleService {
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(List<String> codes) {
         if (roleRepository.existsByCodeInAndUsersIsNotEmpty(codes)) {
-            throw new CustomException(ErrorCode.INVALID_DELETE_ROLE);
+            throw new AppException(ErrorCode.INVALID_DELETE_ROLE);
         }
 
         codes.forEach(code -> {
             if (!roleRepository.existsByCode(code)) {
-                throw new CustomException(ErrorCode.ROLE_NOT_EXISTS);
+                throw new AppException(ErrorCode.ROLE_NOT_EXISTED);
             }
         });
 

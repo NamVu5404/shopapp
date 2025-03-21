@@ -7,7 +7,7 @@ import com.NamVu.dto.response.product.ProductResponse;
 import com.NamVu.entity.Product;
 import com.NamVu.entity.User;
 import com.NamVu.entity.WishList;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.ProductRepository;
 import com.NamVu.repository.UserRepository;
@@ -60,10 +60,10 @@ public class WishListServiceImpl implements WishListService {
         }
 
         User user = userRepository.findByIdAndIsActive(userId, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         wishListRepository.save(WishList.builder()
                 .user(user)

@@ -36,6 +36,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { getOneByOrderId, updateOrderStatus } from "../api/order";
 import { createReview } from "../api/review";
 import { getToken } from "../services/localStorageService";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../api/auth";
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -269,11 +270,19 @@ export default function OrderDetailComponent({
         render: (_, record) => (
           <Space direction="vertical" size={0}>
             <Space>
-              <Avatar
-                shape="square"
-                size={48}
-                src="/logo/wallpaperflare.com_wallpaper.jpg"
+              <img
+                src={
+                  record.images.length !== 0
+                    ? `${IMAGE_URL}/${record.images[0]}`
+                    : DEFAULT_IMAGE
+                }
                 alt={record.productName}
+                style={{
+                  width: 50,
+                  height: 50,
+                  objectFit: "contain",
+                  borderRadius: 4,
+                }}
               />
               <Space direction="vertical" size={0}>
                 {isAdminPath ? (

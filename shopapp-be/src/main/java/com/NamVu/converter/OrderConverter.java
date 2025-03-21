@@ -5,12 +5,9 @@ import com.NamVu.dto.request.order.OrderDetailRequest;
 import com.NamVu.dto.request.order.OrderRequest;
 import com.NamVu.dto.response.order.OrderDetailResponse;
 import com.NamVu.dto.response.order.OrderResponse;
-import com.NamVu.entity.Address;
-import com.NamVu.entity.Order;
-import com.NamVu.entity.OrderDetail;
-import com.NamVu.entity.Product;
+import com.NamVu.entity.*;
 import com.NamVu.enums.OrderStatus;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.AddressRepository;
 import com.NamVu.repository.ProductRepository;
@@ -46,10 +43,10 @@ public class OrderConverter {
         order.setStatus(OrderStatus.PENDING);
 
         order.setUser(userRepository.findByIdAndIsActive(request.getUserId(), StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
 
         order.setAddress(addressRepository.findById(request.getAddressId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_EXISTS)));
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED)));
 
         return order;
     }
@@ -58,7 +55,7 @@ public class OrderConverter {
         return details.stream()
                 .map(detailRequest -> {
                     Product product = productRepository.findById(detailRequest.getProductId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
                     return OrderDetail.builder()
                             .order(order)
@@ -87,6 +84,9 @@ public class OrderConverter {
                                 .productName(orderDetail.getProduct().getName())
                                 .quantity(orderDetail.getQuantity())
                                 .priceAtPurchase(orderDetail.getPriceAtPurchase())
+                                .images(orderDetail.getProduct().getImages().stream()
+                                        .map(ProductImage::getImagePath)
+                                        .toList())
                                 .isReviewed(reviewRepository.existsByUserIdAndOrderIdAndProductId(
                                         order.getUser().getId(),
                                         order.getId(),

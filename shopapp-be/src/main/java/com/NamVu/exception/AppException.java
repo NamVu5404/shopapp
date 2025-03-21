@@ -10,6 +10,6 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CustomException extends RuntimeException {
+public class AppException extends RuntimeException {
     ErrorCode errorCode;
 }

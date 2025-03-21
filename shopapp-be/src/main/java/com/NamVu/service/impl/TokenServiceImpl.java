@@ -2,7 +2,7 @@ package com.NamVu.service.impl;
 
 import com.NamVu.entity.Role;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.InvalidatedTokenRepository;
 import com.NamVu.service.TokenService;
@@ -88,10 +88,10 @@ public class TokenServiceImpl implements TokenService {
         boolean verified = signedJWT.verify(verifier);
 
         if (!(verified && expirationDate.after(new Date())))
-            throw new CustomException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if (invalidatedTokenRepository.existsById(jti))
-            throw new CustomException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         return signedJWT;
     }

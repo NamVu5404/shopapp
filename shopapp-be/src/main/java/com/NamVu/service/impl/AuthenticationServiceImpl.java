@@ -10,7 +10,7 @@ import com.NamVu.dto.response.auth.IntrospectResponse;
 import com.NamVu.dto.response.auth.RefreshResponse;
 import com.NamVu.entity.InvalidatedToken;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.InvalidatedTokenRepository;
 import com.NamVu.repository.UserRepository;
@@ -49,12 +49,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         User user = userRepository.findByUsernameAndIsActive(request.getUsername(), StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated)
-            throw new CustomException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         String token = tokenService.generateToken(user);
 
@@ -69,7 +69,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         try {
             tokenService.verifyToken(request.getToken(), false);
-        } catch (CustomException e) {
+        } catch (AppException e) {
             isValid = false;
         }
 
@@ -93,7 +93,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .build();
 
             invalidatedTokenRepository.save(invalidatedToken);
-        } catch (CustomException e) {
+        } catch (AppException e) {
             log.info("Token is invalid");
         }
     }
@@ -118,7 +118,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String username = signedJWT.getJWTClaimsSet().getSubject();
 
         User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHENTICATED));
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         return RefreshResponse.builder()
                 .token(tokenService.generateToken(user))

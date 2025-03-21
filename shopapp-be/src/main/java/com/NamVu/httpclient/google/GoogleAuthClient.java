@@ -1,4 +1,4 @@
-package com.NamVu.clients.google;
+package com.NamVu.httpclient.google;
 
 import com.NamVu.dto.request.auth.ExchangeTokenRequest;
 import com.NamVu.dto.response.auth.ExchangeTokenResponse;

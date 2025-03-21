@@ -5,7 +5,7 @@ import com.NamVu.dto.request.category.CategoryUpdateRequest;
 import com.NamVu.dto.response.category.CategoryResponse;
 import com.NamVu.entity.Category;
 import com.NamVu.entity.Supplier;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.SupplierRepository;
 import org.modelmapper.ModelMapper;
@@ -60,7 +60,7 @@ public class CategoryConverter {
         return supplierCodes
                 .stream()
                 .map(id -> supplierRepository.findByCode(id)
-                        .orElseThrow(() -> new CustomException(ErrorCode.SUPPLIER_NOT_EXISTS)))
+                        .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXISTED)))
                 .collect(Collectors.toList());
     }
 }

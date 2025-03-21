@@ -2,21 +2,11 @@ import { Badge, Layout, Menu, theme } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { useEffect, useState } from "react";
 import { BiCategory } from "react-icons/bi";
-import {
-  FaBoxOpen,
-  FaEnvelopeOpenText,
-  FaShoppingCart,
-  FaUsers,
-  FaTachometerAlt,
-  FaBars,
-} from "react-icons/fa";
+import { FaBoxOpen, FaEnvelopeOpenText, FaUsers } from "react-icons/fa";
 import {
   MdOutlineDiscount,
   MdOutlineHomeWork,
   MdOutlineInventory2,
-  MdOutlineNotifications,
-  MdOutlineMessage,
-  MdOutlineSearch,
 } from "react-icons/md";
 import { Outlet, useNavigate } from "react-router-dom";
 import { getUnreadCount } from "../api/contact";
@@ -81,19 +71,16 @@ const AdminLayout = () => {
   }, []);
 
   const items = [
-    getItem("Dashboard", "/admin", <FaTachometerAlt />),
-    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"])
+    ...[getItem("Báo cáo & Thống kê", "/admin", <FaEnvelopeOpenText />)],
+    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
       ? [
           getItem(
             "Quản lý đơn hàng",
             "/admin/orders/status/PENDING",
-            <FaShoppingCart />,
+            <MdOutlineInventory2 />,
             pendingOrders
           ),
         ]
-      : []),
-    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_CUSTOMER_SERVICE"])
-      ? [getItem("Quản lý tài khoản", "/admin/users", <FaUsers />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY", "ROLE_STAFF_SALE"])
       ? [getItem("Quản lý sản phẩm", "/admin/products", <FaBoxOpen />)]
@@ -107,6 +94,9 @@ const AdminLayout = () => {
             pendingReceipts
           ),
         ]
+      : []),
+    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_CUSTOMER_SERVICE"])
+      ? [getItem("Quản lý tài khoản", "/admin/users", <FaUsers />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
       ? [getItem("Quản lý danh mục", "/admin/categories", <BiCategory />)]
@@ -139,20 +129,11 @@ const AdminLayout = () => {
           ),
         ]
       : []),
-    ...(hasPermission(["ROLE_ADMIN"])
-      ? [
-          getItem(
-            "Báo cáo & Thống kê",
-            "/admin/statistics",
-            <FaEnvelopeOpenText />,
-          ),
-        ]
-      : []),
   ];
 
   return (
     <div className="nice-admin-layout">
-      <AdminHeader 
+      <AdminHeader
         collapsed={collapsed}
         toggleSidebar={() => setCollapsed(!collapsed)}
       />
@@ -164,24 +145,8 @@ const AdminLayout = () => {
           onCollapse={(value) => setCollapsed(value)}
           className="nice-admin-sidebar"
           trigger={null}
-          width={280}
+          width={200}
         >
-          <div className="sidebar-header">
-            <div className="d-flex justify-content-between align-items-center">
-              {!collapsed && (
-                <a href="/admin" className="logo d-flex align-items-center">
-                  <img src="/logo/logo.webp" alt="Logo" />
-                  <span className="d-none d-lg-block">Admin</span>
-                </a>
-              )}
-              {collapsed && (
-                <a href="/admin" className="logo-small d-flex justify-content-center">
-                  <img src="/logo/logo.webp" alt="Logo" />
-                </a>
-              )}
-            </div>
-          </div>
-
           <Menu
             theme="light"
             mode="inline"
@@ -260,9 +225,9 @@ const AdminLayout = () => {
           border-left: 3px solid #4154f1;
         }
         .nice-admin-content-container {
-          margin-left: ${collapsed ? '80px' : '280px'};
+          margin-left: ${collapsed ? "80px" : "220px"};
           transition: all 0.3s;
-          width: calc(100% - ${collapsed ? '80px' : '280px'});
+          width: calc(100% - ${collapsed ? "80px" : "220px"});
         }
         .nice-admin-content {
           padding: 20px;

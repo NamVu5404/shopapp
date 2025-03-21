@@ -4,7 +4,7 @@ import com.NamVu.converter.PermissionConverter;
 import com.NamVu.dto.request.permission.PermissionRequest;
 import com.NamVu.dto.response.permission.PermissionResponse;
 import com.NamVu.entity.Permission;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.PermissionRepository;
 import com.NamVu.service.PermissionService;
@@ -41,9 +41,9 @@ public class PermissionServiceImpl implements PermissionService {
         String id = request.getId();
 
         if (id == null && permissionRepository.existsByCode(request.getCode())) {
-            throw new CustomException(ErrorCode.PERMISSION_EXISTS);
+            throw new AppException(ErrorCode.PERMISSION_EXISTED);
         } else if (id != null && !permissionRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.PERMISSION_NOT_EXISTS);
+            throw new AppException(ErrorCode.PERMISSION_NOT_EXISTED);
         }
 
         Permission permission = permissionConverter.toEntity(request);
@@ -57,12 +57,12 @@ public class PermissionServiceImpl implements PermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(List<String> codes) {
         if (permissionRepository.existsByCodeInAndRolesIsNotEmpty(codes)) {
-            throw new CustomException(ErrorCode.INVALID_DELETE_PERMISSION);
+            throw new AppException(ErrorCode.INVALID_DELETE_PERMISSION);
         }
 
         codes.forEach(code -> {
             if (!permissionRepository.existsByCode(code)) {
-                throw new CustomException(ErrorCode.PERMISSION_NOT_EXISTS);
+                throw new AppException(ErrorCode.PERMISSION_NOT_EXISTED);
             }
         });
 

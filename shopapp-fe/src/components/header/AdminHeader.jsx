@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import { 
-  MdOutlineAdminPanelSettings, 
-  MdOutlineSearch, 
-  MdOutlineNotifications, 
-  MdOutlineMessage, 
-  MdOutlineMenu,
-  MdOutlineLogout,
-  MdOutlineAccountCircle,
-  MdOutlineSettings
-} from "react-icons/md";
+import { MdOutlineAdminPanelSettings, MdOutlineMenu } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { getMyInfo } from "../../api/user";
@@ -41,24 +32,18 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
   return (
     <header className="nice-admin-header">
       <div className="header-container">
+        <div className="sidebar-header">
+          <div className="d-flex justify-content-between align-items-center">
+            <a href="/admin" className="logo d-flex align-items-center">
+              <img src="/logo/logo.webp" alt="Logo" />
+            </a>
+          </div>
+        </div>
+
         <div className="header-toggle">
           <button className="toggle-sidebar-btn" onClick={toggleSidebar}>
             <MdOutlineMenu />
           </button>
-        </div>
-        
-        <div className="search-bar">
-          <form className="search-form d-flex align-items-center">
-            <input 
-              type="text" 
-              name="query" 
-              placeholder="Tìm kiếm" 
-              title="Nhập từ khóa tìm kiếm"
-            />
-            <button type="submit" title="Tìm kiếm">
-              <MdOutlineSearch />
-            </button>
-          </form>
         </div>
 
         <nav className="header-nav">
@@ -69,64 +54,21 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
                 <span>Trang chủ</span>
               </Link>
             </li>
-            
+
             <li className="nav-item dropdown">
-              <a className="nav-link notifications">
-                <MdOutlineNotifications />
-                <span className="badge">3</span>
-              </a>
-            </li>
-            
-            <li className="nav-item dropdown">
-              <a className="nav-link messages">
-                <MdOutlineMessage />
-                <span className="badge">4</span>
-              </a>
-            </li>
-            
-            <li className="nav-item dropdown">
-              <div 
+              <div
                 className="nav-link profile"
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
                 <span className="profile-name">{myInfo.fullName}</span>
-                <img 
-                  src={myInfo.avatar || "https://via.placeholder.com/150"} 
-                  alt="Profile" 
-                  className="rounded-circle"
-                />
               </div>
-              
+
               {showProfileMenu && (
                 <ul className="dropdown-menu profile-dropdown">
                   <li>
                     <h6 className="dropdown-header">
                       Xin chào {myInfo.fullName}
                     </h6>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link to="/admin/profile" className="dropdown-item">
-                      <MdOutlineAccountCircle className="dropdown-icon" />
-                      <span>Hồ sơ</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/admin/settings" className="dropdown-item">
-                      <MdOutlineSettings className="dropdown-icon" />
-                      <span>Cài đặt</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link to="/logout" className="dropdown-item">
-                      <MdOutlineLogout className="dropdown-icon" />
-                      <span>Đăng xuất</span>
-                    </Link>
                   </li>
                 </ul>
               )}

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -25,6 +26,7 @@ public class ProductResponse {
     double avgRating;
     int reviewCount;
     String discountName;
+    List<String> images;
     LocalDateTime createdDate;
     String createdBy;
     LocalDateTime modifiedDate;

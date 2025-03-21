@@ -7,7 +7,7 @@ import com.NamVu.dto.response.cart.CartResponse;
 import com.NamVu.entity.Cart;
 import com.NamVu.entity.CartItem;
 import com.NamVu.entity.Product;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.CartItemRepository;
 import com.NamVu.repository.CartRepository;
@@ -74,7 +74,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public void removeItem(String userId, String productId) {
         Cart cart = cartRepository.findByUser_Id(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
 
         cartItemRepository.deleteByCart_IdAndProduct_Id(cart.getId(), productId);
     }
@@ -84,7 +84,7 @@ public class CartServiceImpl implements CartService {
                 .orElseGet(() -> {
                     Cart newCart = Cart.builder()
                             .user(userRepository.findByIdAndIsActive(userId, StatusConstant.ACTIVE)
-                                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS)))
+                                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)))
                             .build();
 
                     return cartRepository.save(newCart);
@@ -101,10 +101,10 @@ public class CartServiceImpl implements CartService {
 
     private void createNewCartItem(Cart cart, CartItemRequest request) {
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         if (product.getInventoryQuantity() == 0)
-            throw new CustomException(ErrorCode.INVENTORY_NOT_ENOUGH);
+            throw new AppException(ErrorCode.INVENTORY_NOT_ENOUGH);
 
         CartItem newItem = CartItem.builder()
                 .cart(cart)

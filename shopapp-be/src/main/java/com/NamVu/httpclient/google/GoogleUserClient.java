@@ -1,4 +1,4 @@
-package com.NamVu.clients.google;
+package com.NamVu.httpclient.google;
 
 import com.NamVu.dto.response.user.OutboundUserResponse;
 import org.springframework.cloud.openfeign.FeignClient;

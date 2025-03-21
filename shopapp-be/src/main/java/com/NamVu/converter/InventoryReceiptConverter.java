@@ -7,7 +7,7 @@ import com.NamVu.dto.response.inventoryReceipt.ReceiptDetailByProductResponse;
 import com.NamVu.entity.InventoryReceipt;
 import com.NamVu.entity.InventoryReceiptDetail;
 import com.NamVu.entity.Product;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
@@ -63,7 +63,7 @@ public class InventoryReceiptConverter {
         return details.stream()
                 .map(detailRequest -> {
                     Product product = productRepository.findById(detailRequest.getProductId())
-                            .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
                     return InventoryReceiptDetail.builder()
                             .receipt(receipt)

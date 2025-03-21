@@ -12,7 +12,7 @@ import com.NamVu.entity.OrderDetail;
 import com.NamVu.entity.Product;
 import com.NamVu.entity.User;
 import com.NamVu.enums.OrderStatus;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.OrderRepository;
 import com.NamVu.repository.ProductRepository;
@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getByIdAndEmail(String id, String email) {
         return orderConverter.toResponse(orderRepository
                 .findByIdAndUser_Username(id, email)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS)));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED)));
     }
 
     @Override
@@ -100,10 +100,10 @@ public class OrderServiceImpl implements OrderService {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User currentUser = userRepository.findByUsernameAndIsActive(currentUsername, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!userId.equals(currentUser.getId()) && !AuthUtils.hasPermission("RUD_ORDER")) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         //
         Page<Order> orders = orderRepository.findByStatusAndUser_Id(status, userId, pageable);
@@ -156,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
     @PreAuthorize("hasAuthority('RUD_ORDER')")
     public OrderResponse updateStatus(String orderId, OrderStatusRequest request) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
 
         switch (request.getStatus()) {
             case CANCELLED:
@@ -175,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
                 handleFailed(order);
                 break;
             default:
-                throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+                throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
 
         order.setStatus(request.getStatus());
@@ -190,7 +190,7 @@ public class OrderServiceImpl implements OrderService {
 
     private void handleCancel(Order order) {
         if (order.getStatus() != OrderStatus.PENDING) {
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
 
         updateInventoryQuantity(order.getOrderDetails(), true); // + inventory quantity
@@ -198,19 +198,19 @@ public class OrderServiceImpl implements OrderService {
 
     private void handleConfirm(Order order) {
         if (order.getStatus() != OrderStatus.PENDING) {
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
     }
 
     private void handleShipping(Order order) {
         if (order.getStatus() != OrderStatus.CONFIRMED) {
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
     }
 
     private void handleCompleted(Order order) {
         if (order.getStatus() != OrderStatus.SHIPPING) {
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
 
         updateSoldQuantity(order.getOrderDetails()); // + sold quantity
@@ -219,7 +219,7 @@ public class OrderServiceImpl implements OrderService {
 
     private void handleFailed(Order order) {
         if (order.getStatus() != OrderStatus.SHIPPING) {
-            throw new CustomException(ErrorCode.CAN_NOT_EDITABLE);
+            throw new AppException(ErrorCode.CAN_NOT_EDITABLE);
         }
 
         updateInventoryQuantity(order.getOrderDetails(), true); // + inventory quantity
@@ -233,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
                             (isAddition ? detail.getQuantity() : -detail.getQuantity()));
 
                     if (product.getInventoryQuantity() < 0) {
-                        throw new CustomException(ErrorCode.INVENTORY_NOT_ENOUGH);
+                        throw new AppException(ErrorCode.INVENTORY_NOT_ENOUGH);
                     }
                     return product;
                 })
@@ -272,13 +272,13 @@ public class OrderServiceImpl implements OrderService {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User currentUser = userRepository.findByUsernameAndIsActive(currentUsername, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
 
         if (!order.getUser().getId().equals(currentUser.getId()) && !AuthUtils.hasPermission("RUD_ORDER")) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         return order;

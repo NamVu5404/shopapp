@@ -6,6 +6,7 @@ import {
   HistoryOutlined,
   InfoCircleOutlined,
   LineChartOutlined,
+  PictureOutlined,
   ReloadOutlined,
   SaveOutlined,
   ShopOutlined,
@@ -33,16 +34,19 @@ import {
   Statistic,
   Tooltip,
   Typography,
+  Upload,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { IMAGE_URL } from "../../api/auth";
 import { getAllDiscount } from "../../api/discount";
 import {
   deleteProduct,
   getProductByCode,
   updateProduct,
+  updateProductImages,
 } from "../../api/product";
 import { revenueByProduct } from "../../api/report";
 import MyButton from "../../components/MyButton";
@@ -58,12 +62,15 @@ export default function ProductDetailAdmin() {
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const categories = useCategories();
   const suppliers = useSuppliers();
   const { code } = useParams();
   const navigate = useNavigate();
   const [discountData, setDiscountData] = useState(null);
   const [revenue, setRevenue] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
 
   useEffect(() => {
     const getProductDetail = async () => {
@@ -71,6 +78,18 @@ export default function ProductDetailAdmin() {
       try {
         const data = await getProductByCode(code);
         setProductDetail(data);
+
+        // Xử lý ảnh sản phẩm
+        if (data.images && data.images.length > 0) {
+          const images = data.images.map((img, index) => ({
+            uid: `existing-${index}`,
+            name: img,
+            status: "done",
+            url: `${IMAGE_URL}/${img}`,
+            path: img,
+          }));
+          setExistingImages(images);
+        }
       } catch (error) {
         message.error("Không thể tải thông tin sản phẩm");
       } finally {
@@ -122,6 +141,20 @@ export default function ProductDetailAdmin() {
             modifiedDate: dayjs(productDetail.modifiedDate),
           });
         }
+
+        // Reset file list và existing images
+        setFileList([]);
+        if (productDetail && productDetail.images) {
+          const images = productDetail.images.map((img, index) => ({
+            uid: `existing-${index}`,
+            name: img,
+            status: "done",
+            url: `${IMAGE_URL}/${img}`,
+            path: img,
+          }));
+          setExistingImages(images);
+        }
+
         message.info("Đã hủy thay đổi");
       },
     });
@@ -202,6 +235,105 @@ export default function ProductDetailAdmin() {
     setRevenue(data);
   };
 
+  // Xử lý upload ảnh
+  const handleImageChange = ({ fileList: newFileList }) => {
+    // Lọc ra những file mới upload lên (không phải existing images)
+    const newFiles = newFileList.filter(
+      (file) => !file.uid.startsWith("existing-")
+    );
+    setFileList(newFiles);
+  };
+
+  const handleRemoveExistingImage = (file) => {
+    setExistingImages((prev) => prev.filter((item) => item.uid !== file.uid));
+  };
+
+  const handleSaveImages = async () => {
+    if (!productDetail) return;
+
+    confirm({
+      title: "Xác nhận cập nhật ảnh",
+      icon: <ExclamationCircleOutlined />,
+      content: "Bạn có chắc chắn muốn cập nhật ảnh cho sản phẩm này?",
+      async onOk() {
+        setImageLoading(true);
+        try {
+          // Lấy danh sách đường dẫn ảnh cần giữ lại
+          const keepImages = existingImages.map((img) => img.path);
+          console.log(keepImages);
+
+          // Lấy danh sách file mới
+          const files = fileList.map((file) => file.originFileObj);
+
+          // Gọi API cập nhật ảnh
+          await updateProductImages(productDetail.id, keepImages, files);
+
+          // Reload product data
+          const updatedProduct = await getProductByCode(code);
+          setProductDetail(updatedProduct);
+
+          // Cập nhật lại danh sách ảnh
+          if (updatedProduct.images && updatedProduct.images.length > 0) {
+            const images = updatedProduct.images.map((img, index) => ({
+              uid: `existing-${index}`,
+              name: img,
+              status: "done",
+              url: `${IMAGE_URL}/${img}`,
+              path: img,
+            }));
+            setExistingImages(images);
+          } else {
+            setExistingImages([]);
+          }
+
+          // Reset file list
+          setFileList([]);
+        } catch (error) {
+          message.error(
+            "Cập nhật ảnh thất bại: " + (error.message || "Lỗi không xác định")
+          );
+        } finally {
+          setImageLoading(false);
+        }
+      },
+    });
+  };
+
+  const uploadProps = {
+    onRemove: (file) => {
+      if (file.uid.startsWith("existing-")) {
+        handleRemoveExistingImage(file);
+      } else {
+        const index = fileList.indexOf(file);
+        const newFileList = fileList.slice();
+        newFileList.splice(index, 1);
+        setFileList(newFileList);
+      }
+    },
+    beforeUpload: (file) => {
+      // Kiểm tra kiểu file là hình ảnh
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error(`${file.name} không phải là file hình ảnh!`);
+        return Upload.LIST_IGNORE;
+      }
+
+      // Thêm file vào fileList
+      setFileList((prev) => [
+        ...prev,
+        { ...file, status: "done", uid: file.uid, originFileObj: file },
+      ]);
+      return false;
+    },
+    fileList: [...existingImages, ...fileList],
+    listType: "picture-card",
+    onChange: handleImageChange,
+    showUploadList: {
+      showPreviewIcon: true,
+      showRemoveIcon: true,
+    },
+  };
+
   return (
     <>
       <Breadcrumb
@@ -279,7 +411,6 @@ export default function ProductDetailAdmin() {
                 )}
               </Space>
             }
-            // style={{ width: "100%", maxWidth: 800 }}
           >
             <Form form={form} layout="vertical" onFinish={onSubmit}>
               <Row gutter={[24, 0]}>
@@ -366,6 +497,33 @@ export default function ProductDetailAdmin() {
                   </Form.Item>
                 </Col>
               </Row>
+
+              <Card
+                size="small"
+                bordered
+                style={{ marginBottom: 24 }}
+                extra={
+                  <Button
+                    type="primary"
+                    icon={<SaveOutlined />}
+                    onClick={handleSaveImages}
+                    loading={imageLoading}
+                    disabled={
+                      fileList.length === 0 &&
+                      existingImages.length === productDetail?.images?.length
+                    }
+                  >
+                    Lưu ảnh
+                  </Button>
+                }
+              >
+                <Upload {...uploadProps}>
+                  <div>
+                    <PictureOutlined />
+                    <div style={{ marginTop: 8 }}>Tải ảnh lên</div>
+                  </div>
+                </Upload>
+              </Card>
 
               <Divider orientation="left">
                 <Space>

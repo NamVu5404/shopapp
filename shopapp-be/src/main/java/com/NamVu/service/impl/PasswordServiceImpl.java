@@ -3,7 +3,7 @@ package com.NamVu.service.impl;
 import com.NamVu.constant.StatusConstant;
 import com.NamVu.dto.request.password.ChangePasswordRequest;
 import com.NamVu.entity.User;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.UserRepository;
 import com.NamVu.service.PasswordService;
@@ -33,10 +33,10 @@ public class PasswordServiceImpl implements PasswordService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.OLD_PASSWORD_INCORRECT);
+            throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -49,10 +49,10 @@ public class PasswordServiceImpl implements PasswordService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         User user = userRepository.findByUsernameAndIsActive(username, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (StringUtils.hasText(user.getPassword()))
-            throw new CustomException(ErrorCode.PASSWORD_EXISTS);
+            throw new AppException(ErrorCode.PASSWORD_EXISTED);
 
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
@@ -63,7 +63,7 @@ public class PasswordServiceImpl implements PasswordService {
     @PreAuthorize("hasRole('ADMIN')")
     public void resetPassword(String id) {
         User user = userRepository.findByIdAndIsActive(id, StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         user.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD));
         userRepository.save(user);

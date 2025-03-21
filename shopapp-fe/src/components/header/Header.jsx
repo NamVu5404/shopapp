@@ -296,7 +296,7 @@ export default function Header() {
             <div className="login">
               <UserOutlined
                 style={{
-                  fontSize: "24px",
+                  fontSize: "22px",
                   marginRight: "5px",
                 }}
               />

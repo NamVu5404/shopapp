@@ -28,8 +28,8 @@ public class GlobalExceptionHandler {
 //                .body(apiResponse);
 //    }
 
-    @ExceptionHandler(value = CustomException.class)
-    public ResponseEntity<ApiResponse<?>> customExceptionHandler(CustomException e) {
+    @ExceptionHandler(value = AppException.class)
+    public ResponseEntity<ApiResponse<?>> customExceptionHandler(AppException e) {
         ErrorCode errorCode = e.getErrorCode();
 
         ApiResponse<?> apiResponse = ApiResponse.builder()

@@ -9,7 +9,7 @@ import com.NamVu.entity.Product;
 import com.NamVu.entity.Review;
 import com.NamVu.entity.User;
 import com.NamVu.enums.OrderStatus;
-import com.NamVu.exception.CustomException;
+import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.*;
 import com.NamVu.service.ReviewService;
@@ -71,7 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(String id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_EXISTED));
 
         updateProductRatingAndPoint(review.getProduct().getId(), review.getRating(), false);
         review.setIsActive(StatusConstant.INACTIVE);
@@ -80,14 +80,14 @@ public class ReviewServiceImpl implements ReviewService {
 
     private Order validateOrderAndUser(ReviewRequest request) {
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
 
         if (!order.getUser().getId().equals(request.getUserId())) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         if (order.getStatus() != OrderStatus.COMPLETED) {
-            throw new CustomException(ErrorCode.CAN_NOT_REVIEW);
+            throw new AppException(ErrorCode.CAN_NOT_REVIEW);
         }
 
         return order;
@@ -97,22 +97,22 @@ public class ReviewServiceImpl implements ReviewService {
         boolean productInOrder = orderDetailRepository
                 .existsByOrderIdAndProductId(request.getOrderId(), request.getProductId());
         if (!productInOrder) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_IN_ORDER);
+            throw new AppException(ErrorCode.PRODUCT_NOT_IN_ORDER);
         }
     }
 
     private void validateReviewNotExists(ReviewRequest request) {
         if (reviewRepository.existsByUserIdAndOrderIdAndProductId(
                 request.getUserId(), request.getOrderId(), request.getProductId())) {
-            throw new CustomException(ErrorCode.ALREADY_REVIEWED);
+            throw new AppException(ErrorCode.ALREADY_REVIEWED);
         }
     }
 
     private Review createReviewFromRequest(ReviewRequest request, Order order) {
         User user = userRepository.findByIdAndIsActive(request.getUserId(), StatusConstant.ACTIVE)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         return Review.builder()
                 .user(user)
@@ -131,7 +131,7 @@ public class ReviewServiceImpl implements ReviewService {
      */
     private void updateProductRatingAndPoint(String productId, int newRating, boolean isAdd) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         // Cập nhật avgRating
         int reviewCount = product.getReviewCount();
