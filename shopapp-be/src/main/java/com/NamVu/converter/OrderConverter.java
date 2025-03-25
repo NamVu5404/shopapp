@@ -6,7 +6,6 @@ import com.NamVu.dto.request.order.OrderRequest;
 import com.NamVu.dto.response.order.OrderDetailResponse;
 import com.NamVu.dto.response.order.OrderResponse;
 import com.NamVu.entity.*;
-import com.NamVu.enums.OrderStatus;
 import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.AddressRepository;
@@ -40,13 +39,13 @@ public class OrderConverter {
     public Order toEntity(OrderRequest request) {
         Order order = modelMapper.map(request, Order.class);
 
-        order.setStatus(OrderStatus.PENDING);
-
         order.setUser(userRepository.findByIdAndIsActive(request.getUserId(), StatusConstant.ACTIVE)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
 
-        order.setAddress(addressRepository.findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED)));
+        if (request.getAddressId() != null) {
+            order.setAddress(addressRepository.findById(request.getAddressId())
+                    .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED)));
+        }
 
         return order;
     }
@@ -72,9 +71,15 @@ public class OrderConverter {
 
         response.setUserId(order.getUser().getId());
         response.setUsername(order.getUser().getUsername());
-        response.setFullName(order.getAddress().getFullName());
-        response.setPhone(order.getAddress().getPhone());
-        response.setAddress(buildAddress(order.getAddress()));
+
+        if (order.getAddress() != null) {
+            response.setFullName(order.getAddress().getFullName());
+            response.setPhone(order.getAddress().getPhone());
+            response.setAddress(buildAddress(order.getAddress()));
+        } else {
+            response.setFullName(order.getUser().getUsername());
+            response.setPhone(order.getUser().getPhone());
+        }
 
         List<OrderDetailResponse> details = order.getOrderDetails().stream()
                 .map(orderDetail ->

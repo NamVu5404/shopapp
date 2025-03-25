@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryResponse {
-    String id;
     String code;
     String name;
     List<SupplierResponse> suppliers;

@@ -5,7 +5,7 @@ import { API } from "./auth";
 export const setPassword = async (body) => {
   try {
     const response = await fetch(`${API}/password/set`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getToken()}`,
@@ -34,7 +34,7 @@ export const setPassword = async (body) => {
 export const changePassword = async (body) => {
   try {
     const response = await fetch(`${API}/password/change`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${getToken()}`,
@@ -62,7 +62,7 @@ export const changePassword = async (body) => {
 export const resetPassword = async (id) => {
   try {
     const response = await fetch(`${API}/password/reset/${id}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },

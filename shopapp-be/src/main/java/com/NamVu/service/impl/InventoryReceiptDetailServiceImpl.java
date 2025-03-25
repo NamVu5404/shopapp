@@ -9,7 +9,6 @@ import com.NamVu.service.InventoryReceiptDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InventoryReceiptDetailServiceImpl implements InventoryReceiptDetailService {
     InventoryReceiptDetailRepository receiptDetailRepository;
-    ModelMapper modelMapper;
     InventoryReceiptConverter converter;
 
     @Override

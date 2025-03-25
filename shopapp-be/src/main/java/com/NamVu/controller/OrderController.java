@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,15 @@ public class OrderController {
     @PostMapping
     public ApiResponse<OrderResponse> create(@RequestBody @Valid OrderRequest request) {
         return ApiResponse.<OrderResponse>builder()
-                .result(orderService.create(request))
+                .result(orderService.create(request, OrderStatus.PENDING))
+                .build();
+    }
+
+    @PostMapping("/in-store")
+    @PreAuthorize("hasAuthority('RUD_ORDER')")
+    public ApiResponse<OrderResponse> createInStoreOrder(@RequestBody @Valid OrderRequest request) {
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.create(request, OrderStatus.COMPLETED))
                 .build();
     }
 

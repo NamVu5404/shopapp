@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import ScrollRestoration from "../components/ScrollRestoration";
 import AdminLayout from "../layouts/AdminLayout";
 import MainLayout from "../layouts/MainLayout";
 import CategoryAdmin from "../pages/admin/CategoryAdmin";
@@ -9,6 +10,7 @@ import InventoryReceiptDetailAdmin from "../pages/admin/InventoryReceiptDetailAd
 import InventorySearchAdmin from "../pages/admin/InventorySearchAdmin";
 import OrderAdmin from "../pages/admin/OrderAdmin";
 import OrderByUser from "../pages/admin/OrderByUser";
+import OrderCreationAdmin from "../pages/admin/OrderCreationAdmin";
 import OrderDetailAdmin from "../pages/admin/OrderDetailAdmin";
 import OrderSearchAdmin from "../pages/admin/OrderSearchAdmin";
 import ProductAdmin from "../pages/admin/ProductAdmin";
@@ -41,6 +43,8 @@ import PrivateRoute from "./PrivateRoutes";
 const AppRoutes = () => {
   return (
     <Router>
+      <ScrollRestoration />
+
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
@@ -89,6 +93,15 @@ const AppRoutes = () => {
             path="orders"
             element={
               <PrivateRoute
+                element={<OrderCreationAdmin />}
+                requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_SALE"]}
+              />
+            }
+          />
+          <Route
+            path="orders/search"
+            element={
+              <PrivateRoute
                 element={<OrderSearchAdmin />}
                 requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_SALE"]}
               />
@@ -108,6 +121,15 @@ const AppRoutes = () => {
             element={
               <PrivateRoute
                 element={<OrderDetailAdmin />}
+                requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_SALE"]}
+              />
+            }
+          />
+          <Route
+            path="orders/order-success"
+            element={
+              <PrivateRoute
+                element={<OrderSuccess />}
                 requiredRoles={["ROLE_ADMIN", "ROLE_STAFF_SALE"]}
               />
             }
@@ -175,7 +197,7 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="inventory-receipts/create"
+            path="inventory-receipts"
             element={
               <PrivateRoute
                 element={<InventoryReceiptDetailAdmin />}
@@ -193,7 +215,7 @@ const AppRoutes = () => {
             }
           />
           <Route
-            path="inventory-receipts"
+            path="inventory-receipts/search"
             element={
               <PrivateRoute
                 element={<InventorySearchAdmin />}

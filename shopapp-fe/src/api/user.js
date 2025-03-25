@@ -64,7 +64,7 @@ export const createGuest = async (data) => {
 export const updateUser = async (data, id) => {
   try {
     const response = await fetch(`${API}/users/${id}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",

@@ -216,7 +216,11 @@ export default function Header() {
         <div className="header-top">
           <Link to={"/"} className="secondary-link">
             <div className="logo">
-              <img src="/logo/logo.webp" alt="logo" />
+              <img
+                src="/logo/namvu-logo.svg"
+                alt="logo"
+                style={{ height: 80, margin: "10px -30px 0 -5px" }}
+              />
             </div>
           </Link>
 

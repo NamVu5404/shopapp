@@ -26,6 +26,7 @@ import {
   getInventoryReceipts,
 } from "../../api/inventoryReceipt";
 import MyButton from "../../components/MyButton";
+import InventoryImport from "../../components/InventoryImport";
 
 const { Text } = Typography;
 
@@ -135,13 +136,18 @@ const InventoryReceiptByStatus = ({
       >
         <Text strong>Tổng số: {data?.totalElements || 0} phiếu nhập</Text>
         <div>
-          <Link to={"/admin/inventory-receipts"}>
+          <Link to={"/admin/inventory-receipts/search"}>
             <MyButton style={{ marginRight: 16 }} icon={<SearchOutlined />}>
               Tìm kiếm
             </MyButton>
           </Link>
-          <Link to={"/admin/inventory-receipts/create"}>
-            <Button type="primary" icon={<PlusOutlined />}>
+          <InventoryImport />
+          <Link to={"/admin/inventory-receipts"}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              style={{ marginLeft: 16 }}
+            >
               Tạo phiếu nhập kho
             </Button>
           </Link>

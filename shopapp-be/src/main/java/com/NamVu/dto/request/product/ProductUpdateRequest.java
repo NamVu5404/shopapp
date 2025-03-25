@@ -12,11 +12,11 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUpdateRequest {
-    @NotBlank(message = "CATEGORY_ID_NOT_BLANK")
-    String categoryId;
+    @NotBlank(message = "CATEGORY_NOT_BLANK")
+    String categoryCode;
 
-    @NotBlank(message = "SUPPLIER_ID_NOT_BLANK")
-    String supplierId;
+    @NotBlank(message = "SUPPLIER_NOT_BLANK")
+    String supplierCode;
 
     @NotBlank(message = "NAME_NOT_BLANK")
     String name;

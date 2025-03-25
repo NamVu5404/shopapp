@@ -25,6 +25,8 @@ const { Title, Text } = Typography;
 const OrderSuccess = () => {
   const { state } = useLocation();
   const order = state?.order;
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith("/admin");
 
   if (!order) {
     return (
@@ -40,7 +42,7 @@ const OrderSuccess = () => {
     );
   }
 
-  const address = order.address || "Không có thông tin địa chỉ";
+  const address = order.address || "Mua tại cửa hàng";
 
   // Cấu hình cột cho bảng chi tiết đơn hàng
   const columns = [
@@ -254,23 +256,43 @@ const OrderSuccess = () => {
                 <Divider style={{ margin: "16px 0" }} />
 
                 <div style={{ textAlign: "center" }}>
-                  <Link to="/products">
-                    <Button
-                      type="primary"
-                      size="large"
-                      icon={<ShoppingOutlined />}
-                      style={{
-                        height: "auto",
-                        padding: "10px 24px",
-                        borderRadius: "6px",
-                        background:
-                          "linear-gradient(to right, #1890ff, #096dd9)",
-                        // background: "var(--primary-color)",
-                      }}
-                    >
-                      Tiếp tục mua hàng
-                    </Button>
-                  </Link>
+                  {isAdminPath ? (
+                    <Link to="/admin/orders/status/PENDING">
+                      <Button
+                        type="primary"
+                        size="large"
+                        icon={<ShoppingOutlined />}
+                        style={{
+                          height: "auto",
+                          padding: "10px 24px",
+                          borderRadius: "6px",
+                          background:
+                            "linear-gradient(to right, #1890ff, #096dd9)",
+                          // background: "var(--primary-color)",
+                        }}
+                      >
+                        Trở về
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/products">
+                      <Button
+                        type="primary"
+                        size="large"
+                        icon={<ShoppingOutlined />}
+                        style={{
+                          height: "auto",
+                          padding: "10px 24px",
+                          borderRadius: "6px",
+                          background:
+                            "linear-gradient(to right, #1890ff, #096dd9)",
+                          // background: "var(--primary-color)",
+                        }}
+                      >
+                        Tiếp tục mua hàng
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </Card>
             </Col>

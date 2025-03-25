@@ -117,12 +117,12 @@ export default function ProductDetailAdmin() {
   }, [productDetail, form]);
 
   const categoryMap = categories.reduce((acc, category) => {
-    acc[category.code] = category.id;
+    acc[category.code] = category.code;
     return acc;
   }, {});
 
   const supplierMap = suppliers.reduce((acc, supplier) => {
-    acc[supplier.code] = supplier.id;
+    acc[supplier.code] = supplier.code;
     return acc;
   }, {});
 
@@ -174,8 +174,8 @@ export default function ProductDetailAdmin() {
             null;
 
           const data = {
-            categoryId: categoryMap[values.categoryCode],
-            supplierId: supplierMap[values.supplierCode],
+            categoryCode: categoryMap[values.categoryCode],
+            supplierCode: supplierMap[values.supplierCode],
             name: values.name,
             description: values.description,
             price: values.price,
@@ -414,12 +414,12 @@ export default function ProductDetailAdmin() {
           >
             <Form form={form} layout="vertical" onFinish={onSubmit}>
               <Row gutter={[24, 0]}>
-                <Col span={24} lg={8}>
+                <Col span={24} lg={12}>
                   <Form.Item label="ID" name="id">
                     <Input disabled />
                   </Form.Item>
                 </Col>
-                <Col span={24} lg={16}>
+                <Col span={24} lg={12}>
                   <Form.Item label="Mã sản phẩm" name="code">
                     <Input disabled />
                   </Form.Item>
@@ -471,17 +471,17 @@ export default function ProductDetailAdmin() {
 
                 <Col span={24} lg={12}>
                   <Form.Item
-                    label="Hãng sản xuất"
+                    label="Nhà cung cấp"
                     name="supplierCode"
                     rules={[
                       {
                         required: true,
-                        message: "Vui lòng chọn hãng sản xuất!",
+                        message: "Vui lòng chọn nhà cung cấp!",
                       },
                     ]}
                   >
                     <Select
-                      placeholder="Chọn hãng sản xuất"
+                      placeholder="Chọn nhà cung cấp"
                       showSearch
                       optionFilterProp="children"
                     >

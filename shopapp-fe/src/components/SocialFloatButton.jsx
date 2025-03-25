@@ -10,9 +10,9 @@ const SocialFloatButton = () => {
 
   // Các URL mạng xã hội của bạn
   const socialLinks = {
-    facebook: "https://facebook.com/your-page",
-    messenger: "https://m.me/your-id",
-    instagram: "https://instagram.com/your-profile",
+    facebook: "https://github.com/NamVu5404/shopapp",
+    messenger: "https://github.com/NamVu5404/shopapp",
+    instagram: "https://github.com/NamVu5404/shopapp",
   };
 
   // Xử lý chuyển hướng tới mạng xã hội
@@ -54,25 +54,41 @@ const SocialFloatButton = () => {
     return { x, y };
   };
 
-  // Các nút mạng xã hội
+  // Palette màu hiện đại
+  const palette = {
+    primary: "#4A6CF7", // Xanh dương đậm
+    secondary: "#FF3CAC", // Màu hồng sáng
+    accent1: "#8A2BE2", // Màu tím
+    accent2: "#00BFA6", // Xanh ngọc
+    dark: "#2E3156", // Màu nền tối
+    light: "#FFFFFF", // Màu sáng
+    gradient: "linear-gradient(45deg, #4A6CF7, #FF3CAC)",
+  };
+
+  // Các nút mạng xã hội được cập nhật với màu sắc mới
   const socialButtons = [
     {
       name: "Instagram",
       icon: <SiInstagram />,
       url: socialLinks.instagram,
-      color: "#E1306C",
+      // Gradient theo phong cách Instagram
+      background:
+        "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
+      shadowColor: "rgba(220, 39, 67, 0.5)",
     },
     {
       name: "Facebook",
       icon: <FaFacebookSquare />,
       url: socialLinks.facebook,
-      color: "#1877F2",
+      background: palette.primary,
+      shadowColor: "rgba(74, 108, 247, 0.5)",
     },
     {
       name: "Messager",
       icon: <FaFacebookMessenger />,
       url: socialLinks.messenger,
-      color: "#0099FF",
+      background: "linear-gradient(135deg, #00B2FF 0%, #006AFF 100%)",
+      shadowColor: "rgba(0, 178, 255, 0.5)",
     },
   ];
 
@@ -89,6 +105,7 @@ const SocialFloatButton = () => {
       {/* Hiển thị các nút mạng xã hội khi hover */}
       {socialButtons.map((button, index) => {
         const position = calculatePosition(index, socialButtons.length);
+        const delay = index * 0.1; // Độ trễ tăng dần cho mỗi nút
         return (
           <div
             key={button.name}
@@ -99,20 +116,34 @@ const SocialFloatButton = () => {
               width: 50,
               height: 50,
               borderRadius: "50%",
-              backgroundColor: button.color,
-              color: "#fff",
+              background: button.background,
+              color: palette.light,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               cursor: "pointer",
-              transition: "all 0.3s",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+              transition: `all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) ${delay}s`,
+              boxShadow: open
+                ? `0 8px 20px ${button.shadowColor}`
+                : `0 4px 10px rgba(0, 0, 0, 0.1)`,
               right: open ? position.x : 0,
               bottom: open ? position.y : 0,
               opacity: open ? 1 : 0,
+              transform: open
+                ? "scale(1) rotate(0deg)"
+                : "scale(0.5) rotate(-45deg)",
               pointerEvents: open ? "auto" : "none",
-              fontSize: "24px",
+              fontSize: "22px",
               zIndex: 1000 - index,
+              border: `2px solid ${palette.light}`,
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.1) rotate(0deg)";
+            }}
+            onMouseOut={(e) => {
+              if (open) {
+                e.currentTarget.style.transform = "scale(1) rotate(0deg)";
+              }
             }}
           >
             {button.icon}
@@ -126,29 +157,103 @@ const SocialFloatButton = () => {
         onMouseEnter={handleMouseEnter}
         style={{
           position: "absolute",
-          width: 50,
-          height: 50,
+          width: 60,
+          height: 60,
           borderRadius: "50%",
-          backgroundColor: "#1890ff",
-          color: "#fff",
+          background: open ? palette.dark : palette.gradient,
+          color: palette.light,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           cursor: "pointer",
           zIndex: 1001,
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+          boxShadow: open
+            ? `0 8px 25px rgba(46, 49, 86, 0.4)`
+            : `0 6px 20px rgba(74, 108, 247, 0.4)`,
           right: 0,
           bottom: 0,
           fontSize: "28px",
-          transition: "transform 0.3s",
+          transition: "all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+          transform: open ? "scale(1.1)" : "scale(1)",
+          animation: open ? "none" : "pulse 2s infinite ease-in-out",
+          border: `2px solid ${palette.light}`,
+        }}
+        onMouseOver={(e) => {
+          if (!open) {
+            e.currentTarget.style.transform = "scale(1.05)";
+          }
+        }}
+        onMouseOut={(e) => {
+          if (!open) {
+            e.currentTarget.style.transform = "scale(1)";
+          }
         }}
       >
-        <PlusOutlined
-          style={{
-            transform: open ? "rotate(45deg)" : "rotate(0deg)",
-            transition: "transform 0.3s",
-          }}
-        />
+        <style jsx>{`
+          @keyframes pulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(74, 108, 247, 0.7);
+            }
+            70% {
+              box-shadow: 0 0 0 15px rgba(74, 108, 247, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(74, 108, 247, 0);
+            }
+          }
+          @keyframes spin {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          @keyframes bounce {
+            0% {
+              transform: translateY(0);
+            }
+            100% {
+              transform: translateY(-5px);
+            }
+          }
+        `}</style>
+        {open ? (
+          <PlusOutlined
+            style={{
+              transform: "rotate(45deg)",
+              transition: "transform 0.3s",
+              animation: "spin 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+              fontSize: "28px",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "50%",
+              overflow: "hidden",
+              padding: "10px",
+            }}
+          >
+            <img
+              src="/logo/customer.webp"
+              alt="contact"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "50%",
+                transition: "all 0.3s",
+                animation: "bounce 1s infinite alternate ease-in-out",
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

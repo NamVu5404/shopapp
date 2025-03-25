@@ -7,6 +7,7 @@ import com.NamVu.dto.response.ApiResponse;
 import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.product.ProductResponse;
 import com.NamVu.service.FileService;
+import com.NamVu.service.ProductImportService;
 import com.NamVu.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -28,6 +29,7 @@ import java.util.List;
 @Slf4j
 public class ProductController {
     ProductService productService;
+    ProductImportService productImportService;
     FileService fileService;
 
     @GetMapping
@@ -65,7 +67,7 @@ public class ProductController {
                 .build();
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ApiResponse<ProductResponse> update(@PathVariable String id,
                                                @RequestBody @Valid ProductUpdateRequest request) {
         return ApiResponse.<ProductResponse>builder()
@@ -111,5 +113,11 @@ public class ProductController {
                     .message(e.getMessage())
                     .build();
         }
+    }
+
+    @PostMapping("/import-excel")
+    public ApiResponse<Void> importProducts(@RequestParam MultipartFile file) {
+        productImportService.importFromExcel(file);
+        return ApiResponse.<Void>builder().build();
     }
 }

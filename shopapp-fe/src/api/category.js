@@ -59,7 +59,7 @@ export const createCategory = async (data) => {
 export const updateCategory = async (code, data) => {
   try {
     const response = await fetch(`${API}/categories/${code}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",

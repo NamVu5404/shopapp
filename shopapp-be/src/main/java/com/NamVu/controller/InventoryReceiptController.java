@@ -7,6 +7,7 @@ import com.NamVu.dto.response.ApiResponse;
 import com.NamVu.dto.response.PageResponse;
 import com.NamVu.dto.response.inventoryReceipt.InventoryReceiptResponse;
 import com.NamVu.enums.InventoryStatus;
+import com.NamVu.service.InventoryImportService;
 import com.NamVu.service.InventoryReceiptService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/inventory-receipts")
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 public class InventoryReceiptController {
     InventoryReceiptService inventoryReceiptService;
+    InventoryImportService inventoryImportService;
 
     @GetMapping
     public ApiResponse<PageResponse<InventoryReceiptResponse>> search(
@@ -72,7 +75,7 @@ public class InventoryReceiptController {
                 .build();
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ApiResponse<InventoryReceiptResponse> update(@PathVariable String id,
                                                         @RequestBody @Valid InventoryReceiptRequest request) {
         return ApiResponse.<InventoryReceiptResponse>builder()
@@ -93,5 +96,11 @@ public class InventoryReceiptController {
         return ApiResponse.<Integer>builder()
                 .result(inventoryReceiptService.countTotalPendingReceipts())
                 .build();
+    }
+
+    @PostMapping("/import-excel")
+    public ApiResponse<Void> importProducts(@RequestParam MultipartFile file) {
+        inventoryImportService.importFromExcel(file);
+        return ApiResponse.<Void>builder().build();
     }
 }

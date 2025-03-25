@@ -18,7 +18,7 @@ public class PasswordController {
 
     PasswordService passwordService;
 
-    @PostMapping("/change")
+    @PutMapping("/change")
     public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         passwordService.changePassword(request);
 
@@ -30,7 +30,7 @@ public class PasswordController {
     /*
      * set password cho user login bằng bên thứ 3
      */
-    @PostMapping("/set")
+    @PutMapping("/set")
     public ApiResponse<Void> setPassword(@RequestBody @Valid SetPasswordRequest request) {
         passwordService.setPassword(request.getPassword());
 
@@ -39,7 +39,7 @@ public class PasswordController {
                 .build();
     }
 
-    @PostMapping("/reset/{id}")
+    @PutMapping("/reset/{id}")
     public ApiResponse<Void> resetPassword(@PathVariable String id) {
         passwordService.resetPassword(id);
 

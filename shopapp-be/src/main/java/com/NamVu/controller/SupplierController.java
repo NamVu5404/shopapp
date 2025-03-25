@@ -33,7 +33,7 @@ public class SupplierController {
                 .build();
     }
 
-    @PostMapping("/{code}")
+    @PutMapping("/{code}")
     public ApiResponse<SupplierResponse> update(@PathVariable String code,
                                                 @RequestBody SupplierUpdateRequest request) {
         return ApiResponse.<SupplierResponse>builder()

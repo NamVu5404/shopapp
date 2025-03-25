@@ -6,6 +6,7 @@ import { searchProduct } from "../../api/product";
 import ProductItem from "../../components/ProductItem";
 import { Link } from "react-router-dom";
 import MyButton from "../../components/MyButton";
+import ImageSlider from "../../components/imageSlider/ImageSlider";
 
 export default function Home() {
   const [newProduct, setNewProduct] = useState(null);
@@ -36,15 +37,7 @@ export default function Home() {
   return (
     <>
       <div style={{ margin: "-60px 0 0 -220px", width: "100vw" }}>
-        <img
-          alt="thumbnail_home"
-          src="/logo/thumbnail_home.webp"
-          style={{
-            width: "100vw",
-            height: "auto",
-            display: "block",
-          }}
-        />
+        <ImageSlider />
       </div>
 
       <div

@@ -93,7 +93,7 @@ public class CartServiceImpl implements CartService {
 
     private void updateQuantity(CartItem existedItem, CartItemRequest request) {
         if (request.getUpdatedQuantity() == null) {
-             existedItem.setQuantity(request.getQuantity());
+            existedItem.setQuantity(request.getQuantity());
         } else {
             existedItem.setQuantity(existedItem.getQuantity() + request.getUpdatedQuantity());
         }

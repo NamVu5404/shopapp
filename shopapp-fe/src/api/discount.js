@@ -61,7 +61,7 @@ export const createDiscount = async (data) => {
 export const updateDiscount = async (id, data) => {
   try {
     const response = await fetch(`${API}/discounts/${id}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",

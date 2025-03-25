@@ -59,7 +59,7 @@ export const createSupplier = async (data) => {
 export const updateSupplier = async (code, data) => {
   try {
     const response = await fetch(`${API}/suppliers/${code}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",

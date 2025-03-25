@@ -93,7 +93,7 @@ export const createProduct = async (data) => {
 export const updateProduct = async (id, data) => {
   try {
     const response = await fetch(`${API}/products/${id}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
@@ -205,6 +205,30 @@ export const updateProductImages = async (id, keepImages, files) => {
 
     message.success("Cập nhật ảnh thành công!");
     return result.result;
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+
+export const importFromExcel = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file); // Chỉ thêm một file duy nhất
+
+    const response = await fetch(`${API}/products/import-excel`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Thất bại!");
+    }
+
+    message.success("Tải lên danh sách sản phẩm thành công! Hãy kiểm tra log ...");
   } catch (error) {
     message.error(error.message);
   }

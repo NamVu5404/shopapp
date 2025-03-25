@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -126,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
         // Xóa ảnh cũ nếu ko có trong keepImages
-        if (keepImages == null) {
+        if (CollectionUtils.isEmpty(keepImages)) {
             product.getImages().clear();
         } else {
             product.getImages().removeIf(image -> !keepImages.contains(image.getImagePath()));

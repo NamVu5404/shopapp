@@ -33,17 +33,18 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 import { addDiscountProduct, getAllDiscount } from "../../api/discount";
 import {
   createProduct,
   searchProduct,
   uploadProductImages,
 } from "../../api/product";
+import ProductBatchImport from "../../components/ProductBatchImport";
 import ProductSeachForm from "../../components/ProductSeachForm";
 import { useCategories } from "../../context/CategoryContext";
 import { useSuppliers } from "../../context/SupplierContext";
 import { hasPermission } from "../../services/authService";
-import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -89,13 +90,13 @@ const ProductFormImproved = ({ onSubmit }) => {
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item
-            name="categoryId"
+            name="categoryCode"
             label="Danh mục"
             rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
           >
             <Select placeholder="Chọn danh mục">
               {categories.map((category) => (
-                <Select.Option key={category.id} value={category.id}>
+                <Select.Option key={category.code} value={category.code}>
                   {category.name}
                 </Select.Option>
               ))}
@@ -104,13 +105,13 @@ const ProductFormImproved = ({ onSubmit }) => {
         </Col>
         <Col span={12}>
           <Form.Item
-            name="supplierId"
+            name="supplierCode"
             label="Nhà cung cấp"
             rules={[{ required: true, message: "Vui lòng chọn nhà cung cấp!" }]}
           >
             <Select placeholder="Chọn nhà cung cấp">
               {suppliers.map((supplier) => (
-                <Select.Option key={supplier.id} value={supplier.id}>
+                <Select.Option key={supplier.code} value={supplier.code}>
                   {supplier.name}
                 </Select.Option>
               ))}
@@ -650,9 +651,17 @@ const ProductAdmin = () => {
             </Button>
           </Space>
         )}
-        <Button type="primary" icon={<PlusOutlined />} onClick={showModal}>
-          Thêm mới
-        </Button>
+        <div>
+          <ProductBatchImport />
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={showModal}
+            style={{ marginLeft: 16 }}
+          >
+            Thêm mới
+          </Button>
+        </div>
       </div>
 
       <Table

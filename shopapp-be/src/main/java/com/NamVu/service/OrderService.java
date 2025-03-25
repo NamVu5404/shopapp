@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 public interface OrderService {
     PageResponse<OrderResponse> search(OrderSearchRequest request, Pageable pageable);
 
-    OrderResponse create(OrderRequest request);
+    OrderResponse create(OrderRequest request, OrderStatus status);
 
     OrderResponse getOneByOrderId(String orderId);
 

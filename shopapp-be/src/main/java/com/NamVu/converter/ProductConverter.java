@@ -9,7 +9,6 @@ import com.NamVu.exception.ErrorCode;
 import com.NamVu.repository.CategoryRepository;
 import com.NamVu.repository.DiscountRepository;
 import com.NamVu.repository.SupplierRepository;
-import com.NamVu.service.FileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,9 +26,6 @@ public class ProductConverter {
 
     @Autowired
     private DiscountRepository discountRepository;
-
-    @Autowired
-    private FileService fileService;
 
     public ProductResponse toResponse(Product product) {
         ProductResponse response = modelMapper.map(product, ProductResponse.class);
@@ -53,7 +49,7 @@ public class ProductConverter {
     // create
     public Product toEntity(ProductCreateRequest request) {
         Product product = modelMapper.map(request, Product.class);
-        return getProduct(product, request.getCategoryId(), request.getSupplierId());
+        return getProduct(product, request.getCategoryCode(), request.getSupplierCode());
     }
 
     // update
@@ -73,15 +69,15 @@ public class ProductConverter {
             existedProduct.setDiscountPrice(null);
         }
 
-        return getProduct(existedProduct, request.getCategoryId(), request.getSupplierId());
+        return getProduct(existedProduct, request.getCategoryCode(), request.getSupplierCode());
     }
 
-    private Product getProduct(Product product, String categoryId, String supplierId) {
-        Category category = categoryRepository.findById(categoryId)
+    private Product getProduct(Product product, String categoryCode, String supplierCode) {
+        Category category = categoryRepository.findByCode(categoryCode)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
         product.setCategory(category);
 
-        Supplier supplier = supplierRepository.findById(supplierId)
+        Supplier supplier = supplierRepository.findByCode(supplierCode)
                 .orElseThrow(() -> new AppException(ErrorCode.SUPPLIER_NOT_EXISTED));
         product.setSupplier(supplier);
 

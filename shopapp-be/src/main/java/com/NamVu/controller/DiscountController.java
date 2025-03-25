@@ -32,7 +32,7 @@ public class DiscountController {
                 .build();
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ApiResponse<Discount> update(@PathVariable String id, @RequestBody Discount request) {
         return ApiResponse.<Discount>builder()
                 .result(discountService.update(id, request))

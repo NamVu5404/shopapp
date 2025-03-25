@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class InventoryReceiptDetailRequest {
     @NotBlank(message = "PRODUCT_ID_NOT_BLANK")
-    String productId;
+    String productCode;
 
     @NotNull(message = "QUANTITY_NOT_NULL")
     @Min(value = 1, message = "MIN_QUANTITY")

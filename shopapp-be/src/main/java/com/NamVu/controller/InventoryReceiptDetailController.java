@@ -1,8 +1,8 @@
 package com.NamVu.controller;
 
 import com.NamVu.dto.response.ApiResponse;
-import com.NamVu.dto.response.inventoryReceipt.ReceiptDetailByProductResponse;
 import com.NamVu.dto.response.PageResponse;
+import com.NamVu.dto.response.inventoryReceipt.ReceiptDetailByProductResponse;
 import com.NamVu.service.InventoryReceiptDetailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

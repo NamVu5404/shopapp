@@ -69,7 +69,7 @@ export default function InventoryReceiptDetailAdmin() {
     }
   }, [id]);
 
-  // Khi lấy detailResponses từ API, đảm bảo mỗi item có productId duy nhất.
+  // Khi lấy detailResponses từ API, đảm bảo mỗi item có productCode duy nhất.
   const fetchReceiptDetails = async (receiptId) => {
     try {
       const data = await getInventoryReceiptById(receiptId);
@@ -78,9 +78,9 @@ export default function InventoryReceiptDetailAdmin() {
       setCurrentStatus(data.status);
 
       const updatedProducts = data.detailResponses
-        .filter((item) => item.productId) // Chỉ lấy sản phẩm có productId hợp lệ
+        .filter((item) => item.productCode) // Chỉ lấy sản phẩm có productCode hợp lệ
         .map((item) => ({
-          productId: item.productId, // Giữ nguyên ID từ API
+          productCode: item.productCode, // Giữ nguyên ID từ API
           code: item.productCode, // Hiển thị mã sản phẩm
           quantity: item.quantity,
           price: item.price,
@@ -132,10 +132,10 @@ export default function InventoryReceiptDetailAdmin() {
 
   const handleSelect = (value, option) => {
     // Tránh trùng lặp: Nếu đã có, không thêm lại
-    if (!selectedProducts.some((p) => p.productId === value)) {
+    if (!selectedProducts.some((p) => p.productCode === value)) {
       setSelectedProducts((prev) => [
         {
-          productId: value,
+          productCode: value,
           code: option.children,
           quantity: 1,
           price: 0,
@@ -146,33 +146,27 @@ export default function InventoryReceiptDetailAdmin() {
     }
   };
 
-  const handleQuantityChange = (value, productId) => {
+  const handleQuantityChange = (value, productCode) => {
     setSelectedProducts((prev) =>
       prev.map((p) =>
-        p.productId === productId ? { ...p, quantity: value } : p
+        p.productCode === productCode ? { ...p, quantity: value } : p
       )
     );
   };
 
-  const handlePriceChange = (value, productId) => {
+  const handlePriceChange = (value, productCode) => {
     setSelectedProducts((prev) =>
-      prev.map((p) => (p.productId === productId ? { ...p, price: value } : p))
+      prev.map((p) =>
+        p.productCode === productCode ? { ...p, price: value } : p
+      )
     );
   };
 
-  const handleRemove = (productId) => {
-    Modal.confirm({
-      title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa sản phẩm này khỏi danh sách không?",
-      okText: "Xóa",
-      cancelText: "Hủy",
-      onOk: () => {
-        // Chỉ xóa những item có productId khớp
-        setSelectedProducts((prev) =>
-          prev.filter((p) => p.productId !== productId)
-        );
-      },
-    });
+  const handleRemove = (productCode) => {
+    // Chỉ xóa những item có productCode khớp
+    setSelectedProducts((prev) =>
+      prev.filter((p) => p.productCode !== productCode)
+    );
   };
 
   const totalAmount = selectedProducts.reduce(
@@ -194,8 +188,8 @@ export default function InventoryReceiptDetailAdmin() {
           const payload = {
             totalAmount,
             note,
-            details: selectedProducts.map(({ productId, quantity, price }) => ({
-              productId,
+            details: selectedProducts.map(({ productCode, quantity, price }) => ({
+              productCode,
               quantity,
               price,
             })),
@@ -269,7 +263,7 @@ export default function InventoryReceiptDetailAdmin() {
         <InputNumber
           min={1}
           value={record.quantity}
-          onChange={(value) => handleQuantityChange(value, record.productId)}
+          onChange={(value) => handleQuantityChange(value, record.productCode)}
           disabled={status && status !== "PENDING"}
           style={{ width: 100 }}
           addonAfter="cái"
@@ -288,7 +282,7 @@ export default function InventoryReceiptDetailAdmin() {
           }
           parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
           style={{ width: 150 }}
-          onChange={(value) => handlePriceChange(value, record.productId)}
+          onChange={(value) => handlePriceChange(value, record.productCode)}
           disabled={status && status !== "PENDING"}
           addonAfter="đ"
         />
@@ -309,7 +303,7 @@ export default function InventoryReceiptDetailAdmin() {
           type="text"
           danger
           icon={<DeleteOutlined />}
-          onClick={() => handleRemove(record.productId)}
+          onClick={() => handleRemove(record.productCode)}
           disabled={status && status !== "PENDING"}
         >
           Xóa
@@ -454,7 +448,7 @@ export default function InventoryReceiptDetailAdmin() {
             suffixIcon={<PlusOutlined />}
           >
             {products.map((product) => (
-              <Option key={product.id} value={product.id}>
+              <Option key={product.code} value={product.code}>
                 {product.code}
               </Option>
             ))}
@@ -465,7 +459,7 @@ export default function InventoryReceiptDetailAdmin() {
         <Table
           columns={columns}
           dataSource={selectedProducts}
-          rowKey="productId"
+          rowKey="productCode"
           pagination={false}
           bordered
           locale={{
@@ -548,7 +542,9 @@ export default function InventoryReceiptDetailAdmin() {
                 {id ? "Cập nhật phiếu" : "Tạo phiếu nhập kho"}
               </Button>
               <Button>
-                <Link to="/admin/inventory-receipts/status/PENDING">Quay lại</Link>
+                <Link to="/admin/inventory-receipts/status/PENDING">
+                  Quay lại
+                </Link>
               </Button>
             </Space>
           </Form.Item>

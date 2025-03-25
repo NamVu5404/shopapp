@@ -16,17 +16,17 @@ public class GlobalExceptionHandler {
     private static final String MAX_ATTRIBUTE = "max";
     private static final String MIN_ATTRIBUTE = "min";
 
-//    @ExceptionHandler(value = Exception.class)
-//    public ResponseEntity<ApiResponse<?>> exceptionHandler() {
-//        ApiResponse<?> apiResponse = ApiResponse.builder()
-//                .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
-//                .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
-//                .build();
-//
-//        return ResponseEntity
-//                .status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode())
-//                .body(apiResponse);
-//    }
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ApiResponse<?>> exceptionHandler() {
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
+                .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
+                .build();
+
+        return ResponseEntity
+                .status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode())
+                .body(apiResponse);
+    }
 
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<ApiResponse<?>> customExceptionHandler(AppException e) {

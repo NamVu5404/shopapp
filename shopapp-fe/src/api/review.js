@@ -25,6 +25,7 @@ export const createReview = async (data) => {
       throw new Error(result.message);
     }
 
+    message.success("Đánh giá sản phẩm thành công!");
     return result.result;
   } catch (error) {
     message.error(error.message);

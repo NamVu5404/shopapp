@@ -43,8 +43,7 @@ import { createOrder } from "../../api/order";
 import { createGuest } from "../../api/user";
 import { getToken } from "../../services/localStorageService";
 
-// Giả sử API để lấy thông tin sản phẩm bằng productCode
-import { getProductByCode } from "../../api/product"; // Cần định nghĩa hàm này
+import { getProductByCode } from "../../api/product";
 import { DEFAULT_IMAGE, IMAGE_URL } from "../../api/auth";
 
 const { Text } = Typography;

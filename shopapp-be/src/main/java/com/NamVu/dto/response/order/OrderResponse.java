@@ -1,9 +1,9 @@
 package com.NamVu.dto.response.order;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.NamVu.enums.OrderStatus;
 import com.NamVu.enums.OrderType;
 import com.NamVu.enums.PaymentMethod;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

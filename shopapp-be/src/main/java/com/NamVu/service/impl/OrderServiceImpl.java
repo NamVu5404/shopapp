@@ -69,8 +69,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderResponse create(OrderRequest request) {
+    public OrderResponse create(OrderRequest request, OrderStatus status) {
         Order order = orderConverter.toEntity(request);
+        order.setStatus(status);
 
         List<OrderDetail> details = orderConverter.toDetailEntity(order, request.getDetails());
         order.setOrderDetails(details);

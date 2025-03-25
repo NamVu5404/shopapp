@@ -1,13 +1,6 @@
 import { Badge, Layout, Menu, theme } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { useEffect, useState } from "react";
-import { BiCategory } from "react-icons/bi";
-import { FaBoxOpen, FaEnvelopeOpenText, FaUsers } from "react-icons/fa";
-import {
-  MdOutlineDiscount,
-  MdOutlineHomeWork,
-  MdOutlineInventory2,
-} from "react-icons/md";
 import { Outlet, useNavigate } from "react-router-dom";
 import { getUnreadCount } from "../api/contact";
 import { countTotalPendingReceipts } from "../api/inventoryReceipt";
@@ -15,6 +8,17 @@ import { countTotalPendingOrders } from "../api/order";
 import AdminHeader from "../components/header/AdminHeader";
 import ScrollToTopButton from "../components/ScrollToTopButton";
 import { hasPermission } from "../services/authService";
+import {
+  AppstoreOutlined,
+  BarChartOutlined,
+  GiftOutlined,
+  InboxOutlined,
+  MessageOutlined,
+  ShopOutlined,
+  ShoppingCartOutlined,
+  TagsOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
 const { Sider } = Layout;
 
@@ -71,60 +75,48 @@ const AdminLayout = () => {
   }, []);
 
   const items = [
-    ...[getItem("Báo cáo & Thống kê", "/admin", <FaEnvelopeOpenText />)],
-    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
+    ...[getItem("Báo cáo & Thống kê", "/admin", <BarChartOutlined />)],
+    ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"])
       ? [
           getItem(
             "Quản lý đơn hàng",
             "/admin/orders/status/PENDING",
-            <MdOutlineInventory2 />,
+            <ShoppingCartOutlined />,
             pendingOrders
           ),
         ]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY", "ROLE_STAFF_SALE"])
-      ? [getItem("Quản lý sản phẩm", "/admin/products", <FaBoxOpen />)]
+      ? [getItem("Quản lý sản phẩm", "/admin/products", <AppstoreOutlined />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
       ? [
           getItem(
             "Quản lý nhập kho",
             "/admin/inventory-receipts/status/PENDING",
-            <MdOutlineInventory2 />,
+            <InboxOutlined />,
             pendingReceipts
           ),
         ]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_CUSTOMER_SERVICE"])
-      ? [getItem("Quản lý tài khoản", "/admin/users", <FaUsers />)]
+      ? [getItem("Quản lý tài khoản", "/admin/users", <UserOutlined />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
-      ? [getItem("Quản lý danh mục", "/admin/categories", <BiCategory />)]
+      ? [getItem("Quản lý danh mục", "/admin/categories", <TagsOutlined />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_INVENTORY"])
-      ? [
-          getItem(
-            "Quản lý nhà cung cấp",
-            "/admin/suppliers",
-            <MdOutlineHomeWork />
-          ),
-        ]
+      ? [getItem("Quản lý nhà cung cấp", "/admin/suppliers", <ShopOutlined />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"])
-      ? [
-          getItem(
-            "Quản lý mã giảm giá",
-            "/admin/discounts",
-            <MdOutlineDiscount />
-          ),
-        ]
+      ? [getItem("Quản lý mã giảm giá", "/admin/discounts", <GiftOutlined />)]
       : []),
     ...(hasPermission(["ROLE_ADMIN", "ROLE_STAFF_CUSTOMER_SERVICE"])
       ? [
           getItem(
             "Quản lý liên hệ",
             "/admin/contacts",
-            <FaEnvelopeOpenText />,
+            <MessageOutlined />,
             unreadMessages
           ),
         ]
@@ -145,7 +137,7 @@ const AdminLayout = () => {
           onCollapse={(value) => setCollapsed(value)}
           className="nice-admin-sidebar"
           trigger={null}
-          width={200}
+          width={240}
         >
           <Menu
             theme="light"
@@ -221,13 +213,13 @@ const AdminLayout = () => {
         }
         .nice-admin-menu .ant-menu-item-selected {
           background-color: #f6f9ff !important;
-          color: #4154f1;
-          border-left: 3px solid #4154f1;
+          color: #012970;
+          border-left: 3px solid #012970;
         }
         .nice-admin-content-container {
-          margin-left: ${collapsed ? "80px" : "220px"};
+          margin-left: ${collapsed ? "80px" : "240px"};
           transition: all 0.3s;
-          width: calc(100% - ${collapsed ? "80px" : "220px"});
+          width: calc(100% - ${collapsed ? "80px" : "240px"});
         }
         .nice-admin-content {
           padding: 20px;

@@ -157,7 +157,7 @@ export const createInventoryReceipt = async (data, navigate) => {
 export const updateInventoryReceipt = async (id, data) => {
   try {
     const response = await fetch(`${API}/inventory-receipts/${id}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
@@ -240,3 +240,28 @@ export const countTotalPendingReceipts = async () => {
     message.error(error.message);
   }
 };
+
+export const importFromExcel = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file); // Chỉ thêm một file duy nhất
+
+    const response = await fetch(`${API}/inventory-receipts/import-excel`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Thất bại!");
+    }
+
+    message.success("Tải lên phiếu nhập kho thành công!");
+  } catch (error) {
+    message.error(error.message);
+  }
+};
+

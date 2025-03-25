@@ -32,17 +32,43 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
   return (
     <header className="nice-admin-header">
       <div className="header-container">
-        <div className="sidebar-header">
-          <div className="d-flex justify-content-between align-items-center">
-            <a href="/admin" className="logo d-flex align-items-center">
-              <img src="/logo/logo.webp" alt="Logo" />
-            </a>
-          </div>
-        </div>
+        <div
+          className="sidebar-header"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: "50px",
+            padding: "0 0",
+          }}
+        >
+          <a
+            href="/admin"
+            className="logo d-flex align-items-center"
+            style={{ display: "flex", alignItems: "center" }}
+          >
+            <img
+              src="/logo/logo.png"
+              alt="logo"
+              style={{ maxHeight: 26, marginRight: 6 }}
+            />
+            <span style={{ fontSize: 30, fontWeight: 500, marginRight: 85 }}>
+              NamVu
+            </span>
+          </a>
 
-        <div className="header-toggle">
-          <button className="toggle-sidebar-btn" onClick={toggleSidebar}>
-            <MdOutlineMenu />
+          <button
+            className="toggle-sidebar-btn"
+            onClick={toggleSidebar}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            <MdOutlineMenu size={30} />
           </button>
         </div>
 

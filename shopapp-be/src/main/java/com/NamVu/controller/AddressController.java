@@ -34,7 +34,7 @@ public class AddressController {
                 .build();
     }
 
-    @PostMapping("/{addressId}")
+    @PutMapping("/{addressId}")
     public ApiResponse<AddressResponse> update(@PathVariable String addressId,
                                                @RequestBody @Valid AddressUpdateRequest request) {
         return ApiResponse.<AddressResponse>builder()

@@ -1,5 +1,6 @@
 import {
   PhoneOutlined,
+  PlusOutlined,
   RightOutlined,
   SearchOutlined,
   ShoppingOutlined,
@@ -335,9 +336,20 @@ const OrderByStatus = ({
       >
         <Text strong>Tổng số: {data?.totalElements || 0} đơn hàng</Text>
         {isAdminView && (
-          <Link to={"/admin/orders"}>
-            <MyButton icon={<SearchOutlined />}>Tìm kiếm</MyButton>
-          </Link>
+          <div>
+            <Link to={"/admin/orders/search"}>
+              <MyButton icon={<SearchOutlined />}>Tìm kiếm</MyButton>
+            </Link>
+            <Link to={"/admin/orders"}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                style={{ marginLeft: 16 }}
+              >
+                Thêm mới
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 

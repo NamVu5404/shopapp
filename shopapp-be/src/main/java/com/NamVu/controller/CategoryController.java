@@ -34,7 +34,7 @@ public class CategoryController {
                 .build();
     }
 
-    @PostMapping("/{code}")
+    @PutMapping("/{code}")
     public ApiResponse<CategoryResponse> update(@PathVariable String code,
                                                 @RequestBody @Valid CategoryUpdateRequest request) {
         return ApiResponse.<CategoryResponse>builder()

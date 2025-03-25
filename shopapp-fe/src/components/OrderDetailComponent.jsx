@@ -229,7 +229,6 @@ export default function OrderDetailComponent({
       setOrder((prev) => ({ ...prev, details: updatedDetails }));
       form.resetFields();
       setReviewModalVisible(false);
-      message.success("Đánh giá sản phẩm thành công!");
     } catch (error) {
       console.error("Lỗi khi gửi đánh giá:", error);
       message.error("Không thể gửi đánh giá. Vui lòng thử lại sau!");
@@ -502,7 +501,7 @@ export default function OrderDetailComponent({
                   {order.phone}
                 </Descriptions.Item>
                 <Descriptions.Item label="Địa chỉ">
-                  {order.address}
+                  {order.address || "Mua tại cửa hàng"}
                 </Descriptions.Item>
               </Descriptions>
             </Card>

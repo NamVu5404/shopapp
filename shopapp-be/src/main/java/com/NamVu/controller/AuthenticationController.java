@@ -30,38 +30,30 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        AuthenticationResponse result = authenticationService.authenticate(request);
-
         return ApiResponse.<AuthenticationResponse>builder()
-                .result(result)
+                .result(authenticationService.authenticate(request))
                 .build();
     }
 
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
-        IntrospectResponse result = authenticationService.introspect(request);
-
         return ApiResponse.<IntrospectResponse>builder()
-                .result(result)
+                .result(authenticationService.introspect(request))
                 .build();
     }
 
     @PostMapping("/logout")
-    ApiResponse<?> logout(@RequestBody LogoutRequest request)
-            throws ParseException, JOSEException {
+    ApiResponse<?> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
-
         return ApiResponse.builder().build();
     }
 
     @PostMapping("/refresh")
     ApiResponse<RefreshResponse> refreshToken(@RequestBody RefreshRequest request)
             throws ParseException, JOSEException {
-        RefreshResponse result = authenticationService.refreshToken(request);
-
         return ApiResponse.<RefreshResponse>builder()
-                .result(result)
+                .result(authenticationService.refreshToken(request))
                 .build();
     }
 }

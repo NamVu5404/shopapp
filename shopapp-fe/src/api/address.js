@@ -59,7 +59,7 @@ export const createAddress = async (data) => {
 export const updateAddress = async (addressId, data) => {
   try {
     const response = await fetch(`${API}/addresses/${addressId}`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",

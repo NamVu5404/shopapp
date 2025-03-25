@@ -1,5 +1,6 @@
 package com.NamVu.converter;
 
+import com.NamVu.constant.StatusConstant;
 import com.NamVu.dto.request.inventoryReceipt.InventoryReceiptDetailRequest;
 import com.NamVu.dto.response.inventoryReceipt.InventoryReceiptDetailResponse;
 import com.NamVu.dto.response.inventoryReceipt.InventoryReceiptResponse;
@@ -62,7 +63,8 @@ public class InventoryReceiptConverter {
                                                        List<InventoryReceiptDetailRequest> details) {
         return details.stream()
                 .map(detailRequest -> {
-                    Product product = productRepository.findById(detailRequest.getProductId())
+                    Product product = productRepository
+                            .findByCodeAndIsActive(detailRequest.getProductCode(), StatusConstant.ACTIVE)
                             .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
 
                     return InventoryReceiptDetail.builder()
