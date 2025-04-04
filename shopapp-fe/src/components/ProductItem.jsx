@@ -124,6 +124,7 @@ export default function ProductItem({ data }) {
           productName: product.name,
           price: product.price,
           discountPrice: product.discountPrice || null,
+          images: product.images,
           quantity: 1,
         });
       }

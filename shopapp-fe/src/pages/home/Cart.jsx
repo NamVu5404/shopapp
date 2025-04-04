@@ -38,7 +38,7 @@ export default function Cart() {
   const [updateTimeout, setUpdateTimeout] = useState(null);
   const userId = useSelector((state) => state.user.id);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const getCartData = async () => {
       setLoading(true);

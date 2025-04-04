@@ -53,7 +53,7 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
               style={{ maxHeight: 26, marginRight: 6 }}
             />
             <span style={{ fontSize: 30, fontWeight: 500, marginRight: 85 }}>
-              NamVu
+              ADMIN
             </span>
           </a>
 

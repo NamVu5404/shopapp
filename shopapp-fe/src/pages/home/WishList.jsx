@@ -1,16 +1,18 @@
-import { Breadcrumb, Pagination } from "antd";
+import { Breadcrumb, Button, Card, Empty, Pagination } from "antd";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getWishListByUser } from "../../api/wishList";
 import ProductItem from "../../components/ProductItem";
 import { getToken } from "../../services/localStorageService";
+import { ShoppingOutlined } from "@ant-design/icons";
 
 export default function WishList() {
   const user = useSelector((state) => state.user);
   const [data, setData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -44,6 +46,7 @@ export default function WishList() {
 
     fetchWishlist();
   }, [user, currentPage]);
+  console.log(data);
 
   return (
     <>
@@ -55,27 +58,47 @@ export default function WishList() {
         ]}
       />
 
-      {data && (
-        <>
-          <ProductItem data={data.data} />
+      {data &&
+        (data.totalElements !== 0 ? (
+          <>
+            <ProductItem data={data.data} />
 
-          <div
-            style={{
-              marginTop: "16px",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
+            <div
+              style={{
+                marginTop: "16px",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={data.totalElements}
+                onChange={(page) => setCurrentPage(page)}
+                showSizeChanger={false}
+              />
+            </div>
+          </>
+        ) : (
+          <Card
+            bordered={false}
+            className="cart-container"
+            style={{ boxShadow: "0 1px 10px rgba(0,0,0,0.08)" }}
           >
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={data.totalElements}
-              onChange={(page) => setCurrentPage(page)}
-              showSizeChanger={false}
-            />
-          </div>
-        </>
-      )}
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Danh sách yêu thích của bạn đang trống"
+            >
+              <Button
+                type="primary"
+                icon={<ShoppingOutlined />}
+                onClick={() => navigate("/products")}
+              >
+                Thêm sản phẩm vào danh sách yêu thích
+              </Button>
+            </Empty>
+          </Card>
+        ))}
     </>
   );
 }
