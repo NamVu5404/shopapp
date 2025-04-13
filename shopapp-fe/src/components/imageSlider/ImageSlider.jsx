@@ -4,7 +4,7 @@ import "./ImageSlider.css";
 
 const ImageSlider = () => {
   // Mảng chứa đường dẫn đến các hình ảnh
-  const images = ["/logo/thumbnail_home.webp", "/logo/slider_3.webp"];
+  const images = ["/logo/thumbnail_home.webp?v=1.0.0", "/logo/slider_3.webp?v=1.0.0"];
 
   // Style inline cho hình ảnh
   const imageStyle = {

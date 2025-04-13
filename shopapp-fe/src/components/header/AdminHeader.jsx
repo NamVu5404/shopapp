@@ -48,7 +48,7 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
             style={{ display: "flex", alignItems: "center" }}
           >
             <img
-              src="/logo/logo.png"
+              src="/logo/logo.png?v=1.0.0"
               alt="logo"
               style={{ maxHeight: 26, marginRight: 6 }}
             />

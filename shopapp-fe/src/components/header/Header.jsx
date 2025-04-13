@@ -217,7 +217,7 @@ export default function Header() {
           <Link to={"/"} className="secondary-link">
             <div className="logo">
               <img
-                src="/logo/logo.webp"
+                src="/logo/logo.webp?v=1.0.0"
                 alt="logo"
                 // style={{ height: 80, margin: "10px -30px 0 -5px" }}
                 style={{

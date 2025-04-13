@@ -241,7 +241,7 @@ const SocialFloatButton = () => {
             }}
           >
             <img
-              src="/logo/customer.webp"
+              src="/logo/customer.webp?v=1.0.0"
               alt="contact"
               style={{
                 width: "100%",
