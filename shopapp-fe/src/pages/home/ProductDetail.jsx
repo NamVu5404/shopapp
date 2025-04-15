@@ -135,7 +135,7 @@ export default function ProductDetail() {
       const existingItem = guestCart.items.find(
         (item) => item.productId === product.id
       );
-
+      
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
@@ -146,6 +146,7 @@ export default function ProductDetail() {
           price: product.price,
           discountPrice: product.discountPrice || null,
           quantity: quantity,
+          images: product.images,
         });
       }
 
