@@ -157,9 +157,9 @@ export const searchUser = async (request, page, size) => {
   }
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async (ids) => {
   try {
-    const response = await fetch(`${API}/users/${id}`, {
+    const response = await fetch(`${API}/users/${ids}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${getToken()}`,

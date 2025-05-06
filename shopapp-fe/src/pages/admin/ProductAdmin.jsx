@@ -39,12 +39,14 @@ import {
   createProduct,
   searchProduct,
   uploadProductImages,
+  deleteProduct
 } from "../../api/product";
 import ProductBatchImport from "../../components/ProductBatchImport";
 import ProductSeachForm from "../../components/ProductSeachForm";
 import { useCategories } from "../../context/CategoryContext";
 import { useSuppliers } from "../../context/SupplierContext";
 import { hasPermission } from "../../services/authService";
+import { ExclamationCircleOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -216,6 +218,7 @@ const ProductAdmin = () => {
   const categories = useCategories();
   const suppliers = useSuppliers();
   const [direction, setDirection] = useState(direc || "DESC");
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Get category and supplier names from codes
   const getCategoryName = (categoryCode) => {
@@ -226,6 +229,41 @@ const ProductAdmin = () => {
   const getSupplierName = (supplierCode) => {
     const supplier = suppliers.find((s) => s.code === supplierCode);
     return supplier ? supplier.name : supplierCode;
+  };
+
+  // Add this function before the return statement
+  const handleMultipleDelete = async () => {
+    Modal.confirm({
+      title: 'Xác nhận xóa sản phẩm',
+      icon: <ExclamationCircleOutlined />,
+      content: `Bạn có chắc chắn muốn xóa ${selectedProducts.length} sản phẩm đã chọn?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        setDeleteLoading(true);
+        try {
+          await deleteProduct(selectedProducts);
+          setSelectedProducts([]);
+          // Refresh data
+          const request = {
+            id,
+            categoryCode,
+            supplierCode,
+            code,
+            name,
+            minPrice,
+            maxPrice,
+          };
+          const refreshedData = await searchProduct(request, currentPage, pageSize, sortBy);
+          setProductData(refreshedData);
+        } catch (error) {
+          console.error('Error deleting products:', error);
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
+    });
   };
 
   // Function to update URL
@@ -636,19 +674,32 @@ const ProductAdmin = () => {
         }}
       >
         {hasPermission(["ROLE_ADMIN", "ROLE_STAFF_SALE"]) && (
+          // Replace the existing Space component inside the first div of the action buttons
           <Space>
             <Text strong>
               Tổng số: {productData?.totalElements || 0} sản phẩm
             </Text>
-            <Button
-              type="primary"
-              danger
-              disabled={!selectedProducts.length}
-              onClick={showDiscountModal}
-              icon={<TagOutlined />}
-            >
-              Thêm mã giảm giá ({selectedProducts.length})
-            </Button>
+            {selectedProducts.length > 0 && (
+              <>
+                <Button
+                  type="primary"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={handleMultipleDelete}
+                  loading={deleteLoading}
+                >
+                  Xóa {selectedProducts.length} sản phẩm
+                </Button>
+                <Button
+                  type="primary"
+                  danger
+                  onClick={showDiscountModal}
+                  icon={<TagOutlined />}
+                >
+                  Thêm mã giảm giá ({selectedProducts.length})
+                </Button>
+              </>
+            )}
           </Space>
         )}
         <div>

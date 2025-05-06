@@ -33,9 +33,11 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { createUser, searchUser } from "../../api/user";
+import { createUser, searchUser, deleteUser } from "../../api/user";
 import UserForm from "../../components/UserForm";
 import { useRoles } from "../../context/RoleContext";
+import { ExclamationCircleOutlined, DeleteOutlined } from "@ant-design/icons";
+
 
 const { Panel } = Collapse;
 const { Text } = Typography;
@@ -84,10 +86,40 @@ const UserAdmin = () => {
   const roles = useRoles();
   const [loading, setLoading] = useState(false);
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   // Hàm lấy chữ cái đầu của tên người dùng
   const getFirstLetterAvatar = (fullName) => {
     if (!fullName) return null;
     return fullName.trim().charAt(0).toUpperCase();
+  };
+
+  const handleMultipleDelete = async () => {
+    Modal.confirm({
+      title: 'Xác nhận xóa người dùng',
+      icon: <ExclamationCircleOutlined />,
+      content: `Bạn có chắc chắn muốn xóa ${selectedRowKeys.length} người dùng đã chọn?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk: async () => {
+        setDeleteLoading(true);
+        try {
+          await deleteUser(selectedRowKeys);
+          
+          setSelectedRowKeys([]);
+          // Refresh data
+          const request = { id, username, fullName, phone, role, isGuest };
+          const refreshedData = await searchUser(request, currentPage, pageSize);
+          setUserData(refreshedData);
+        } catch (error) {
+          console.error('Error deleting users:', error);
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
+    });
   };
 
   // Hàm cập nhật URL
@@ -459,6 +491,21 @@ const UserAdmin = () => {
         </Button>
       </div>
 
+      <div style={{ marginBottom: 16 }}>
+        {selectedRowKeys.length > 0 && (
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleMultipleDelete}
+            loading={deleteLoading}
+            style={{ marginRight: 16 }}
+          >
+            Xóa {selectedRowKeys.length} người dùng
+          </Button>
+        )}
+      </div>
+
       <Table
         dataSource={userData.data}
         columns={columns}
@@ -468,6 +515,10 @@ const UserAdmin = () => {
         bordered
         rowClassName={(record) => (!record.isActive ? "inactive-row" : "")}
         style={{ marginBottom: 16 }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys),
+        }}
       />
 
       <div

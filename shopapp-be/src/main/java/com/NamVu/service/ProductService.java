@@ -18,7 +18,7 @@ public interface ProductService {
 
     ProductResponse update(String id, ProductUpdateRequest request);
 
-    void delete(String id);
+    void delete(List<String> ids);
 
     void saveProductImages(String id, List<String> fileNames);
 

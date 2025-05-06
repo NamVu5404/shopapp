@@ -195,7 +195,6 @@ export default function UserDetailAdmin() {
       onOk: async () => {
         try {
           await deleteUser(id);
-          message.success("Đã xóa tài khoản thành công");
           navigate("/admin/users");
         } catch (error) {
           message.error("Có lỗi xảy ra khi xóa tài khoản");

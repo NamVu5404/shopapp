@@ -119,9 +119,9 @@ export const updateProduct = async (id, data) => {
   }
 };
 
-export const deleteProduct = async (id) => {
+export const deleteProduct = async (ids) => {
   try {
-    const response = await fetch(`${API}/products/${id}`, {
+    const response = await fetch(`${API}/products/${ids}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${getToken()}`,

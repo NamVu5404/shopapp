@@ -75,9 +75,9 @@ public class ProductController {
                 .build();
     }
 
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable String id) {
-        productService.delete(id);
+    @DeleteMapping("/{ids}")
+    public ApiResponse<Void> delete(@PathVariable List<String> ids) {
+        productService.delete(ids);
 
         return ApiResponse.<Void>builder()
                 .message("Deleted successfully")

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.MalformedURLException;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/uploads")
@@ -28,6 +30,7 @@ public class FileController {
         Resource resource = fileService.loadFileAsResource(fileName);
 
         return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "public, max-age=31536000, immutable")
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(resource);
     }

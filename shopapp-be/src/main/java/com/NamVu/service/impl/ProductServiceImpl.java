@@ -95,12 +95,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @PreAuthorize("hasAuthority('CUD_PRODUCT')")
-    public void delete(String id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+    public void delete(List<String> ids) {
+        List<Product> products = ids.stream()
+                .map(id -> productRepository.findById(id)
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED)))
+                .toList();
 
-        product.setIsActive(StatusConstant.INACTIVE);
-        productRepository.save(product);
+        products.forEach(product -> product.setIsActive(StatusConstant.INACTIVE));
+        productRepository.saveAll(products);
     }
 
     @Override
