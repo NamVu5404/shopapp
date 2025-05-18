@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,16 +24,22 @@ public class ProductImportServiceImpl implements ProductImportService {
     ExcelProdHelper excelProdHelper;
 
     @Override
+    @Async
     public void importFromExcel(MultipartFile file) {
         List<ProductCreateRequest> requests = excelProdHelper.parseExcel(file);
 
         for (ProductCreateRequest request : requests) {
-            try {
-                productService.create(request);
-                log.info("Thêm sản phẩm {} thành công!", request.getCode());
-            } catch (AppException e) {
-                log.error("Lỗi khi thêm sản phẩm {}: {}", request.getCode(), e.getErrorCode().getMessage());
-            }
+            asyncCreate(request);
         }
     }
-}   
+
+    @Async
+    public void asyncCreate(ProductCreateRequest request) {
+        try {
+            productService.create(request);
+            log.info("Thêm sản phẩm {} thành công!", request.getCode());
+        } catch (AppException e) {
+            log.error("Lỗi khi thêm sản phẩm {}: {}", request.getCode(), e.getErrorCode().getMessage());
+        }
+    }
+}

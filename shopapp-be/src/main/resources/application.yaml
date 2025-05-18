@@ -3,6 +3,14 @@ spring:
     url: "${DB_URL}"
     username: "${DB_USERNAME}"
     password: "${DB_PASSWORD}"
+
+    hikari:
+      maximum-pool-size: 20      # Số kết nối tối đa trong pool
+      minimum-idle: 5            # Số kết nối tối thiểu giữ ở trạng thái idle
+      idle-timeout: 30000        # Thời gian idle tối đa trước khi đóng (ms)
+      max-lifetime: 1800000      # Tuổi thọ tối đa của 1 connection (ms)
+      connection-timeout: 20000  # Thời gian chờ tối đa để lấy connection (ms)
+      pool-name: MyHikariCP
   jpa:
     hibernate:
       ddl-auto: update
