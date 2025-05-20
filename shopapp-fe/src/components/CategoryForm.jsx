@@ -1,7 +1,6 @@
-import { Divider, Form, Input, Select } from "antd";
+import { Button, Divider, Form, Input, Select } from "antd";
 import { useEffect } from "react";
 import { useSuppliers } from "../context/SupplierContext";
-import MyButton from "./MyButton";
 
 export default function CategoryForm({
   initValues,
@@ -87,9 +86,9 @@ export default function CategoryForm({
         <Divider style={{ margin: "16px 0" }} />
 
         <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
-          <MyButton type="primary" htmlType="submit" style={{ minWidth: 120 }}>
+          <Button type="primary" htmlType="submit" style={{ minWidth: 120 }}>
             {submitButtonText}
-          </MyButton>
+          </Button>
         </Form.Item>
       </Form>
     </div>

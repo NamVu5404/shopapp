@@ -11,6 +11,7 @@ import com.NamVu.dto.response.user.UserResponse;
 import com.NamVu.entity.User;
 import com.NamVu.exception.AppException;
 import com.NamVu.exception.ErrorCode;
+import com.NamVu.repository.RoleRepository;
 import com.NamVu.repository.UserRepository;
 import com.NamVu.service.UserService;
 import com.NamVu.specifications.UserSpecification;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
     UserConverter userConverter;
+    RoleRepository roleRepository;
 
     @Override
     @PreAuthorize("hasAuthority('RU_USER')")
@@ -122,7 +124,9 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)))
                 .collect(Collectors.toList());
 
-        users.forEach(user -> user.setIsActive(StatusConstant.INACTIVE));
+        users.stream()
+                .filter(user -> !user.getRoles().contains(roleRepository.findByCode("ADMIN"))) // ko xóa ADMIN
+                .forEach(user -> user.setIsActive(StatusConstant.INACTIVE));
         userRepository.saveAll(users);
     }
 

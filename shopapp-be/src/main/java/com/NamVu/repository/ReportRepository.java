@@ -91,6 +91,7 @@ public interface ReportRepository extends JpaRepository<Order, String> {
             FROM Product p
             LEFT JOIN OrderDetail od ON od.product = p
                 AND od.order.status = 'COMPLETED'
+            WHERE p.isActive = 1
             GROUP BY p.code, p.name
             ORDER BY COALESCE(SUM(od.priceAtPurchase * od.quantity), 0) DESC
             """)
@@ -105,6 +106,7 @@ public interface ReportRepository extends JpaRepository<Order, String> {
             FROM Product p
             LEFT JOIN OrderDetail od ON od.product = p
                 AND od.order.status = 'COMPLETED'
+            WHERE p.isActive = 1
             GROUP BY p.code, p.name
             ORDER BY COALESCE(SUM(od.priceAtPurchase * od.quantity), 0) ASC
             """)

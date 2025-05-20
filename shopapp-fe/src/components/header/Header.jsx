@@ -2,20 +2,22 @@ import {
   CaretDownOutlined,
   PhoneOutlined,
   ShoppingCartOutlined,
-  UserOutlined,
+  UserOutlined
 } from "@ant-design/icons";
+import { Badge, Button, Dropdown, Input, Space, Spin, Tooltip } from "antd";
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
-import { Button, Dropdown, Input, Space, Badge, Tooltip } from "antd";
-import { useCallback, useEffect, useState } from "react";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { introspect, logout } from "../../api/auth";
+import { getTotalItemsByUser } from "../../api/cart";
+import { searchProduct } from "../../api/product";
 import { useCategories } from "../../context/CategoryContext";
 import { hasPermission } from "../../services/authService";
 import { getToken } from "../../services/localStorageService";
 import "./Header.css";
-import { getTotalItemsByUser } from "../../api/cart";
 
 export default function Header() {
   const [isHidden, setIsHidden] = useState(false);
@@ -29,6 +31,83 @@ export default function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const userId = useSelector((state) => state.user.id);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Hàm tìm kiếm sản phẩm từ API
+  const fetchProducts = async (search = "") => {
+    if (!search.trim()) {
+      setProducts([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const request = {
+        id: "",
+        categoryCode: "",
+        supplierCode: "",
+        code: "",
+        name: search,
+        minPrice: "",
+        maxPrice: "",
+      };
+
+      const data = await searchProduct(request, 1, 10);
+      setProducts(data.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm:", error);
+      setProducts([]);
+    }
+    setLoading(false);
+  };
+
+  // Debounce search để tránh gọi API liên tục
+  const debouncedSearch = useMemo(
+    () => debounce((value) => fetchProducts(value), 300),
+    []
+  );
+
+  // Xử lý thay đổi input
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+
+    if (value.trim()) {
+      debouncedSearch(value);
+      setDropdownOpen(true);
+    } else {
+      setProducts([]);
+      setDropdownOpen(false);
+    }
+  };
+
+  // Xử lý khi chọn sản phẩm từ gợi ý
+  const handleSelectProduct = (product) => {
+    setQuery(product.name);
+    setDropdownOpen(false);
+    navigate(`/products?name=${product.name}&page=1`);
+  };
+
+  // Xử lý submit form tìm kiếm
+  const onSearch = (event) => {
+    if (event) event.preventDefault();
+    navigate(`/products?name=${query}&page=1`);
+    setDropdownOpen(false);
+  };
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setDropdownOpen(false);
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   // Cấu trúc menu category với CSS tùy chỉnh
   const menuCategory = categories.map((category) => ({
@@ -48,24 +127,19 @@ export default function Header() {
     ),
     children: category.suppliers
       ? category.suppliers.map((supplier) => ({
-          key: `${category.code}-${supplier.code}`,
-          label: (
-            <Link
-              to={`products?categoryCode=${category.code}&supplierCode=${supplier.code}&page=1`}
-              className="supplier-link"
-            >
-              {supplier.name}
-            </Link>
-          ),
-        }))
+        key: `${category.code}-${supplier.code}`,
+        label: (
+          <Link
+            to={`products?categoryCode=${category.code}&supplierCode=${supplier.code}&page=1`}
+            className="supplier-link"
+          >
+            {supplier.name}
+          </Link>
+        ),
+      }))
       : [],
     popupClassName: "custom-dropdown-submenu",
   }));
-
-  const onSearch = (event) => {
-    event.preventDefault();
-    navigate(`/products?name=${query}&page=1`);
-  };
 
   // Function to fetch cart count for logged-in users
   const fetchCartCount = useCallback(async () => {
@@ -148,6 +222,67 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos]);
 
+  // Dropdown menu với danh sách gợi ý
+  const dropdownMenu = (
+    <div
+      className="suggestion-dropdown"
+      style={{
+        background: 'white',
+        boxShadow: '0 3px 6px rgba(0,0,0,0.16)',
+        borderRadius: '8px',
+        width: '500px',
+        maxHeight: '600px',
+        overflowY: 'auto',
+        marginTop: '5px',
+        position: 'absolute',
+        zIndex: 1000
+      }}
+      onClick={e => e.stopPropagation()}
+    >
+      {loading ? (
+        <div style={{ padding: '15px', textAlign: 'center' }}>
+          <Spin size="small" />
+        </div>
+      ) : products.length > 0 ? (
+        products.map((product) => (
+          <div
+            key={product.code}
+            className="suggestion-item"
+            onClick={() => handleSelectProduct(product)}
+            style={{
+              padding: '10px 15px',
+              cursor: 'pointer',
+              borderBottom: '1px solid #f0f0f0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f5f5f5';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{product.name}</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>Mã: {product.code}</div>
+            </div>
+            {product.price && (
+              <div style={{ color: 'var(--primary-color)' }}>
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product?.discountPrice || product.price)}
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <div style={{ padding: '15px', textAlign: 'center', color: '#888' }}>
+          Không tìm thấy sản phẩm
+        </div>
+      )}
+    </div>
+  );
+
   // CSS nội tuyến cho dropdown
   const dropdownCSS = `
     .custom-dropdown .ant-dropdown-menu {
@@ -227,24 +362,25 @@ export default function Header() {
             </div>
           </Link>
 
-          <div className="input-search">
+          <div className="search-container" style={{ position: 'relative' }} onClick={e => e.stopPropagation()}>
             <form onSubmit={onSearch}>
-              <Space.Compact
-                style={{
-                  // width: "100%",
-                  width: "500px",
-                }}
-              >
+              <Space.Compact style={{ width: '500px' }}>
                 <Input
                   placeholder="Nhập tên sản phẩm bạn mong muốn"
                   allowClear
                   size="large"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={handleInputChange}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (query.trim() && products.length > 0) {
+                      setDropdownOpen(true);
+                    }
+                  }}
                   style={{
-                    borderTopLeftRadius: "20px",
-                    borderBottomLeftRadius: "20px",
-                    padding: "0 30px",
+                    borderTopLeftRadius: '20px',
+                    borderBottomLeftRadius: '20px',
+                    padding: '0 30px',
                   }}
                 />
                 <Button
@@ -252,16 +388,19 @@ export default function Header() {
                   type="primary"
                   htmlType="submit"
                   style={{
-                    backgroundColor: "var(--primary-color)",
-                    border: "1px solid var(--secondary-color)",
-                    borderTopRightRadius: "20px",
-                    borderBottomRightRadius: "20px",
+                    backgroundColor: 'var(--primary-color)',
+                    border: '1px solid var(--secondary-color)',
+                    borderTopRightRadius: '20px',
+                    borderBottomRightRadius: '20px',
                   }}
                 >
                   Tìm kiếm
                 </Button>
               </Space.Compact>
             </form>
+
+            {/* Hiển thị dropdown gợi ý nếu có */}
+            {dropdownOpen && dropdownMenu}
           </div>
 
           <Link
@@ -376,18 +515,16 @@ export default function Header() {
         <div className={`header-bottom ${isHidden ? "hidden" : ""}`}>
           <ol className="menu">
             <li
-              className={`menu-item ${
-                location.pathname === "/" ? "active" : ""
-              }`}
+              className={`menu-item ${location.pathname === "/" ? "active" : ""
+                }`}
             >
               <Link to={"/"} className="primary-link">
                 Trang chủ
               </Link>
             </li>
             <li
-              className={`menu-item ${
-                location.pathname.startsWith("/products") ? "active" : ""
-              }`}
+              className={`menu-item ${location.pathname.startsWith("/products") ? "active" : ""
+                }`}
             >
               <Dropdown
                 menu={{ items: menuCategory }}
@@ -402,18 +539,16 @@ export default function Header() {
               </Dropdown>
             </li>
             <li
-              className={`menu-item ${
-                location.pathname === "/check-order" ? "active" : ""
-              }`}
+              className={`menu-item ${location.pathname === "/check-order" ? "active" : ""
+                }`}
             >
               <Link to={"/check-order"} className="primary-link">
                 Tra cứu đơn hàng
               </Link>
             </li>
             <li
-              className={`menu-item ${
-                location.pathname === "/contact" ? "active" : ""
-              }`}
+              className={`menu-item ${location.pathname === "/contact" ? "active" : ""
+                }`}
             >
               <Link to={"/contact"} className="primary-link">
                 Liên hệ

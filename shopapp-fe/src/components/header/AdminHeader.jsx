@@ -1,23 +1,13 @@
 import { useEffect, useState } from "react";
 import { MdOutlineAdminPanelSettings, MdOutlineMenu } from "react-icons/md";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { getMyInfo } from "../../api/user";
-import { getToken } from "../../services/localStorageService";
 import "./Header.css";
 
 export default function AdminHeader({ collapsed, toggleSidebar }) {
   const [loading, setLoading] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const myInfo = useSelector((state) => state.user);
-  const token = getToken();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (token) {
-      dispatch(getMyInfo(token));
-    }
-  }, [token, dispatch]);
 
   useEffect(() => {
     if (myInfo.id) {
@@ -90,13 +80,11 @@ export default function AdminHeader({ collapsed, toggleSidebar }) {
               </div>
 
               {showProfileMenu && (
-                <ul className="dropdown-menu profile-dropdown">
-                  <li>
-                    <h6 className="dropdown-header">
-                      Xin chào {myInfo.fullName}
-                    </h6>
-                  </li>
-                </ul>
+                <div className="dropdown-menu profile-dropdown">
+                  <h6 className="dropdown-header">
+                    Xin chào {myInfo.fullName}
+                  </h6>
+                </div>
               )}
             </li>
           </ul>

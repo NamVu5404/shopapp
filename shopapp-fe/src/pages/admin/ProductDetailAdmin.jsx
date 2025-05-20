@@ -393,7 +393,7 @@ export default function ProductDetailAdmin() {
                       }}
                     >
                       <Button type="primary" ghost icon={<HistoryOutlined />}>
-                        Lịch sử nhập kho
+                        
                       </Button>
                     </Link>
                   </Tooltip>

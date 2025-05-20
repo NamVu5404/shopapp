@@ -1,4 +1,4 @@
-import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Breadcrumb,
   Button,
@@ -8,22 +8,21 @@ import {
   Input,
   InputNumber,
   Modal,
-  Table,
+  Popconfirm,
   Space,
+  Table,
   Tooltip,
   Typography,
-  Popconfirm,
 } from "antd";
-import { useEffect, useState } from "react";
 import dayjs from "dayjs";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   createDiscount,
   deleteDiscount,
   getAllDiscount,
   updateDiscount,
 } from "../../api/discount";
-import MyButton from "../../components/MyButton";
-import { Link } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
 const { Text } = Typography;
@@ -132,18 +131,16 @@ export default function DiscountAdmin() {
     {
       title: "Hành động",
       key: "action",
-      width: 200,
+      width: 100,
       align: "center",
       render: (discount) => (
         <Space size="small">
           <Tooltip title="Cập nhật">
             <Button
-              type="primary"
+              type="link"
               icon={<EditOutlined />}
-              size="small"
               onClick={() => showUpdateModal(discount)}
             >
-              Cập nhật
             </Button>
           </Tooltip>
           <Popconfirm
@@ -153,14 +150,14 @@ export default function DiscountAdmin() {
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button
-              type="primary"
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-            >
-              Xóa
-            </Button>
+            <Tooltip title="Xóa">
+              <Button
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+              >
+              </Button>
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -278,9 +275,9 @@ export default function DiscountAdmin() {
           </Form.Item>
 
           <Form.Item>
-            <MyButton style={{ width: "100%" }} htmlType="submit">
+            <Button type="primary" style={{ width: "100%" }} htmlType="submit">
               {editingDiscount ? "Cập nhật" : "Thêm mới"}
-            </MyButton>
+            </Button>
           </Form.Item>
         </Form>
       </Modal>

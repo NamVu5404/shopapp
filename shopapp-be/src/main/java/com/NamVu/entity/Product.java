@@ -32,11 +32,11 @@ public class Product extends BaseEntity {
     Long discountPrice;
 
     @Column(nullable = false)
-    int inventoryQuantity = 0;
+    int inventoryQuantity;
 
-    int soldQuantity = 0;
+    int soldQuantity;
 
-    double point = 0;
+    double point;
 
     double avgRating = 2.5;
 

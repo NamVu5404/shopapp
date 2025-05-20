@@ -87,12 +87,11 @@ export default function SupplierAdmin() {
         <Space size="small">
           <Tooltip title="Cập nhật">
             <Button
-              type="primary"
+              type="link"
               icon={<EditOutlined />}
-              size="small"
               onClick={() => showUpdateModal(supplier)}
             >
-              Cập nhật
+
             </Button>
           </Tooltip>
           <Popconfirm
@@ -102,14 +101,14 @@ export default function SupplierAdmin() {
             okText="Xóa"
             cancelText="Hủy"
           >
-            <Button
-              type="primary"
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-            >
-              Xóa
-            </Button>
+            <Tooltip title="Xóa">
+              <Button
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+              >
+              </Button>
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -151,9 +150,7 @@ export default function SupplierAdmin() {
         dataSource={suppliers}
         columns={columns}
         rowKey="code"
-        pagination={{
-          defaultPageSize: 20,
-        }}
+        pagination={false}
         bordered
         size="middle"
         scroll={{ x: 800 }}

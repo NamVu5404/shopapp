@@ -5,11 +5,11 @@ spring:
     password: "${DB_PASSWORD}"
 
     hikari:
-      maximum-pool-size: 20      # Số kết nối tối đa trong pool
-      minimum-idle: 5            # Số kết nối tối thiểu giữ ở trạng thái idle
-      idle-timeout: 30000        # Thời gian idle tối đa trước khi đóng (ms)
-      max-lifetime: 1800000      # Tuổi thọ tối đa của 1 connection (ms)
-      connection-timeout: 20000  # Thời gian chờ tối đa để lấy connection (ms)
+      maximum-pool-size: 30      # Số kết nối tối đa trong pool
+      minimum-idle: 10           # Số kết nối tối thiểu giữ ở trạng thái idle
+      idle-timeout: 60000        # Thời gian idle tối đa trước khi đóng (ms)
+      max-lifetime: 900000       # Tuổi thọ tối đa của 1 connection (ms)
+      connection-timeout: 30000  # Thời gian chờ tối đa để lấy connection (ms)
       pool-name: MyHikariCP
   jpa:
     hibernate:
@@ -27,6 +27,10 @@ server:
   port: 8088
   servlet:
     context-path: /api/v1
+
+app:
+  file:
+    storage-dir: F:/upload
 
 #logging:
 #  level:

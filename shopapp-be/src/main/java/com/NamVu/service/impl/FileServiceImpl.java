@@ -1,7 +1,9 @@
 package com.NamVu.service.impl;
 
 import com.NamVu.service.FileService;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,10 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class FileServiceImpl implements FileService {
-    private static final String UPLOAD_DIR = "F:\\upload";
+
+    @NonFinal
+    @Value("${app.file.storage-dir}")
+    private String STORAGE_DIR;
 
     @Override
     public List<String> uploadFiles(MultipartFile[] files) throws IOException {
@@ -29,7 +34,7 @@ public class FileServiceImpl implements FileService {
             return new ArrayList<>();
         }
 
-        Path folder = Paths.get(UPLOAD_DIR);
+        Path folder = Paths.get(STORAGE_DIR);
         Files.createDirectories(folder);
 
         List<String> fileNames = new ArrayList<>();
@@ -54,7 +59,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Resource loadFileAsResource(String fileName) throws MalformedURLException {
-        Path filePath = Paths.get(UPLOAD_DIR).resolve(fileName);
+        Path filePath = Paths.get(STORAGE_DIR).resolve(fileName);
         return new UrlResource(filePath.toUri());
     }
 }

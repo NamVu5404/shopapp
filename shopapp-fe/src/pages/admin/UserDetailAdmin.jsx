@@ -35,7 +35,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   createAddress,
@@ -48,6 +48,7 @@ import { deleteUser, getUserById, updateUser } from "../../api/user";
 import AddressModal from "../../components/AddressModal";
 import { useRoles } from "../../context/RoleContext";
 import { hasPermission } from "../../services/authService";
+import { useSelector } from "react-redux";
 
 dayjs.extend(customParseFormat);
 const dateFormat = "YYYY-MM-DD";
@@ -71,6 +72,7 @@ export default function UserDetailAdmin() {
   const roles = useRoles();
   const navigate = useNavigate();
   const { id } = useParams();
+  const currentUser = useSelector((state) => state.user);
 
   // User, Address
   useEffect(() => {
@@ -322,7 +324,7 @@ export default function UserDetailAdmin() {
                         </Button>
                       </Tooltip>
                     )}
-                    {hasPermission(["ROLE_ADMIN"]) && (
+                    {(hasPermission(["ROLE_ADMIN"]) && user.id !== currentUser.id && !user?.roles.includes("ADMIN")) && (
                       <Tooltip title="Xóa tài khoản">
                         <Button
                           danger
@@ -413,7 +415,7 @@ export default function UserDetailAdmin() {
                     </Col>
                   </Row>
 
-                  <Form.Item label="Vai trò" name="roles">
+                  <Form.Item label="Vai trò" name="roles" hidden={!hasPermission(["ROLE_ADMIN"]) || user.id === currentUser.id}>
                     <Checkbox.Group>
                       {roles.map((role) => (
                         <Checkbox key={role.code} value={role.code}>
@@ -473,9 +475,9 @@ export default function UserDetailAdmin() {
                 </Descriptions>
               )}
 
-              {user.isActive === 1 && !isEditing && (
+              {!isEditing && (
                 <Row style={{ marginTop: 16 }} gutter={[16, 16]}>
-                  {user.hasPassword && (
+                  {user.hasPassword && user.isActive === 1 && (
                     <Col>
                       <Tooltip title="Đặt lại mật khẩu">
                         <Button

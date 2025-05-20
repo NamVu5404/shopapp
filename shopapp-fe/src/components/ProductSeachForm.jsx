@@ -2,10 +2,10 @@ import {
   AppstoreOutlined,
   ClearOutlined,
   IdcardOutlined,
-  SearchOutlined,
-  ShopOutlined,
+  SearchOutlined
 } from "@ant-design/icons";
 import {
+  AutoComplete,
   Button,
   Col,
   Form,
@@ -15,8 +15,12 @@ import {
   Row,
   Select,
   Space,
+  Spin,
 } from "antd";
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { searchProduct } from "../api/product";
 import { useCategories } from "../context/CategoryContext";
 import { useSuppliers } from "../context/SupplierContext";
 
@@ -32,6 +36,64 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
   const isAdminPath = location.pathname.startsWith("/admin");
   const categories = useCategories();
   const suppliers = useSuppliers();
+
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [options, setOptions] = useState([]);
+
+  const fetchProducts = async (search = "") => {
+    if (!search.trim()) {
+      setProducts([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const request = {
+        id: "",
+        categoryCode: "",
+        supplierCode: "",
+        code: "",
+        name: search,
+        minPrice: "",
+        maxPrice: "",
+      };
+
+      const data = await searchProduct(request, 1, 10);
+      setProducts(data.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm:", error);
+      setProducts([]);
+    }
+    setLoading(false);
+  };
+
+  // Chuyển đổi products thành options khi products thay đổi
+  useEffect(() => {
+    if (products && products.length > 0) {
+      // Chuyển đổi kết quả thành định dạng options cho AutoComplete
+      const formattedOptions = products.map(product => ({
+        value: product.name,
+        label: <div>{product.name}</div>
+      }));
+
+      setOptions(formattedOptions);
+    } else {
+      setOptions([]);
+    }
+  }, [products]);
+
+  const debouncedSearch = useMemo(
+    () => debounce((value) => fetchProducts(value), 300),
+    []
+  );
+
+  const handleSearch = useCallback(
+    (value) => {
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   const handleSubmit = (values) => {
     onSearch(values);
@@ -59,10 +121,15 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
 
           <Col xl={8} lg={8} md={12} sm={24} xs={24}>
             <Form.Item name="name" label="Tên sản phẩm">
-              <Input
-                placeholder="Nhập tến sản phẩm"
-                prefix={<ShopOutlined />}
-              />
+              <AutoComplete
+                options={options}
+                onSearch={handleSearch}
+                placeholder="Nhập tên sản phẩm"
+                style={{ width: '100%' }}
+                notFoundContent={loading ? <Spin size="small" /> : "Không tìm thấy sản phẩm"}
+              >
+                <Input />
+              </AutoComplete>
             </Form.Item>
           </Col>
 
