@@ -9,7 +9,7 @@ import { getMyInfo } from "./user";
 
 export const API = `http://localhost:8088/api/v1`;
 export const IMAGE_URL = `${API}/uploads`;
-export const DEFAULT_IMAGE = "/logo/wallpaperflare.com_wallpaper.jpg";
+export const DEFAULT_IMAGE = "/logo/default-prod-image.jpg";
 
 export const login = async (data, navigate, dispatch) => {
   await fetch(`${API}/auth/login`, {

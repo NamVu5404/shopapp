@@ -4,20 +4,22 @@ import {
   ShoppingCartOutlined,
   UserOutlined
 } from "@ant-design/icons";
-import { Badge, Button, Dropdown, Input, Space, Spin, Tooltip } from "antd";
+import { Badge, Button, Dropdown, Input, Space, Spin, Tooltip, Typography } from "antd";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaHeart } from "react-icons/fa6";
 import { MdOutlineAdminPanelSettings } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { introspect, logout } from "../../api/auth";
+import { DEFAULT_IMAGE, IMAGE_URL, introspect, logout } from "../../api/auth";
 import { getTotalItemsByUser } from "../../api/cart";
 import { searchProduct } from "../../api/product";
 import { useCategories } from "../../context/CategoryContext";
 import { hasPermission } from "../../services/authService";
 import { getToken } from "../../services/localStorageService";
 import "./Header.css";
+
+const { Text } = Typography;
 
 export default function Header() {
   const [isHidden, setIsHidden] = useState(false);
@@ -54,7 +56,7 @@ export default function Header() {
         maxPrice: "",
       };
 
-      const data = await searchProduct(request, 1, 10);
+      const data = await searchProduct(request, 1, 5);
       setProducts(data.data);
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
@@ -227,7 +229,7 @@ export default function Header() {
     <div
       className="suggestion-dropdown"
       style={{
-        background: 'white',
+        background: '#fff',
         boxShadow: '0 3px 6px rgba(0,0,0,0.16)',
         borderRadius: '8px',
         width: '500px',
@@ -264,15 +266,41 @@ export default function Header() {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            <div>
-              <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{product.name}</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>Mã: {product.code}</div>
-            </div>
-            {product.price && (
-              <div style={{ color: 'var(--primary-color)' }}>
-                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product?.discountPrice || product.price)}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={
+                  product.images.length !== 0
+                    ? `${IMAGE_URL}/${product.images[0]}`
+                    : DEFAULT_IMAGE
+                }
+                alt={product.name}
+                style={{
+                  width: 50,
+                  height: 50,
+                  objectFit: "contain",
+                }}
+              />
+              <div>
+                <div style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{product.name}</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>Mã: {product.code}</div>
               </div>
-            )}
+            </div>
+            <Space align="baseline">
+              {product.discountPrice ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <Text delete type="secondary" style={{ fontSize: 14 }}>
+                    {product.price?.toLocaleString("vi-VN")}đ
+                  </Text>
+                  <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
+                    {product.discountPrice?.toLocaleString("vi-VN")}đ
+                  </Text>
+                </div>
+              ) : (
+                <Text strong style={{ color: "#ff4d4f", fontSize: 16 }}>
+                  {product.price?.toLocaleString("vi-VN")}đ
+                </Text>
+              )}
+            </Space>
           </div>
         ))
       ) : (
