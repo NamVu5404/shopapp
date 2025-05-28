@@ -180,7 +180,7 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
             <Form.Item name="categoryCode" label="Danh mục">
               <Select placeholder="Chọn danh mục">
                 <Select.Option value={""}>Tất cả danh mục</Select.Option>
-                {categories.map((category) => (
+                {categories?.map((category) => (
                   <Select.Option key={category.code} value={category.code}>
                     {category.name}
                   </Select.Option>
@@ -193,7 +193,7 @@ export default function ProductSeachForm({ form, onSearch, handleCancel }) {
             <Form.Item name="supplierCode" label="Nhà cung cấp">
               <Select placeholder="Chọn nhà cung cấp">
                 <Select.Option value={""}>Tất cả nhà cung cấp</Select.Option>
-                {suppliers.map((supplier) => (
+                {suppliers?.map((supplier) => (
                   <Select.Option key={supplier.code} value={supplier.code}>
                     {supplier.name}
                   </Select.Option>

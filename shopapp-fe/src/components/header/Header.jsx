@@ -112,7 +112,7 @@ export default function Header() {
   }, []);
 
   // Cấu trúc menu category với CSS tùy chỉnh
-  const menuCategory = categories.map((category) => ({
+  const menuCategory = categories?.map((category) => ({
     key: category.id,
     label: (
       <Link
@@ -127,8 +127,8 @@ export default function Header() {
         )}
       </Link>
     ),
-    children: category.suppliers
-      ? category.suppliers.map((supplier) => ({
+    children: category?.suppliers
+      ? category?.suppliers?.map((supplier) => ({
         key: `${category.code}-${supplier.code}`,
         label: (
           <Link

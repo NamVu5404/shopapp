@@ -2,6 +2,7 @@ package com.NamVu.exception;
 
 import com.NamVu.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -12,16 +13,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     private static final String MAX_ATTRIBUTE = "max";
     private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<ApiResponse<?>> exceptionHandler() {
+    public ResponseEntity<ApiResponse<?>> exceptionHandler(Exception e) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
                 .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
                 .build();
+
+        log.error("error message: {}", e.getMessage());
 
         return ResponseEntity
                 .status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode())
@@ -37,6 +41,8 @@ public class GlobalExceptionHandler {
                 .message(errorCode.getMessage())
                 .build();
 
+        log.error("error message: {}", errorCode.getMessage());
+
         return ResponseEntity
                 .status(errorCode.getStatusCode())
                 .body(apiResponse);
@@ -45,6 +51,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = AccessDeniedException.class)
     public ResponseEntity<ApiResponse<?>> accessDeniedExceptionHandler() {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+
+        log.error("error message: {}", errorCode.getMessage());
 
         return ResponseEntity
                 .status(errorCode.getStatusCode())
@@ -75,12 +83,16 @@ public class GlobalExceptionHandler {
 
         }
 
+        String errorMessage = attributes != null
+                ? mapAttribute(errorCode.getMessage(), attributes)
+                : errorCode.getMessage();
+
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(errorCode.getCode())
-                .message(attributes != null ?
-                        mapAttribute(errorCode.getMessage(), attributes)
-                        : errorCode.getMessage())
+                .message(errorMessage)
                 .build();
+
+        log.error("error message: {}", errorMessage);
 
         return ResponseEntity
                 .status(errorCode.getStatusCode())

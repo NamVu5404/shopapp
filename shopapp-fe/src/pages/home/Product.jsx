@@ -202,7 +202,7 @@ export default function Product() {
 
       {data && (
         <>
-          <ProductItem data={data.data} />
+          <ProductItem data={data?.data} />
 
           {data.data.length === 0 && <p>Không có kết quả phù hợp!</p>}
 
@@ -216,7 +216,7 @@ export default function Product() {
             <Pagination
               current={currentPage}
               pageSize={pageSize}
-              total={data.totalElements}
+              total={data?.totalElements}
               onChange={(page) => setCurrentPage(page)}
               showSizeChanger={false}
             />
